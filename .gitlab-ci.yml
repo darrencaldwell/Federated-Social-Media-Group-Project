@@ -9,11 +9,10 @@ rust-latest:
     - cargo build --verbose
     - cargo test --verbose
 
-rust-nightly:
+node-latest:
   stage: build
-  image: rustlang/rust:nightly
+  image: node:latest
   script:
-    - cd actix
-    - cargo build --verbose
-    - cargo test --verbose
-  allow_failure: true
+    - cd react-front-end
+    - npm install
+    - npm run
