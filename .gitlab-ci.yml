@@ -1,1 +1,18 @@
-image: "centos:8"
+stages:
+  - build
+
+rust-latest:
+  stage: build
+  image: rust:latest
+  script:
+    - cd actix
+    - cargo build --verbose
+    - cargo test --verbose
+
+node-latest:
+  stage: build
+  image: node:latest
+  script:
+    - cd react-front-end
+    - npm install
+    - npm run
