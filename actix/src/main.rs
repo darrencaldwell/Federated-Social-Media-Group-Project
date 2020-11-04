@@ -1,4 +1,4 @@
-use actix_web::{get, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use chrono::prelude::*;
 use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
@@ -11,6 +11,13 @@ struct MyText {
     text: String,
 }
 
+#[derive(Serialize, Deserialize)]
+struct Post {
+    postTitle: String,
+    postMarkup: String,
+    userId: u32,
+}
+
 #[get("/text")] // called when receiving a request for get /text
 async fn get_text() -> impl Responder {
     // return the current time as a string in the json format text:string
@@ -19,10 +26,38 @@ async fn get_text() -> impl Responder {
     })
 }
 
+#[post("/api/subforums/{id}/posts")]
+async fn post_post(
+    web::Path(id): web::Path<u32>,
+    pool: web::Data<MySqlPool>,
+    post: web::Json<Post>,
+) -> impl Responder {
+    // create a post instance from the deserialised JSON
+    let post_info: Post = post.into_inner();
+
+    // insert into db
+    let new_post = sqlx::query_as!(
+        Post,
+        r#"
+    INSERT INTO posts (post_title, user_id, post_contents, subforum_id)
+    VALUES( ?, ?, ?, ? )
+        "#,
+        post_info.postTitle,
+        post_info.userId,
+        post_info.postMarkup,
+        id
+    )
+    .fetch_one(&**pool)
+    .await
+    .unwrap();
+
+    Ok(HttpResponse::Ok().json(new_post))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
-    dotenv().unwrap();
+    dotenv().unwrap(); // update env with .env file.
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await;
     let pool = match pool {
         Ok(pool) => pool,
@@ -33,11 +68,16 @@ async fn main() -> std::io::Result<()> {
         .await
         .unwrap();
     println!("{:?}", result);
-    println!("{}", result.user_id);
+    println!("{}", result.username);
 
     // start server with service get_text to process /text Gets
-    HttpServer::new(|| App::new().service(get_text))
-        .bind("127.0.0.1:5000")?
-        .run()
-        .await
+    HttpServer::new(|| {
+        App::new()
+            .data(pool.clone())
+            .service(get_text)
+            .service(post_post)
+    })
+    .bind("127.0.0.1:5000")?
+    .run()
+    .await
 }
