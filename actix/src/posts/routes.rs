@@ -4,7 +4,7 @@ use sqlx::MySqlPool;
 
 #[post("/api/subforums/{id}/posts")]
 async fn post_post(
-    web::Path(id): web::Path<u32>,
+    web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
     post: web::Json<PostRequest>,
 ) -> impl Responder {
@@ -12,6 +12,15 @@ async fn post_post(
     match result {
         Ok(post) => HttpResponse::Ok().json(post),
         _ => HttpResponse::BadRequest().body("Error trying to create new post"),
+    }
+}
+
+#[get("/api/subforums/{id}/posts")]
+async fn get_posts(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
+    let result = Post::get_all(id, pool.get_ref()).await;
+    match result {
+        Ok(posts) => HttpResponse::Ok().json(posts),
+        _ => HttpResponse::BadRequest().body("Error trying to retrieve all posts"),
     }
 }
 
@@ -23,4 +32,5 @@ async fn ping() -> impl Responder {
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(post_post);
     cfg.service(ping);
+    cfg.service(get_posts);
 }
