@@ -9,7 +9,6 @@ async fn post_post(
     post: web::Json<PostRequest>,
 ) -> impl Responder {
     let result = Post::create(id, post.into_inner(), pool.get_ref()).await;
-    println!("{}", result);
     match result {
         Ok(post) => HttpResponse::Ok().json(post),
         _ => HttpResponse::BadRequest().body("Error trying to create new post"),
@@ -18,6 +17,7 @@ async fn post_post(
 
 #[get("/ping")]
 async fn ping() -> impl Responder {
+    println!("yeet");
     HttpResponse::Ok()
 }
 pub fn init(cfg: &mut web::ServiceConfig) {
