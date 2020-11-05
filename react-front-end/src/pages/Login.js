@@ -1,9 +1,10 @@
 import React from 'react';
-import InputField from "./InputField";
-import SubmitButton from "./SubmitButton";
-import UserStore from "./stores/UserStore";
+import InputField from "../components/InputField";
+import SubmitButton from "../components/SubmitButton";
+import UserStore from "../stores/UserStore";
+import '../styling/Login.css'
 
-class LoginForm extends React.Component {
+class Login extends React.Component {
 
     constructor(props) {
         super(props);
@@ -12,6 +13,7 @@ class LoginForm extends React.Component {
             password: '',
             buttonDisabled: false
         }
+
     }
 
     setInputValue(property, val) {
@@ -41,7 +43,7 @@ class LoginForm extends React.Component {
             return;
         }
         this.setState({
-            buttonDisable: true
+            buttonDisabled: true
         })
 
         try {
@@ -61,7 +63,7 @@ class LoginForm extends React.Component {
             if (result && result.success) {
                 UserStore.isLoggedIn = true;
                 UserStore.username = result.username;
-            } else if (result && result.success == false) {
+            } else if (result && result.success === false) {
                 this.resetForm();
                 alert(result.msg);
             }
@@ -74,13 +76,14 @@ class LoginForm extends React.Component {
     render() {
         return (
             <div className="loginForm">
-                Log in
+                <h1>User Login</h1>
                 <InputField
                     type='text'
                     placeholder='Username'
                     value={this.state.username ? this.state.username : ''}
                     onChange={(val) => this.setInputValue('username', val)}
                 />
+
                 <InputField
                     type='password'
                     placeholder='Password'
@@ -91,12 +94,11 @@ class LoginForm extends React.Component {
                 <SubmitButton
                     text='Login'
                     disabled={this.state.buttonDisabled}
-                    onClick={ () => this.doLogin()}
+                    onClick={() => this.doLogin()}
                 />
-
             </div>
         );
     }
 }
 
-export default LoginForm;
+export default Login;

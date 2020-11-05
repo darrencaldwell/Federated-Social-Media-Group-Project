@@ -1,10 +1,13 @@
 import React from 'react';
-import { observer } from "mobx-react";
+import {observer} from "mobx-react";
 import UserStore from "./stores/UserStore";
-import LoginForm from "./LoginForm";
-import SubmitButton from "./SubmitButton";
-import './App.css';
-
+import Login from "./pages/Login";
+import SubmitButton from "./components/SubmitButton";
+import './styling/App.css';
+import Navbar from "./components/Navbar/Navbar";
+import {BrowserRouter as Router, Switch, Route} from "react-router-dom";
+import Home from "./pages/Home";
+import Register from "./pages/Register"
 
 class App extends React.Component {
 
@@ -33,7 +36,6 @@ class App extends React.Component {
             UserStore.isLoggedIn = false;
         }
     }
-
 
     async doLogout() {
         try {
@@ -83,10 +85,16 @@ class App extends React.Component {
             }
             return (
                 <div className="app">
-                    <div className='container'>
-                        <LoginForm />
+                        <Router>
+                            <Navbar/>
+                            <Switch>
+                                <Route path="/" exact component={Home}/>
+                                <Route path="/login" component={Login}/>
+                                <Route path="/register" component={Register} />
+                                {/*<Route path="/posts" component={Posts} />*/}
+                            </Switch>
+                        </Router>
                     </div>
-                </div>
             );
         }
     }

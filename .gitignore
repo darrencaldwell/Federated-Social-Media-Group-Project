@@ -10,8 +10,8 @@ Cargo.lock
 
 #REACT
 # dependencies
-/node_modules
-/.pnp
+/node_modules/
+./.pnp
 .pnp.js
 
 # testing
@@ -30,9 +30,9 @@ Cargo.lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-<<<<<<< HEAD
+
+
 .idea/
 actix/out/
 package-lock.json
-=======
->>>>>>> c2d972a6e012a19b2bd29af17bd3e70d2a20b765
+
