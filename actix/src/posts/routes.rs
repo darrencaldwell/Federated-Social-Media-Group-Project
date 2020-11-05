@@ -1,5 +1,5 @@
 use crate::posts::model::{Post, PostRequest};
-use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use sqlx::MySqlPool;
 
 #[post("/api/subforums/{id}/posts")]

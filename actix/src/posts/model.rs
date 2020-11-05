@@ -2,25 +2,27 @@ use actix_web::{Error, HttpRequest, HttpResponse, Responder};
 use anyhow::Result;
 use futures::future::{ready, Ready};
 use serde::{Deserialize, Serialize};
-use sqlx::mysql::MySqlRow;
-use sqlx::{FromRow, MySqlPool, Row};
+
+use sqlx::{FromRow, MySqlPool};
 
 // user input
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase", serialize = "camelCase"))]
 pub struct PostRequest {
-    pub postTitle: String,
-    pub postMarkup: String,
-    pub userId: u32,
+    pub post_title: String,
+    pub post_markup: String,
+    pub user_id: u32,
 }
 
 // database record
 #[derive(Serialize, FromRow)]
+#[serde(rename_all(deserialize = "camelCase", serialize = "camelCase"))]
 pub struct Post {
-    pub postTitle: String,
-    pub postMarkup: String,
-    pub userId: u32,
-    pub postId: u64,
-    pub subforumId: u32,
+    pub post_title: String,
+    pub post_markup: String,
+    pub user_id: u32,
+    pub post_id: u64,
+    pub subforum_id: u32,
 }
 
 impl Responder for Post {
@@ -46,9 +48,9 @@ impl Post {
     insert into posts (post_title, user_id, post_contents, subforum_id)
     values( ?, ?, ?, ? )
         "#,
-            post.postTitle,
-            post.userId,
-            post.postMarkup,
+            post.post_title,
+            post.user_id,
+            post.post_markup,
             id
         )
         .execute(&mut tx)
@@ -57,11 +59,11 @@ impl Post {
 
         tx.commit().await?;
         let new_post = Post {
-            postTitle: post.postTitle,
-            postMarkup: post.postMarkup,
-            userId: post.userId,
-            postId: post_id,
-            subforumId: id,
+            post_title: post.post_title,
+            post_markup: post.post_markup,
+            user_id: post.user_id,
+            post_id: post_id,
+            subforum_id: id,
         };
         Ok(new_post)
     }

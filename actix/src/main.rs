@@ -1,5 +1,5 @@
 use actix_web::middleware::Logger;
-use actix_web::{web, App, HttpResponse, Responder};
+
 use anyhow::Result;
 use dotenv::dotenv;
 use env_logger::Env;
