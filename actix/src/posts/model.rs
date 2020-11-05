@@ -7,7 +7,7 @@ use sqlx::{FromRow, MySqlPool, Row};
 
 // user input
 #[derive(Serialize, Deserialize)]
-struct PostRequest {
+pub struct PostRequest {
     pub postTitle: String,
     pub postMarkup: String,
     pub userId: u32,
@@ -15,12 +15,12 @@ struct PostRequest {
 
 // database record
 #[derive(Serialize, FromRow)]
-struct Post {
+pub struct Post {
     pub postTitle: String,
     pub postMarkup: String,
     pub userId: u32,
-    pub postId: u32,
-    pub subforumId: String,
+    pub postId: u64,
+    pub subforumId: u32,
 }
 
 impl Responder for Post {
@@ -41,7 +41,7 @@ impl Post {
         let mut tx = pool.begin().await?;
 
         // insert into db
-        let post = sqlx::query!(
+        let post_id = sqlx::query!(
             r#"
     insert into posts (post_title, user_id, post_contents, subforum_id)
     values( ?, ?, ?, ? )
@@ -60,7 +60,7 @@ impl Post {
             postTitle: post.postTitle,
             postMarkup: post.postMarkup,
             userId: post.userId,
-            postId: post,
+            postId: post_id,
             subforumId: id,
         };
         Ok(new_post)
