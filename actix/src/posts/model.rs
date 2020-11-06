@@ -139,28 +139,17 @@ impl Post {
         Ok(posts)
     }
 }
-// please god tell me there's a better way of putting variables into strings i literally could not
-// find it
+
 fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: u64) -> PostLinks {
-    let mut self_link = String::from("<url>/api/forums/");
-    self_link.push_str(&forum_id.to_string());
-    self_link.push_str("subforums/");
-    self_link.push_str(&subforum_id.to_string());
-    self_link.push_str("/posts/");
-    self_link.push_str(&post_id.to_string());
+    let self_link = format!("<url>/api/forums/{}/subforums/{}/posts/{}", forum_id, subforum_id, post_id);
 
-    let mut subforum_link = String::from("<url>/api/subforums/");
-    subforum_link.push_str(&subforum_id.to_string());
+    let subforum_link = format!("<url>/api/subforums/{}", subforum_id);
 
-    let mut forum_link = String::from("<url>/api/forums/");
-    forum_link.push_str(&forum_id.to_string());
+    let forum_link = format!("<url>/api/forums/{}", forum_id);
 
-    let mut user_link = String::from("<url>/users/");
-    user_link.push_str(&user_id.to_string());
+    let user_link = format!("<url>/users/{}", user_id);
 
-    let mut comments_link = String::from("<url>/posts/");
-    comments_link.push_str(&post_id.to_string());
-    comments_link.push_str("/comments");
+    let comments_link = format!("<url>/posts/{}/comments", post_id);
 
     PostLinks {
         _self: Link { href: self_link },
