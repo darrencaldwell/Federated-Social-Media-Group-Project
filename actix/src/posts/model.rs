@@ -141,15 +141,30 @@ impl Post {
 }
 
 fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: u64) -> PostLinks {
-    let self_link = format!("<url>/api/forums/{}/subforums/{}/posts/{}", forum_id, subforum_id, post_id);
+    let self_link = format!(
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums/{}/posts/{}",
+        forum_id, subforum_id, post_id
+    );
 
-    let subforum_link = format!("<url>/api/subforums/{}", subforum_id);
+    let subforum_link = format!(
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk//api/subforums/{}",
+        subforum_id
+    );
 
-    let forum_link = format!("<url>/api/forums/{}", forum_id);
+    let forum_link = format!(
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk//api/forums/{}",
+        forum_id
+    );
 
-    let user_link = format!("<url>/users/{}", user_id);
+    let user_link = format!(
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk//users/{}",
+        user_id
+    );
 
-    let comments_link = format!("<url>/posts/{}/comments", post_id);
+    let comments_link = format!(
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk//posts/{}/comments",
+        post_id
+    );
 
     PostLinks {
         _self: Link { href: self_link },

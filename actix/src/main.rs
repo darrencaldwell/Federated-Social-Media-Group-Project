@@ -1,12 +1,9 @@
 use actix_web::middleware::Logger;
-use actix_web::{web};
-use actix_files::{Files, NamedFile};
 use anyhow::Result;
 use dotenv::dotenv;
 use env_logger::Env;
 use sqlx::MySqlPool;
 use std::env;
-use std::path::PathBuf;
 
 mod posts;
 
