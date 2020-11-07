@@ -1,10 +1,12 @@
 use actix_web::middleware::Logger;
-
+use actix_web::{web};
+use actix_files::{Files, NamedFile};
 use anyhow::Result;
 use dotenv::dotenv;
 use env_logger::Env;
 use sqlx::MySqlPool;
 use std::env;
+use std::path::PathBuf;
 
 mod posts;
 
@@ -22,7 +24,8 @@ async fn main() -> Result<()> {
             .data(pool.clone())
             .configure(posts::init)
     })
-    .bind("127.0.0.1:5000")?
+    .workers(1)
+    .bind("127.0.0.1:21450")?
     .run()
     .await?;
 

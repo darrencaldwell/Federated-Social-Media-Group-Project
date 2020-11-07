@@ -6,7 +6,7 @@ function App() {
     const [currentText, setCurrentText] = useState(0); // defines getter and setter. Where getter currentText is just a variable
 
     useEffect(() => { // calls this function after a render
-      fetch('/text').then (res => res.json()).then(data => { // retrieves the current time using a GET request on /text, proxying to Actix server
+      fetch('/api/subforums/1/posts').then (res => res.json()).then(data => { // retrieves the current time using a GET request on /text, proxying to Actix server
           setCurrentText(data.text);
       });
     }, []);

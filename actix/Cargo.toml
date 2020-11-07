@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 actix-web = "3.2"
+actix-files = "*"
 sqlx = { version = "0.4.0-beta.1", default-features = false, features = [ "runtime-actix", "macros", "mysql", "json" ] }
 futures-util = "0.3.7"
 dotenv = "0.15.0"

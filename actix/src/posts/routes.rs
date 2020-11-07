@@ -24,7 +24,7 @@ async fn get_posts(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) ->
     }
 }
 
-#[get("/ping")]
+#[get("api/ping")]
 async fn ping() -> impl Responder {
     println!("yeet");
     HttpResponse::Ok()
