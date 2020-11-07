@@ -14,7 +14,7 @@ rust-latest:
     - DATABASE_URL=mysql://runner:123@runner/test
     - apt update -y
     - apt-get install -y mariadb-client
-    - mysql --user=runner --password=123 -h localhost --protocol=tcp test < sql/schema.sql
+    - mysql --user=runner --password=123 -h mysql --protocol=tcp test < sql/schema.sql
     - cargo build --verbose
     - cargo test --verbose
 
