@@ -12,8 +12,6 @@ rust-latest:
   script:
     - cd actix
     - DATABASE_URL=mysql://runner:123@runner/test
-    - apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
-    - add-apt-repository 'deb [arch=amd64] http://mariadb.mirror.liquidtelecom.com/repo/10.4/debian buster main'
     - apt update
     - apt-get install mariadb-client
     - mysql -u runner -p 123 test < sql/schema.sql
