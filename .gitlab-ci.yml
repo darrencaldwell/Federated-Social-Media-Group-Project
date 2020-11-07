@@ -12,8 +12,8 @@ rust-latest:
   script:
     - cd actix
     - DATABASE_URL=mysql://runner:123@runner/test
-    - apt update
-    - apt-get install mariadb-client
+    - apt update -y
+    - apt-get install -y mariadb-client
     - mysql -u runner -p 123 test < sql/schema.sql
     - cargo build --verbose
     - cargo test --verbose
