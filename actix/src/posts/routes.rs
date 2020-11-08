@@ -24,6 +24,15 @@ async fn get_posts(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) ->
     }
 }
 
+#[get("/api/posts/{id}")]
+async fn get_post(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
+    let result = Post::get_one(id, pool.get_ref()).await;
+    match result {
+        Ok(post) => HttpResponse::Ok().json(post),
+        _ => HttpResponse::BadRequest().body("Error trying to get post"),
+    }
+}
+
 #[get("api/ping")]
 async fn ping() -> impl Responder {
     println!("yeet");

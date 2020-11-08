@@ -138,6 +138,41 @@ impl Post {
         }
         Ok(posts)
     }
+
+    pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
+        let rec = sqlx::query!(
+            r#"
+            SELECT post_id, post_title, user_id, post_markup, subforum_id FROM posts WHERE post_id = ?
+            "#,
+            post_id
+        )
+        .fetch_one(pool)
+        .await?;
+
+        let forum_id = sqlx::query!(
+            r#"
+            SELECT forum_id FROM subforums WHERE subforum_id = ?
+            "#,
+            rec.subforum_id
+        )
+        .fetch_one(pool)
+        .await?;
+
+        let post = Post {
+            post_id: rec.post_id,
+            post_title: rec.post_title,
+            post_markup: rec.post_markup,
+            user_id: rec.user_id,
+            subforum_id: rec.subforum_id,
+            _links: generate_post_links(
+                rec.post_id,
+                rec.subforum_id,
+                forum_id.forum_id,
+                rec.user_id,
+            ),
+        };
+        Ok(post)
+    }
 }
 
 fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: u64) -> PostLinks {
