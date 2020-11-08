@@ -2,7 +2,8 @@
 Federated Social Media
 By Darren Caldwell, Raiyan Chowdhury, Dean Kuyser, Donald Enwan, Euan Lacy
 
-To run open two terminals and navigate to the actix and react-front-end directories respecively.
+API Reference:
+https://gist.github.com/11wykessam/f88fdac4a40faeca11922835c25d4c32
 
 To start the Actix backend type:
 

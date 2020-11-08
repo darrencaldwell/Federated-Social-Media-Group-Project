@@ -7,6 +7,14 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = "3"
-serde = "1"
-chrono = "0.4"
+actix-web = "3.2"
+actix-files = "*"
+sqlx = { version = "0.4.0-beta.1", default-features = false, features = [ "runtime-actix", "macros", "mysql", "json" ] }
+futures-util = "0.3.7"
+dotenv = "0.15.0"
+serde = "*"
+chrono = "*"
+anyhow = "*"
+env_logger = "*"
+futures = "*"
+serde_json = "*"

@@ -1,28 +1,30 @@
-use actix_web::{get, HttpResponse, Responder};
-use chrono::prelude::*;
-use serde::{Deserialize, Serialize};
+use actix_web::middleware::Logger;
+use anyhow::Result;
+use dotenv::dotenv;
+use env_logger::Env;
+use sqlx::MySqlPool;
+use std::env;
 
-#[derive(Serialize, Deserialize)]
-struct MyText {
-    // Struct used as effectively a JSON skeleton for sending as a response
-    text: String,
-}
-
-#[get("/text")] // called when receiving a request for get /text
-async fn get_text() -> impl Responder {
-    // return the current time as a string in the json format text:string
-    HttpResponse::Ok().json(MyText {
-        text: Utc::now().to_string(),
-    })
-}
+mod posts;
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<()> {
     use actix_web::{App, HttpServer};
+    dotenv().unwrap(); // update env with .env file.
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+    let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await?;
 
     // start server with service get_text to process /text Gets
-    HttpServer::new(|| App::new().service(get_text))
-        .bind("127.0.0.1:5000")?
-        .run()
-        .await
+    HttpServer::new(move || {
+        App::new()
+            .wrap(Logger::default())
+            .data(pool.clone())
+            .configure(posts::init)
+    })
+    .workers(1)
+    .bind("127.0.0.1:21450")?
+    .run()
+    .await?;
+
+    Ok(())
 }
