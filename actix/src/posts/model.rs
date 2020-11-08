@@ -31,6 +31,7 @@ pub struct Post {
 #[derive(Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct Embedded {
+    #[serde(rename = "_embedded")]
     _embedded: PostList,
 }
 

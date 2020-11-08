@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
             .configure(posts::init)
     })
     .workers(1)
-    .bind("127.0.0.1:5000")?
+    .bind("127.0.0.1:21450")?
     .run()
     .await?;
 
