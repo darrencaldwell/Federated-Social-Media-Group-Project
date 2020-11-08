@@ -1,35 +1,103 @@
-import React, {useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import {observer} from "mobx-react";
+import UserStore from "./stores/UserStore";
+import Login from "./pages/Login";
+import SubmitButton from "./components/SubmitButton";
+import './styling/App.css';
+import Navbar from "./components/Navbar/Navbar";
+import {BrowserRouter as Router, Switch, Route} from "react-router-dom";
+import Home from "./pages/Home";
+import Register from "./pages/Register"
 
-function App() {
-    const [currentText, setCurrentText] = useState(0); // defines getter and setter. Where getter currentText is just a variable
+class App extends React.Component {
 
-    useEffect(() => { // calls this function after a render
-      fetch('/api/subforums/1/posts').then (res => res.json()).then(data => { // retrieves the current time using a GET request on /text, proxying to Actix server
-          setCurrentText(data.text);
-      });
-    }, []);
+    async componentDidMount() {
+        try {
+            let res = await fetch('/isLoggedIn', {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
 
-  return (
-    <div className="App"> 
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      <p> The current text is {currentText}. </p> // current time var!
-      </header>
-    </div>
-  );
+            let result = await res.json();
+
+            if (result && result.success) {
+                UserStore.loading = false;
+                UserStore.isLoggedIn = true;
+                UserStore.username = result.username;
+            } else {
+                UserStore.loading = false;
+                UserStore.isLoggedIn = false;
+            }
+        } catch (e) {
+            UserStore.loading = false;
+            UserStore.isLoggedIn = false;
+        }
+    }
+
+    async doLogout() {
+        try {
+            let res = await fetch('/logout', {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            let result = await res.json();
+
+            if (result && result.success) {
+                UserStore.isLoggedIn = false;
+                UserStore.username = '';
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    render() {
+
+        if (UserStore.loading) {
+            return (
+                <div className="app">
+                    <div className='container'>
+                        Loading, please wait..
+                    </div>
+                </div>
+            );
+        } else {
+            if (UserStore.isLoggedIn) {
+                return (
+                    <div className="app">
+                        <div className='container'>
+                            Welcome {UserStore.username}
+                            <SubmitButton
+                                text={'Log out'}
+                                disabled={false}
+                                onClick={() => this.doLogout()}
+                            />
+                        </div>
+                    </div>
+                );
+            }
+            return (
+                <div className="app">
+                        <Router>
+                            <Navbar/>
+                            <Switch>
+                                <Route path="/" exact component={Home}/>
+                                <Route path="/login" component={Login}/>
+                                <Route path="/register" component={Register} />
+                                {/*<Route path="/posts" component={Posts} />*/}
+                            </Switch>
+                        </Router>
+                    </div>
+            );
+        }
+    }
 }
 
-export default App;
+export default observer(App);
