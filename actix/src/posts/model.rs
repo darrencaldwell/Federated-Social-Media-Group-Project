@@ -23,7 +23,22 @@ pub struct Post {
     pub user_id: u64,
     pub post_id: u64,
     pub subforum_id: u64,
-    pub _links: PostLinks,
+    #[serde(rename = "_links")]
+    pub links: PostLinks,
+}
+
+// database record
+#[derive(Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct Embedded {
+    _embedded: PostList,
+}
+
+// database record
+#[derive(Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct PostList {
+    post_list: Vec<Post>,
 }
 
 #[derive(Serialize, FromRow)]
@@ -95,12 +110,12 @@ impl Post {
             user_id: post.user_id,
             post_id: post_id,
             subforum_id: subforum_id,
-            _links: generate_post_links(post_id, subforum_id, forum_id.forum_id, post.user_id),
+            links: generate_post_links(post_id, subforum_id, forum_id.forum_id, post.user_id),
         };
         Ok(new_post)
     }
 
-    pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Vec<Post>> {
+    pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
         let mut posts = vec![];
         let recs = sqlx::query!(
             r#"
@@ -128,7 +143,7 @@ impl Post {
                 post_markup: rec.post_markup,
                 user_id: rec.user_id,
                 subforum_id: rec.subforum_id,
-                _links: generate_post_links(
+                links: generate_post_links(
                     rec.post_id,
                     rec.subforum_id,
                     forum_id.forum_id,
@@ -136,7 +151,11 @@ impl Post {
                 ),
             });
         }
-        Ok(posts)
+        let post_list = PostList { post_list: posts };
+        let embedded = Embedded {
+            _embedded: post_list,
+        };
+        Ok(embedded)
     }
 
     pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
@@ -164,7 +183,7 @@ impl Post {
             post_markup: rec.post_markup,
             user_id: rec.user_id,
             subforum_id: rec.subforum_id,
-            _links: generate_post_links(
+            links: generate_post_links(
                 rec.post_id,
                 rec.subforum_id,
                 forum_id.forum_id,

@@ -75,7 +75,8 @@ class App extends React.Component {
     async componentDidMount () {
         try {
             this.setState({loading: true, listingPosts: false, listingPost: false});
-            let url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/1/posts";
+//            let url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/1/posts";
+            let url = "/api/subforums/1/posts";
             let res = await fetch(url
                 , {
                     method: 'get',
@@ -86,6 +87,7 @@ class App extends React.Component {
                 }
             );
             let result = await res.json();
+            console.log(result);
             this.setState({info: result, loading: false, listingPosts: true});
         } catch (e) {
             this.setState({loading: false});
