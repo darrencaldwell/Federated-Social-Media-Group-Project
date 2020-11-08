@@ -95,7 +95,7 @@ class Register extends React.Component {
                     />
 
                     <SubmitButton
-                        text='Login'
+                        text='Register'
                         disabled={this.state.buttonDisabled}
                         onClick={() => this.doRegister()}
                     />
