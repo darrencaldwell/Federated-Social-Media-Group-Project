@@ -1,56 +1,102 @@
 import React from 'react';
-import axios from 'axios'
-import {Redirect} from "react-router-dom";
-
+import InputField from "../components/InputField";
+import SubmitButton from "../components/SubmitButton";
+import UserStore from "../stores/UserStore";
+import '../styling/Login.css'
 
 class Login extends React.Component {
-    state = {}
 
-    handleSubmit = e => {
-        e.preventDefault()
-
-        const data = {
-            username: this.username,
-            password: this.password
+    constructor(props) {
+        super(props);
+        this.state = {
+            username: '',
+            password: '',
+            buttonDisabled: false
         }
 
-        // api/users/login
-        axios.post('login', data)
-            .then(res => {
-                localStorage.setItem('token', res.data.token)
-                this.setState({
-                    loggedIn: true
-                })
-                this.props.setUser(res.data.user)
-            }).catch(err => {
-                console.log(err)
+    }
+
+    setInputValue(property, val) {
+        val = val.trim();
+
+        if (val.length > 12) {
+            return;
+        }
+        this.setState({
+            [property]: val
         })
     }
 
-    render() {
+    resetForm() {
+        this.setState({
+            username: '',
+            password: '',
+            buttonDisabled: false
+        })
+    }
 
-        if (this.state.loggedIn) {
-            return <Redirect to={'/'}/>
+    async doLogin() {
+        if (!this.state.username) {
+            return;
         }
+        if (!this.state.password) {
+            return;
+        }
+        this.setState({
+            buttonDisabled: true
+        })
 
+        try {
+            let res = await fetch('./login', {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: this.state.username,
+                    password: this.state.password
+                })
+            });
+
+            let result = await res.json();
+            if (result && result.success) {
+                UserStore.isLoggedIn = true;
+                UserStore.username = result.username;
+            } else if (result && result.success === false) {
+                this.resetForm();
+                alert(result.msg);
+            }
+        } catch (e) {
+            console.log();
+            this.resetForm();
+        }
+    }
+
+    render() {
         return (
-            <form onSubmit={this.handleSubmit}>
-                <h3>Login</h3>
+            <div className="loginForm">
+                <h1>User Login</h1>
+                <InputField
+                    type='text'
+                    placeholder='Username'
+                    value={this.state.username ? this.state.username : ''}
+                    onChange={(val) => this.setInputValue('username', val)}
+                />
 
-                <div className="form-group">
-                    <label>Username</label>
-                    <input type="text" className="form-control" placeholder="Username"
-                           onChange={e => this.username = e.target.value}/>
-                </div>
+                <InputField
+                    type='password'
+                    placeholder='Password'
+                    value={this.state.password ? this.state.password : ''}
+                    onChange={(val) => this.setInputValue('password', val)}
+                />
 
-                <div className="form-group">
-                    <label>Password</label>
-                    <input type="password" className="form-control" placeholder="Password"
-                           onChange={e => this.password = e.target.value}/>
-                </div>
-
-                <button className="btn btn-primary btn-block">Login</button>
-            </form>
+                <SubmitButton
+                    text='Login'
+                    disabled={this.state.buttonDisabled}
+                    onClick={() => this.doLogin()}
+                />
+            </div>
         );
     }
 }

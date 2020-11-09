@@ -2,14 +2,13 @@
   "name": "cs3099",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "./",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "mobx-react": "^7.0.0",
     "react": "^17.0.1",
-    "react-bootstrap": "^1.4.0",
     "react-dom": "^17.0.1",
     "react-icons": "^3.11.0",
     "react-router": "^5.2.0",
@@ -46,5 +45,5 @@
     "react-router-dom": "^5.2.0",
     "react-transition-group": "^4.4.1"
   },
-  "proxy": "http://localhost:21463"
+  "proxy": "http://localhost:5000"
 }

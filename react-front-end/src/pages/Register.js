@@ -1,75 +1,109 @@
 import React from 'react';
+import InputField from "../components/InputField";
+import SubmitButton from "../components/SubmitButton";
 
-import axios from 'axios'
+class Register extends React.Component {
 
-class Login extends React.Component {
+    constructor(props) {
+        super(props)
 
-    handleSubmit = e => {
-        e.preventDefault()
-        const data = {
-            firstName: this.firstName,
-            lastName: this.lastName,
-            email: this.email,
-            username: this.username,
-            password: this.password,
-            password_confirm: this.confirmPassword
+        this.state = {
+            // email: "",
+            username: "",
+            password: "",
+            buttonDisabled: false
         }
+        this.handleSubmit=this.handleSubmit.bind(this)
+    }
 
-        // api/users/register
-        axios.post('register', data)
-            .then(res => {
-                console.log(res)
-            }).catch(
-                err => {
-                    console.log(err)
-                }
-        )
+    setInputValue(property, val) {
+        val = val.trim();
+
+        if (val.length > 12) {
+            return;
+        }
+        this.setState({
+            [property]: val
+        })
+    }
+
+    resetForm() {
+        this.setState({
+            // email: '',
+            username: '',
+            password: '',
+            buttonDisabled: false
+        })
+    }
+
+    // emailhandler = (event) => {
+    //     this.setState({
+    //         email: event.target.value
+    //     })
+    // }
+
+    usernamehandler = (event) => {
+        this.setState({
+            username: event.target.value
+        })
+    }
+    passwordhandler = (event) => {
+        this.setState({
+            password: event.target.value
+        })
+    }
+
+    handleSubmit = (event) => {
+        alert(`${this.state.username}  Registered Successfully!`)
+        console.log(this.state);
+        this.setState({
+            // email: "",
+            username: "",
+            password: '',
+        })
+        event.preventDefault()
+
+    }
+
+    doRegister() {
+        this.resetForm()
     }
 
     render() {
         return (
-            <form onSubmit={this.handleSubmit}>
-                <h3>Register</h3>
-                <div className="form-group">
-                    <label>First Name</label>
-                    <input type="text" className="form-control" placeholder="First Name"
-                           onChange={e => this.firstName = e.target.value}/>
-                </div>
+            <div>
 
-                <div className="form-group">
-                    <label>Last Name</label>
-                    <input type="text" className="form-control" placeholder="Last Name"
-                           onChange={e => this.lastName = e.target.value}/>
-                </div>
+                <form onSubmit={this.handleSubmit}>
+                    <h1>User Registration</h1>
+                    {/*<InputField*/}
+                    {/*    type='email'*/}
+                    {/*    placeholder='Email'*/}
+                    {/*    value={this.state.email ? this.state.email : ''}*/}
+                    {/*    onChange={}*/}
+                    {/*/>*/}
+                    <InputField
+                        type='username'
+                        placeholder='Username'
+                        value={this.state.username ? this.state.username : ''}
+                        onChange={(val) => this.setInputValue('username', val)}
+                    />
+                    <InputField
+                        type='password'
+                        placeholder='Password'
+                        value={this.state.password ? this.state.password : ''}
+                        onChange={(val) => this.setInputValue('password', val)}
+                    />
 
-                <div className="form-group">
-                    <label>Email</label>
-                    <input type="email" className="form-control" placeholder="Email"
-                           onChange={e => this.email = e.target.value}/>
-                </div>
+                    <SubmitButton
+                        text='Register'
+                        disabled={this.state.buttonDisabled}
+                        onClick={() => this.doRegister()}
+                    />
+                </form>
 
-                <div className="form-group">
-                    <label>Username</label>
-                    <input type="text" className="form-control" placeholder="Username"
-                           onChange={e => this.username = e.target.value}/>
-                </div>
-
-                <div className="form-group">
-                    <label>Password</label>
-                    <input type="password" className="form-control" placeholder="Password"
-                           onChange={e => this.password = e.target.value}/>
-                </div>
-
-                <div className="form-group">
-                    <label>Confirm Password</label>
-                    <input type="password" className="form-control" placeholder="Confirm Password"
-                           onChange={e => this.confirmPassword = e.target.value}/>
-                </div>
-
-                <button className="btn btn-primary btn-block">Register</button>
-            </form>
+            </div>
         );
     }
 }
 
-export default Login;
+export default Register;
