@@ -24,7 +24,7 @@ node-latest:
   script:
     - cd react-front-end
     - npm install
-    - npm run
+    - npm start
 
 variables:
     MYSQL_DATABASE: "test"
