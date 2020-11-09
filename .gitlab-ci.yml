@@ -8,19 +8,18 @@ stages:
 
 rust-latest:
   stage: build
-  image: rust:latest
+  image: rust:alpine
   script:
     - cd actix
     - export DATABASE_URL=mysql://root:password@mariadb/test
-    - apt update -y
-    - apt-get install -y mariadb-client
+    - apk add mysql-client
     - mysql --user=root --password=password -h mariadb --protocol=tcp test < sql/schema.sql
     - cargo build --verbose
     - cargo test --verbose
 
 node-latest:
   stage: build
-  image: node:latest
+  image: node:current-alpine3.10
   script:
     - cd react-front-end
     - npm install
