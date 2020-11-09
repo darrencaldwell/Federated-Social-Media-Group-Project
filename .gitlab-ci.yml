@@ -20,7 +20,7 @@ rust-latest:
 
 node-latest:
   stage: build
-  image: node:latest
+  image: node:current-alpine3.10
   script:
     - cd react-front-end
     - npm install
