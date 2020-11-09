@@ -12,7 +12,8 @@ rust-latest:
   script:
     - cd actix
     - export DATABASE_URL=mysql://root:password@mariadb/test
-    - apk add mysql-client
+    - apt update -y
+    - apt-get install -y mariadb-client
     - mysql --user=root --password=password -h mariadb --protocol=tcp test < sql/schema.sql
     - cargo build --verbose
     - cargo test --verbose
