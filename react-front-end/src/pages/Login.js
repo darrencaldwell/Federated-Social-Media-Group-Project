@@ -47,8 +47,8 @@ class Login extends React.Component {
         })
 
         try {
-            let res = await fetch('./login', {
-                method: 'post',
+            let res = await fetch('/api/users/register/{username}/{password}?', {
+                method: 'GET',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'

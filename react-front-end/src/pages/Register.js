@@ -1,19 +1,19 @@
 import React from 'react';
 import InputField from "../components/InputField";
 import SubmitButton from "../components/SubmitButton";
+import '../styling/Login.css'
+// import UserStore from "../stores/UserStore";
 
-class Register extends React.Component {
+class Login extends React.Component {
 
     constructor(props) {
-        super(props)
-
+        super(props);
         this.state = {
-            // email: "",
-            username: "",
-            password: "",
+            username: '',
+            password: '',
             buttonDisabled: false
         }
-        this.handleSubmit=this.handleSubmit.bind(this)
+
     }
 
     setInputValue(property, val) {
@@ -29,81 +29,62 @@ class Register extends React.Component {
 
     resetForm() {
         this.setState({
-            // email: '',
             username: '',
             password: '',
             buttonDisabled: false
         })
     }
 
-    // emailhandler = (event) => {
-    //     this.setState({
-    //         email: event.target.value
-    //     })
-    // }
-
-    usernamehandler = (event) => {
+    async doRegister() {
         this.setState({
-            username: event.target.value
+            buttonDisabled: true
         })
-    }
-    passwordhandler = (event) => {
-        this.setState({
-            password: event.target.value
-        })
-    }
 
-    handleSubmit = (event) => {
-        alert(`${this.state.username}  Registered Successfully!`)
-        console.log(this.state);
-        this.setState({
-            // email: "",
-            username: "",
-            password: '',
-        })
-        event.preventDefault()
-
-    }
-
-    doRegister() {
-        this.resetForm()
+        try {
+            await fetch('/api/users/register/{username}/{password}?', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: this.state.username,
+                    password: this.state.password
+                })
+            });
+        } catch (e) {
+            console.log();
+            this.resetForm();
+        }
     }
 
     render() {
         return (
-            <div>
+            <div className="register">
+                <h1>User Registration</h1>
+                <InputField
+                    type='text'
+                    placeholder='Username'
+                    value={this.state.username ? this.state.username : ''}
+                    onChange={(val) => this.setInputValue('username', val)}
+                />
 
-                <form onSubmit={this.handleSubmit}>
-                    <h1>User Registration</h1>
-                    {/*<InputField*/}
-                    {/*    type='email'*/}
-                    {/*    placeholder='Email'*/}
-                    {/*    value={this.state.email ? this.state.email : ''}*/}
-                    {/*    onChange={}*/}
-                    {/*/>*/}
-                    <InputField
-                        type='username'
-                        placeholder='Username'
-                        value={this.state.username ? this.state.username : ''}
-                        onChange={(val) => this.setInputValue('username', val)}
-                    />
-                    <InputField
-                        type='password'
-                        placeholder='Password'
-                        value={this.state.password ? this.state.password : ''}
-                        onChange={(val) => this.setInputValue('password', val)}
-                    />
+                <InputField
+                    type='password'
+                    placeholder='Password'
+                    value={this.state.password ? this.state.password : ''}
+                    onChange={(val) => this.setInputValue('password', val)}
+                />
 
-                    <SubmitButton
-                        text='Register'
-                        disabled={this.state.buttonDisabled}
-                        onClick={() => this.doRegister()}
-                    />
-                </form>
 
+                <SubmitButton
+                    text='Register'
+                    disabled={this.state.buttonDisabled}
+                    onClick={() => this.doRegister()}
+                />
             </div>
         );
     }
 }
 
-export default Register;
+export default Login;

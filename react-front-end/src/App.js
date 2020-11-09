@@ -3,7 +3,7 @@ import {observer} from "mobx-react";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Post from "./pages/Posts"
-import PostList from "./pages/PostList"
+import PostList from "./components/PostList"
 import Posts from "./pages/Posts";
 import Register from "./pages/Register";
 import './styling/App.css';
@@ -25,54 +25,9 @@ class App extends React.Component {
     }
 
 
-    // async componentDidMount() {
-    //     try {
-    //         let res = await fetch('/isLoggedIn', {
-    //             method: 'post',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         });
-    //
-    //         let result = await res.json();
-    //
-    //         if (result && result.success) {
-    //             UserStore.loading = false;
-    //             UserStore.isLoggedIn = true;
-    //             UserStore.username = result.username;
-    //         } else {
-    //             UserStore.loading = false;
-    //             UserStore.isLoggedIn = false;
-    //         }
-    //     } catch (e) {
-    //         UserStore.loading = false;
-    //         UserStore.isLoggedIn = false;
-    //     }
-    // }
-    //
-    // async doLogout() {
-    //     try {
-    //         let res = await fetch('/logout', {
-    //             method: 'post',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         });
-    //
-    //         let result = await res.json();
-    //
-    //         if (result && result.success) {
-    //             UserStore.isLoggedIn = false;
-    //             UserStore.username = '';
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // }
 
-    async componentDidMount () {
+
+    async componentDidMount() {
         try {
             this.setState({loading: true, listingPosts: false, listingPost: false});
 //            let url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/1/posts";
@@ -118,30 +73,6 @@ class App extends React.Component {
 
     render() {
 
-        // if (UserStore.loading) {
-        //     return (
-        //         <div className="app">
-        //             <div className='container'>
-        //                 Loading, please wait..
-        //             </div>
-        //         </div>
-        //     );
-        // } else {
-        //     if (UserStore.isLoggedIn) {
-        //         return (
-        //             <div className="app">
-        //                 <div className='container'>
-        //                     Welcome {UserStore.username}
-        //                     <SubmitButton
-        //                         text={'Log out'}
-        //                         disabled={false}
-        //                         onClick={() => this.doLogout()}
-        //                     />
-        //                 </div>
-        //             </div>
-        //         );
-        //     }
-
         if (this.state.loading) {
             return (
                 <div className="App">
@@ -151,13 +82,13 @@ class App extends React.Component {
         } else if (!this.state.loading && this.state.listingPosts) {
             return (
                 <div className="App">
-                    <PostList postList={this.state.info._embedded} expandPost={this.expandPost}></PostList>
+                    <PostList postList={this.state.info._embedded} expandPost={this.expandPost}/>
                 </div>
             )
         } else if (!this.state.loading && this.state.listingPost) {
             return (
                 <div>
-                    <Post post={this.state.info} expandPost={this.expandPost}></Post>
+                    <Post post={this.state.info} expandPost={this.expandPost}/>
                 </div>
             )
         }

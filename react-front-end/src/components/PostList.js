@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Posts from './Posts';
+import Posts from '../pages/Posts';
 
 class PostList extends Component {
 
@@ -7,7 +7,7 @@ class PostList extends Component {
         if (this.props.postList.postList !== null) {
             // The property you want is called postList and then the array you want is called postList
             return this.props.postList.postList.map((post) => (
-                <Posts key={post.id} post={post} expandPost={this.props.expandPost}></Posts>
+                <Posts key={post.id} post={post} expandPost={this.props.expandPost}/>
             ));
         } else {
             return (

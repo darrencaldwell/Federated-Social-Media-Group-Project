@@ -5,6 +5,7 @@ class Home extends React.Component {
         return (
             <div>
                 <h1> Home Page </h1>
+                {/*<h1>Status: {this.props.}</h1>*/}
             </div>
         );
     }
