@@ -8,7 +8,7 @@ stages:
 
 rust-latest:
   stage: build
-  image: rust:alpine
+  image: rust:slim
   script:
     - cd actix
     - export DATABASE_URL=mysql://root:password@mariadb/test
