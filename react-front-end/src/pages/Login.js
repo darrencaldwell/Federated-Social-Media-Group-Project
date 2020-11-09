@@ -1,102 +1,56 @@
 import React from 'react';
-import InputField from "../components/InputField";
-import SubmitButton from "../components/SubmitButton";
-import UserStore from "../stores/UserStore";
-import '../styling/Login.css'
+import axios from 'axios'
+import {Redirect} from "react-router-dom";
+
 
 class Login extends React.Component {
+    state = {}
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            username: '',
-            password: '',
-            buttonDisabled: false
+    handleSubmit = e => {
+        e.preventDefault()
+
+        const data = {
+            username: this.username,
+            password: this.password
         }
 
-    }
-
-    setInputValue(property, val) {
-        val = val.trim();
-
-        if (val.length > 12) {
-            return;
-        }
-        this.setState({
-            [property]: val
-        })
-    }
-
-    resetForm() {
-        this.setState({
-            username: '',
-            password: '',
-            buttonDisabled: false
-        })
-    }
-
-    async doLogin() {
-        if (!this.state.username) {
-            return;
-        }
-        if (!this.state.password) {
-            return;
-        }
-        this.setState({
-            buttonDisabled: true
-        })
-
-        try {
-            let res = await fetch('/api/users/register/{username}/{password}?', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: this.state.username,
-                    password: this.state.password
+        // api/users/login
+        axios.post('login', data)
+            .then(res => {
+                localStorage.setItem('token', res.data.token)
+                this.setState({
+                    loggedIn: true
                 })
-            });
-
-            let result = await res.json();
-            if (result && result.success) {
-                UserStore.isLoggedIn = true;
-                UserStore.username = result.username;
-            } else if (result && result.success === false) {
-                this.resetForm();
-                alert(result.msg);
-            }
-        } catch (e) {
-            console.log();
-            this.resetForm();
-        }
+                this.props.setUser(res.data.user)
+            }).catch(err => {
+                console.log(err)
+        })
     }
 
     render() {
+
+        if (this.state.loggedIn) {
+            return <Redirect to={'/'}/>
+        }
+
         return (
-            <div className="loginForm">
-                <h1>User Login</h1>
-                <InputField
-                    type='text'
-                    placeholder='Username'
-                    value={this.state.username ? this.state.username : ''}
-                    onChange={(val) => this.setInputValue('username', val)}
-                />
+            <form onSubmit={this.handleSubmit}>
+                <h3>Login</h3>
 
-                <InputField
-                    type='password'
-                    placeholder='Password'
-                    value={this.state.password ? this.state.password : ''}
-                    onChange={(val) => this.setInputValue('password', val)}
-                />
+                <div className="form-group">
+                    <label>Username</label>
+                    <input type="text" className="form-control" placeholder="Username"
+                           onChange={e => this.username = e.target.value}/>
+                </div>
 
-                <SubmitButton
-                    text='Login'
-                    disabled={this.state.buttonDisabled}
-                    onClick={() => this.doLogin()}
-                />
-            </div>
+                <div className="form-group">
+                    <label>Password</label>
+                    <input type="password" className="form-control" placeholder="Password"
+                           onChange={e => this.password = e.target.value}/>
+                </div>
+
+                <button className="btn btn-primary btn-block">Login</button>
+            </form>
         );
     }
 }
