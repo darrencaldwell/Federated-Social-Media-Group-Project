@@ -11,7 +11,7 @@ struct UserRequest {
     password: String,
 }
 
-#[post("/api/register")]
+#[post("/api/users/register")]
 async fn register(post: web::Json::<UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     let post = post.into_inner();
     let user = user::register(post.username, post.password, &pool).await;
@@ -22,7 +22,7 @@ async fn register(post: web::Json::<UserRequest>, pool: web::Data<MySqlPool>) ->
     }
 }
 
-#[post("/api/login")]
+#[post("/api/users/login")]
 async fn login(post: web::Json::<UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     let valid = user::verify(&post.username, &post.password, &pool).await;
 
