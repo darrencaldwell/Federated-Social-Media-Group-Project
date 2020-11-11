@@ -1,8 +1,8 @@
 use anyhow::Result;
 use serde::Serialize;
 
-use sqlx::{FromRow, MySqlPool};
 use bcrypt::hash;
+use sqlx::{FromRow, MySqlPool};
 
 #[derive(Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -47,17 +47,23 @@ pub struct Link {
     pub href: String,
 }
 
+pub enum LoginError {
+    InvalidHash,
+}
+
 fn gen_links(user_id: u64) -> UserLinks {
     UserLinks {
-        _self: Link { href: format!("<url>/api/users/{}", user_id) },
-        users: Link { href: format!("<url>/api/users") },
+        _self: Link {
+            href: format!("<url>/api/users/{}", user_id),
+        },
+        users: Link {
+            href: format!("<url>/api/users"),
+        },
     }
 }
 
 pub async fn get_user(user_id: u64, pool: &MySqlPool) -> Result<User> {
-    let username = sqlx::query!(
-        "SELECT username FROM users WHERE user_id = ?",
-        user_id)
+    let username = sqlx::query!("SELECT username FROM users WHERE user_id = ?", user_id)
         .fetch_one(pool)
         .await?
         .username;
@@ -74,19 +80,23 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
         .fetch_all(pool)
         .await?;
 
-    let users: Vec<User> = result.into_iter()
+    let users: Vec<User> = result
+        .into_iter()
         .map(|rec| User {
             username: rec.username,
             user_id: rec.user_id,
-            links: gen_links(rec.user_id)
+            links: gen_links(rec.user_id),
         })
         .collect();
 
     Ok(Users {
         embedded: UsersList { user_list: users },
-        links: UsersLinks { _self: Link { href: format!("<url>/api/users") } }
+        links: UsersLinks {
+            _self: Link {
+                href: format!("<url>/api/users"),
+            },
+        },
     })
-
 }
 
 pub async fn register(username: String, password: String, pool: &MySqlPool) -> Result<User> {
@@ -113,22 +123,28 @@ pub async fn register(username: String, password: String, pool: &MySqlPool) -> R
     Ok(new_user)
 }
 
-pub async fn verify(username: &String, password: &String, pool: &MySqlPool) -> bool {
-    let hash = sqlx::query!(
-        "SELECT password_hash FROM users WHERE username = ?",
+pub async fn verify(
+    username: &String,
+    password: &String,
+    pool: &MySqlPool,
+) -> Result<u64, LoginError> {
+    let rec = sqlx::query!(
+        "SELECT password_hash, user_id FROM users WHERE username = ?",
         username
     )
     // Uniqueness guaranteed by database
     .fetch_one(pool)
     .await;
 
-    let password_hash = match hash {
-        Ok(hash) => hash.password_hash,
-        Err(_) => return false,
+    let rec_result = match rec {
+        Ok(rec) => rec,
+        Err(_) => return Err(LoginError::InvalidHash),
     };
 
-    match bcrypt::verify(password, &password_hash) {
+    match bcrypt::verify(password, &rec_result.password_hash) {
         Ok(o) => o,
-        Err(_) => false,
-    }
+        Err(_) => return Err(LoginError::InvalidHash),
+    };
+
+    Ok(rec_result.user_id)
 }

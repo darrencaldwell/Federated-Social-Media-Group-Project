@@ -1,9 +1,9 @@
 use super::user;
 use crate::auth;
-use actix_web::{web, get, post, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
-use sqlx::MySqlPool;
 use serde::{Deserialize, Serialize};
+use sqlx::MySqlPool;
 
 #[derive(Serialize, Deserialize)]
 struct UserRequest {
@@ -11,8 +11,17 @@ struct UserRequest {
     password: String,
 }
 
+// i want to move this to users euan u meanie >:(
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LoginResponse {
+    pub user_id: u64,
+    pub username: String,
+    pub token: String,
+}
+
 #[post("/api/users/register")]
-async fn register(post: web::Json::<UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn register(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     let post = post.into_inner();
     let user = user::register(post.username, post.password, &pool).await;
 
@@ -23,17 +32,26 @@ async fn register(post: web::Json::<UserRequest>, pool: web::Data<MySqlPool>) ->
 }
 
 #[post("/api/users/login")]
-async fn login(post: web::Json::<UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
-    let valid = user::verify(&post.username, &post.password, &pool).await;
+async fn login(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
+    let result = user::verify(&post.username, &post.password, &pool).await;
 
-    if !valid {
-        return HttpResponse::Forbidden().body("");
-    }
+    let user_id = match result {
+        Ok(result) => result,
+        Err(_) => return HttpResponse::Forbidden().body(""),
+    };
 
-    match auth::encode_jwt(post.username.clone()) {
-        Ok(token) => HttpResponse::Ok().content_type("plain/text").body(token),
-        Err(_) => HttpResponse::Forbidden().body(""),
-    }
+    let token = match auth::encode_jwt(post.username.clone()) {
+        Ok(token) => token,
+        Err(_) => return HttpResponse::Forbidden().body(""),
+    };
+
+    let res = LoginResponse {
+        user_id: user_id,
+        username: post.username.clone(),
+        token: token,
+    };
+
+    HttpResponse::Ok().json(res)
 }
 
 #[get("/api/users/{id}")]
@@ -55,7 +73,7 @@ async fn get_users(pool: web::Data<MySqlPool>) -> impl Responder {
 #[get("/test")]
 async fn test(auth: BearerAuth) -> String {
     let s = auth.token();
-    
+
     match auth::decode_jwt(s) {
         Ok(user) => user,
         Err(e) => format!("error: {}", e),
