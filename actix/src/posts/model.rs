@@ -202,22 +202,22 @@ fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: u
     );
 
     let subforum_link = format!(
-        "https://cs3099user-b5.host.cs.st-andrews.ac.uk//api/subforums/{}",
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/{}",
         subforum_id
     );
 
     let forum_link = format!(
-        "https://cs3099user-b5.host.cs.st-andrews.ac.uk//api/forums/{}",
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}",
         forum_id
     );
 
     let user_link = format!(
-        "https://cs3099user-b5.host.cs.st-andrews.ac.uk//users/{}",
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/{}",
         user_id
     );
 
     let comments_link = format!(
-        "https://cs3099user-b5.host.cs.st-andrews.ac.uk//posts/{}/comments",
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}/comments",
         post_id
     );
 
