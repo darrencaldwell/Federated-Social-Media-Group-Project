@@ -24,9 +24,10 @@ async fn get_posts(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) ->
     }
 }
 
-#[get("/api/posts/{id}")]
-async fn get_post(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
-    let result = Post::get_one(id, pool.get_ref()).await;
+//#[get("/api/posts/{id}")]
+#[get("/api/forums/{forum_id}/subforums/{subforum_id}/posts/{post_id}")]
+async fn get_post(web::Path(post_id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
+    let result = Post::get_one(post_id, pool.get_ref()).await;
     match result {
         Ok(post) => HttpResponse::Ok().json(post),
         _ => HttpResponse::BadRequest().body("Error trying to get post"),
