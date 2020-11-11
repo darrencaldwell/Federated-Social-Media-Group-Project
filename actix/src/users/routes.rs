@@ -31,7 +31,7 @@ async fn login(post: web::Json::<UserRequest>, pool: web::Data<MySqlPool>) -> im
     }
 
     match auth::encode_jwt(post.username.clone()) {
-        Ok(token) => HttpResponse::Ok().body(token),
+        Ok(token) => HttpResponse::Ok().content_type("plain/text").body(token),
         Err(_) => HttpResponse::Forbidden().body(""),
     }
 }
