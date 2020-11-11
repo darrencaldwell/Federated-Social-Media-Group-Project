@@ -36,6 +36,14 @@ async fn login(post: web::Json::<UserRequest>, pool: web::Data<MySqlPool>) -> im
     }
 }
 
+#[get("/api/users/{id}")]
+async fn get_user(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
+    match user::get_user(id, &pool).await {
+        Ok(user) => HttpResponse::Ok().json(user),
+        Err(_) => HttpResponse::InternalServerError().body(""),
+    }
+}
+
 #[get("/api/users")]
 async fn get_users(pool: web::Data<MySqlPool>) -> impl Responder {
     match user::get_users(&pool).await {
@@ -59,4 +67,5 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(login);
     cfg.service(test);
     cfg.service(get_users);
+    cfg.service(get_user);
 }

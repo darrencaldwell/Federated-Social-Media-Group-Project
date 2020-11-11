@@ -54,6 +54,21 @@ fn gen_links(user_id: u64) -> UserLinks {
     }
 }
 
+pub async fn get_user(user_id: u64, pool: &MySqlPool) -> Result<User> {
+    let username = sqlx::query!(
+        "SELECT username FROM users WHERE user_id = ?",
+        user_id)
+        .fetch_one(pool)
+        .await?
+        .username;
+
+    Ok(User {
+        username,
+        user_id,
+        links: gen_links(user_id),
+    })
+}
+
 pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
     let result = sqlx::query!("SELECT user_id, username FROM users")
         .fetch_all(pool)
