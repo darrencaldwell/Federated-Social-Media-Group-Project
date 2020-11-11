@@ -24,9 +24,20 @@ pub struct Links {
 }
 
 #[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Link {
     pub href: String,
+}
+
+#[derive(Serialize)]
+pub struct Comments {
+    #[serde(rename = "_embedded")]
+    pub embedded: CommentList,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CommentList {
+    pub comment_list: Vec<Comment>,
 }
 
 fn gen_links(comment_id: u64, user_id: u64, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
@@ -39,6 +50,51 @@ fn gen_links(comment_id: u64, user_id: u64, post_id: u64, subforum_id: u64, foru
     }
 }
 
+async fn get_subforum(post_id: u64, pool: &MySqlPool) -> Result<u64> {
+    Ok(sqlx::query!(
+        "SELECT subforum_id FROM posts WHERE post_id = ?",
+        post_id)
+        .fetch_one(pool)
+        .await?
+        .subforum_id)
+}
+
+async fn get_forum(subforum_id: u64, pool: &MySqlPool) -> Result<u64> {
+    Ok(sqlx::query!(
+        " SELECT forum_id FROM subforums WHERE subforum_id = ?",
+        subforum_id)
+        .fetch_one(pool)
+        .await?
+        .forum_id)
+}
+
+pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
+    let recs = sqlx::query!(
+        "SELECT comment, user_id, comment_id FROM comments WHERE post_id = ?",
+        post_id)
+        .fetch_all(pool)
+        .await?;
+
+    let mut comments: Vec<Comment> = Vec::new();
+
+    for rec in recs {
+        let subforum_id = get_subforum(post_id, pool).await?;
+        let forum_id = get_forum(subforum_id, pool).await?;
+        let comment = Comment {
+            id: rec.comment_id,
+            comment_content: rec.comment,
+            user_id: rec.user_id,
+            post_id,
+            links: gen_links(rec.comment_id, rec.user_id, post_id,
+                             subforum_id,forum_id)
+        };
+        comments.push(comment);
+    }
+    Ok(Comments {
+        embedded: CommentList { comment_list: comments } 
+    })
+}
+
 pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
     let rec = sqlx::query!(
         "SELECT comment, user_id, post_id FROM comments WHERE comment_id = ?",
@@ -46,19 +102,8 @@ pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
         .fetch_one(pool)
         .await?;
 
-    let subforum_id = sqlx::query!(
-        "SELECT subforum_id FROM posts WHERE post_id = ?",
-        rec.post_id)
-        .fetch_one(pool)
-        .await?
-        .subforum_id;
-
-    let forum_id = sqlx::query!(
-        " SELECT forum_id FROM subforums WHERE subforum_id = ?",
-        subforum_id)
-        .fetch_one(pool)
-        .await?
-        .forum_id;
+    let subforum_id = get_subforum(rec.post_id, pool).await?;
+    let forum_id = get_forum(subforum_id, pool).await?;
 
     Ok(Comment {
         id: comment_id,
