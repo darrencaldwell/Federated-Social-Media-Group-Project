@@ -1,6 +1,15 @@
 use sqlx::MySqlPool;
 use anyhow::Result;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
+pub struct CommentRequest {
+    pub comment_content: String,
+    pub user_id: u64,
+    pub username: String,
+}
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -66,6 +75,35 @@ async fn get_forum(subforum_id: u64, pool: &MySqlPool) -> Result<u64> {
         .fetch_one(pool)
         .await?
         .forum_id)
+}
+
+pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
+                            pool: &MySqlPool) -> Result<Comment> {
+    let mut tx = pool.begin().await?;
+    println!("{:?}", comment_request);
+
+    let comment_id = sqlx::query!(
+        "INSERT INTO comments (comment, user_id, post_id) VALUES (?, ?, ?)",
+        comment_request.comment_content,
+        comment_request.user_id,
+        post_id)
+        .execute(&mut tx)
+        .await?
+        .last_insert_id();
+
+    tx.commit().await?;
+
+    let subforum_id = get_subforum(post_id, pool).await?;
+    let forum_id = get_forum(subforum_id, pool).await?;
+
+    Ok(Comment {
+        id: comment_id,
+        comment_content: comment_request.comment_content,
+        user_id: comment_request.user_id,
+        post_id,
+        links: gen_links(comment_id, comment_request.user_id, post_id, subforum_id, forum_id)
+    })
+
 }
 
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
