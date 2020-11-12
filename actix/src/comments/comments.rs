@@ -113,21 +113,20 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
         .fetch_all(pool)
         .await?;
 
-    let mut comments: Vec<Comment> = Vec::new();
+    let subforum_id = get_subforum(post_id, pool).await?;
+    let forum_id = get_forum(subforum_id, pool).await?;
 
-    for rec in recs {
-        let subforum_id = get_subforum(post_id, pool).await?;
-        let forum_id = get_forum(subforum_id, pool).await?;
-        let comment = Comment {
+
+    let comments: Vec<Comment> = recs.into_iter()
+        .map(|rec| Comment {
             id: rec.comment_id,
             comment_content: rec.comment,
             user_id: rec.user_id,
             post_id,
             links: gen_links(rec.comment_id, rec.user_id, post_id,
                              subforum_id,forum_id)
-        };
-        comments.push(comment);
-    }
+        }).collect();
+
     Ok(Comments {
         embedded: CommentList { comment_list: comments } 
     })
