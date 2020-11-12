@@ -4,8 +4,8 @@ class Home extends React.Component {
 
     render() {
 
-        if (this.props.user) {
-            return <h2>Welcome {this.state.username}</h2>
+        if (localStorage.getItem('username')) {
+            return <h2>Welcome {localStorage.getItem('username')}</h2>
         }
 
         return (
