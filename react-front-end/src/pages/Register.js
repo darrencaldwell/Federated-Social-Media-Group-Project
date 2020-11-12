@@ -1,8 +1,12 @@
 import React from 'react';
 import axios from 'axios'
+import {Redirect} from "react-router-dom";
 
 class Register extends React.Component {
-    state ={}
+    constructor(props) {
+        super(props);
+        this.state = {registered: false}; // set initial state
+    }
 
     handleSubmit = e => {
         e.preventDefault()
@@ -18,7 +22,10 @@ class Register extends React.Component {
         // register
         axios.post('api/users/register', data)
             .then(res => {
-                console.log(res)
+                console.log("success")
+                this.setState({
+                    registered: true
+                })
             }).catch(
             err => {
                 this.setState({
@@ -30,7 +37,9 @@ class Register extends React.Component {
 
 
     render() {
-
+        if (this.state.registered) {
+            return <Redirect to={'/login'}/>
+        }
         let error = ''
 
         if (this.state.message) {
