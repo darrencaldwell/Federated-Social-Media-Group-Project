@@ -40,15 +40,15 @@ async fn login(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
-    let token = match auth::encode_jwt(post.username.clone()) {
+    let token = match auth::encode_jwt(user_id, post.username.clone()) {
         Ok(token) => token,
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
     let res = LoginResponse {
-        user_id: user_id,
+        user_id,
         username: post.username.clone(),
-        token: token,
+        token,
     };
 
     HttpResponse::Ok().json(res)
@@ -75,7 +75,7 @@ async fn test(auth: BearerAuth) -> String {
     let s = auth.token();
 
     match auth::decode_jwt(s) {
-        Ok(user) => user,
+        Ok(user) => user.to_string(),
         Err(e) => format!("error: {}", e),
     }
 }
