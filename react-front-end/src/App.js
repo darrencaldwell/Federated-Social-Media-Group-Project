@@ -9,36 +9,31 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import axios from "axios";
 
 class App extends React.Component {
-    state = {}
-    componentDidMount = () => {
-
-        axios.get('user')
-            .then(res => {
-                    this.setUser(res.data)
-                },
-                err => {
-                    console.log(err)
-                })
+    constructor(props) {
+        super(props);
+        this.state = {token: localStorage.getItem('token')}; // set initial state
     }
-
-    setUser = user => {
-        this.setState({
-            user: user
-        })
+    login = () => { // used to update App state from within login page
+        this.setState({ token: localStorage.getItem('token')});
+    }
+    logout = () => { // used to update App state from within navbar
+        localStorage.clear();
+        this.setState({ token: localStorage.getItem('token')});
     }
 
     render() {
+        const {token} = this.state;
         return (
 
             <Router>
                 <div className="App">
-                    <Nav user={this.state.user} setUser={this.setUser}/>
+                    <Nav isLoggedIn={token} logout={this.logout}  /> 
 
                     <div className="auth-wrapper">
                         <div className="auth-inner">
                             <Switch>
                                 <Route exact path="/" component={() => <Home user={this.state.user}/>}/>
-                                <Route exact path="/login" component={() => <Login setUser={this.setUser}/>}/>
+                                <Route exact path="/login" component={() => <Login login={this.login}/>}/>
                                 <Route exact path="/register" component={Register}/>
                             </Switch>
                         </div>

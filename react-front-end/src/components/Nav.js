@@ -3,21 +3,19 @@ import {Link} from 'react-router-dom';
 
 
 class Nav extends React.Component {
-
-    handleLogout = () => {
-        localStorage.clear()
-        this.props.setUser(null)
+    constructor(props) {
+        super(props);
     }
 
     render() {
 
         let buttons;
 
-        if (this.props.user) {
+        if (this.props.isLoggedIn) {
             buttons = (
                 <ul className="navbar-nav ml-auto">
                     <li className="nav-item">
-                        <Link to={'/'} onClick={this.handleLogout} className="nav-link">Logout</Link>
+                        <Link to={'/login'} onClick={this.props.logout} className="nav-link">Logout</Link>
                     </li>
                 </ul>)
         } else {

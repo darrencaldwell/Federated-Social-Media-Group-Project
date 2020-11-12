@@ -18,14 +18,16 @@ class Login extends React.Component {
         // login
         axios.post('api/users/login', data)
             .then(res => {
-                localStorage.setItem('token', res.data.token)
+                localStorage.setItem('token', res.data.token);
+                localStorage.setItem('userId', res.data.userId);
+                localStorage.setItem('username', res.data.username);
                 this.setState({
                     loggedIn: true
                 })
-                this.props.setUser(res.data.user)
+                this.props.login()
             }).catch(err => {
             this.setState({
-                message: err.response.data.message
+                //message: err.response.data.message
             })
         })
     }
