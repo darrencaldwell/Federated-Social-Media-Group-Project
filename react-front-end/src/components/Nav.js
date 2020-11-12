@@ -14,6 +14,9 @@ class Nav extends React.Component {
                     <li className="nav-item">
                         <Link to={'/login'} onClick={this.props.logout} className="nav-link">Logout</Link>
                     </li>
+                    <li className="nav-item">
+                        <Link to={'/makePost'} className="nav-link">Make Post</Link>
+                    </li>
                 </ul>)
         } else {
             buttons = (

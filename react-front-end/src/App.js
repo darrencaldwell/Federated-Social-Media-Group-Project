@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 // import CreatePost from "./pages/CreatePost"
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Title from "./pages/MakePost.js";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
 class App extends React.Component {
@@ -34,6 +35,7 @@ class App extends React.Component {
                                 <Route exact path="/" component={() => <Home user={this.state.user}/>}/>
                                 <Route exact path="/login" component={() => <Login login={this.login}/>}/>
                                 <Route exact path="/register" component={Register}/>
+                                <Route exact path="/makePost" component={Title}/>
                             </Switch>
                         </div>
                     </div>
