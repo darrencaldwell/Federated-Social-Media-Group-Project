@@ -92,13 +92,13 @@ handleClick() {
           withCredentials: true,
           credentials: 'include',
           headers: {
-              'Authorization': localStorage.getItem('token'),
+              'Authorization': "Bearer " + localStorage.getItem('token'),
               'Content-Type': 'application/json'
           },
           body: JSON.stringify({
       "postTitle":this.state.titleText,
       "postMarkup":this.state.bodyText,
-      "userId":localStorage.getItem('userId') //somehow find out the user id
+      "userId":parseInt(localStorage.getItem('userId'))
     })
       }).then(responseJson => {
           console.log(responseJson);
