@@ -75,12 +75,14 @@ class Make extends React.Component {
         this.changeTitle = this.changeTitle.bind(this);
         this.changeBody = this.changeBody.bind(this);
         this.mode = this.props.mode === "comment" ? true : false;
+        const defaultBody = this.mode ? 'Put the body of your comment here' : 'Put the body of your post here';
+        const defaultTitle = 'Title';
         this.state = {
             buttonText: this.mode ? 'Create Comment' : 'Create Post',
-            defaultTitle: 'Title',
-            titleText: this.state.defaultTitle,
-            defaultBody: this.mode ? 'Put the body of your comment here' : 'Put the body of your post here',
-            bodyText: this.state.defaultBody,
+            defaultTitle: defaultTitle,
+            titleText: defaultTitle,
+            defaultBody: defaultBody,
+            bodyText: defaultBody,
         };
     }
 
