@@ -18,6 +18,9 @@ export class Post extends Component {
                     <p>
                         <button onClick={() => this.props.loadPosts()}>Go back to list of posts</button>
                     </p>
+                    <p>
+                        Make posts here means make comment. Will be fixed later.
+                    </p>
                     <div>
                         <Make mode="comment" url="/api/posts/1/comments" /> {/*hard-coded in for now, will be fixed when proper navigation implemented*/}
                     </div>
@@ -56,6 +59,9 @@ export class Post extends Component {
                     </p>
                     <p>
                         <button onClick={() => this.props.loadPosts()}>Go back to list of posts</button>
+                    </p>
+                    <p>
+                        Make posts here means make comment. Will be fixed later.
                     </p>
                     <div>
                         <Make mode="comment" url="/api/posts/1/comments" /> {/*hard-coded in for now, will be fixed when proper navigation implemented*/}
