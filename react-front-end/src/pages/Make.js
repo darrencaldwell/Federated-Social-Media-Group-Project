@@ -16,6 +16,12 @@ class Title extends React.Component {
         }
     }
 
+    handleFocus() {
+        if (this.props.value == this.props.default) {
+            this.props.onChange('');
+        }
+    }
+
     render() {
         const value = this.props.value;
         return (
@@ -23,7 +29,7 @@ class Title extends React.Component {
                 <input
                     value={value}
                     onChange={this.handleChange}
-                    onFocus={() => this.props.onChange('')}
+                    onFocus={() => this.handleFocus()}
                     onBlur={() => this.handleBlur()}/>
             </div>
         );
@@ -46,12 +52,18 @@ class Body extends React.Component {
         }
     }
 
+    handleFocus() {
+        if (this.props.value == this.props.default) {
+            this.props.onChange('');
+        }
+    }
+
     render() {
         return (
             <div>
     <textarea
         className="text" value={this.props.value} onChange={this.handleChange}
-        onFocus={() => this.props.onChange('')}
+        onFocus={() => this.handleFocus()}
         onBlur={() => this.handleBlur()}>
     </textarea>
             </div>
