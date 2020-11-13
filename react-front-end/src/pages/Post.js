@@ -5,7 +5,7 @@ import Make from './Make.js';
 import '../styling/Post.css';
 export class Post extends Component {
     render() {
-        const url = "/api/posts" + this.props.post.postId + "/comments";
+        const url = "/api/posts/" + this.props.post.postId + "/comments";
         // If the list of commnts is empty print out a message saying so else print out comments
         if (this.props.comments.commentList.length === 0) {
             return (
