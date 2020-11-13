@@ -104,7 +104,7 @@ class Make extends React.Component {
                 body: this.mode ? JSON.stringify(
                     {
                         "commentContent": this.state.bodyText,
-                        "userID": parseInt(localStorage.getItem('userId')),
+                        "userId": parseInt(localStorage.getItem('userId')),
                         "username":localStorage.getItem('username')
                     }
                 ) : JSON.stringify({
