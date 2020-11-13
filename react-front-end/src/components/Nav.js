@@ -8,6 +8,7 @@ class Nav extends React.Component {
 
         let buttons;
 
+        // If user is logged in (prop), display logout and make post buttons
         if (this.props.isLoggedIn) {
             buttons = (
                 <ul className="navbar-nav ml-auto">
@@ -18,7 +19,7 @@ class Nav extends React.Component {
                         <Link to={'/makePost'} className="nav-link">Make Post</Link>
                     </li>
                 </ul>)
-        } else {
+        } else { // If user is not logged in, display login and register buttons
             buttons = (
                 <ul className="navbar-nav ml-auto">
                     <li className="nav-item">

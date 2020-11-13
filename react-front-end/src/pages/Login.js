@@ -7,8 +7,9 @@ class Login extends React.Component {
     state = {}
 
     handleSubmit = e => {
-        e.preventDefault()
+        e.preventDefault() // Prevent the browser refreshing
 
+        // Store data to be sent to backend
         const data = {
             username: this.username,
             password: this.password
@@ -16,6 +17,7 @@ class Login extends React.Component {
 
         // api/users/login
         // login
+        // POST data to backend and set and set the data in local storage
         axios.post('api/users/login', data)
             .then(res => {
                 localStorage.setItem('token', res.data.token);
@@ -27,13 +29,14 @@ class Login extends React.Component {
                 this.props.login()
             }).catch(err => {
             this.setState({
-                //message: err.response.data.message
+                message: err.response.data.message
             })
         })
     }
 
     render() {
 
+        // If logged in, redirect to home page
         if (this.state.loggedIn) {
             return <Redirect to={'/'}/>
         }
@@ -53,12 +56,14 @@ class Login extends React.Component {
 
                 {error} {/* // if invalid login. if valid then empty string shown*/}
 
+                {/* Username Input */}
                 <div className="form-group">
                     <label>Username</label>
                     <input type="text" className="form-control" placeholder="Username"
                            onChange={e => this.username = e.target.value}/>
                 </div>
 
+                {/* Password Input */}
                 <div className="form-group">
                     <label>Password</label>
                     <input type="password" className="form-control" placeholder="Password"

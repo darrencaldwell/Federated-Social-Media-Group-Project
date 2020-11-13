@@ -21,13 +21,19 @@ class App extends React.Component {
         this.setState({ token: localStorage.getItem('token')});
     }
 
+    /**
+     *
+     * @returns {JSX.Element}
+     */
     render() {
+        // Whether user is logged in or logged out
         const {token} = this.state;
         return (
 
             <Router>
                 <div className="App">
-                    <Nav isLoggedIn={token} logout={this.logout}  /> 
+                    {/* Pass the state onto Nav bar about state of user login /*/}
+                    <Nav isLoggedIn={token} logout={this.logout}  />
 
                     <div className="auth-wrapper">
                         <div className="auth-inner">

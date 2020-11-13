@@ -8,6 +8,7 @@ class Register extends React.Component {
         this.state = {registered: false}; // set initial state
     }
 
+
     handleSubmit = e => {
         e.preventDefault()
         const data = {
@@ -20,6 +21,7 @@ class Register extends React.Component {
 
         // api/users/register
         // register
+        // POST registration data to backend
         axios.post('api/users/register', data)
             .then(res => {
                 console.log("success")
@@ -37,6 +39,7 @@ class Register extends React.Component {
 
 
     render() {
+        // If registered successfully, Redirect to login page
         if (this.state.registered) {
             return <Redirect to={'/login'}/>
         }
