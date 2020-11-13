@@ -1,11 +1,11 @@
 import React from 'react';
 import Nav from "./components/Nav";
-import {BrowserRouter as Router, Switch, Route} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Home from "./pages/Home";
-// import CreatePost from "./pages/CreatePost"
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Title from "./pages/MakePost.js";
+import PostList from "./pages/PostList";
+import Make from "./pages/Make.js";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
 class App extends React.Component {
@@ -38,10 +38,12 @@ class App extends React.Component {
                     <div className="auth-wrapper">
                         <div className="auth-inner">
                             <Switch>
+                                <Route exact path="/api/subforums/1/posts" component={() => <PostList/>} />
                                 <Route exact path="/" component={() => <Home user={this.state.user}/>}/>
                                 <Route exact path="/login" component={() => <Login login={this.login}/>}/>
                                 <Route exact path="/register" component={Register}/>
-                                <Route exact path="/makePost" component={Title}/>
+                                {/*url hardcoded for now, will be fixed later */}
+                                <Route exact path="/makePost" component={() => <Make url="/api/subforums/1/posts"/>}/>
                             </Switch>
                         </div>
                     </div>
