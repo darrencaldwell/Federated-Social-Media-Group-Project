@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PostList from "./pages/PostList";
-import Title from "./pages/Make.js";
+import Make from "./pages/Make.js";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
 class App extends React.Component {

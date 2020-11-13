@@ -74,14 +74,13 @@ class Make extends React.Component {
         super(props);
         this.changeTitle = this.changeTitle.bind(this);
         this.changeBody = this.changeBody.bind(this);
-        mode = this.props.mode === "comment" ? true : false;
+        this.mode = this.props.mode === "comment" ? true : false;
         this.state = {
-            mode: mode,
-            buttonText: m ? 'Create Comment' : 'Create Post',
+            buttonText: this.mode ? 'Create Comment' : 'Create Post',
             defaultTitle: 'Title',
-            titleText: defaultTitle,
-            defaultBody: m ? 'Put the body of your comment here' : 'Put the body of your post here',
-            bodyText: defaultBody,
+            titleText: this.state.defaultTitle,
+            defaultBody: this.mode ? 'Put the body of your comment here' : 'Put the body of your post here',
+            bodyText: this.state.defaultBody,
         };
     }
 
@@ -89,7 +88,7 @@ class Make extends React.Component {
         e.preventDefault()
         // if no text has been entered, it will return to default before the button is pressed
         // don't worry about title if in comment mode
-        if ((this.state.titleText === this.state.defaultTitle && !mode) ||
+        if ((this.state.titleText === this.state.defaultTitle && !this.mode) ||
             this.state.bodyText === this.state.defaultBody) {
             alert('Please enter a title and body');
         } else {
@@ -101,7 +100,7 @@ class Make extends React.Component {
                     'Authorization': "Bearer " + localStorage.getItem('token'),
                     'Content-Type': 'application/json'
                 },
-                body: mode ? JSON.stringify(
+                body: this.mode ? JSON.stringify(
                     {
                         "commentContent": this.state.bodyText,
                         "userID": parseInt(localStorage.getItem('userId')),
@@ -129,7 +128,7 @@ class Make extends React.Component {
     }
 
     renderTitle() {
-        return ( mode ? null :
+        return ( this.mode ? null :
             <Title
                 value={this.state.titleText}
                 default={this.state.defaultTitle}
