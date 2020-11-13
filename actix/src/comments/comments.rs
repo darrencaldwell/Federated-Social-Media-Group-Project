@@ -116,7 +116,6 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let subforum_id = get_subforum(post_id, pool).await?;
     let forum_id = get_forum(subforum_id, pool).await?;
 
-
     let comments: Vec<Comment> = recs.into_iter()
         .map(|rec| Comment {
             id: rec.comment_id,
@@ -124,7 +123,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
             user_id: rec.user_id,
             post_id,
             links: gen_links(rec.comment_id, rec.user_id, post_id,
-                             subforum_id,forum_id)
+                             subforum_id, forum_id)
         }).collect();
 
     Ok(Comments {
