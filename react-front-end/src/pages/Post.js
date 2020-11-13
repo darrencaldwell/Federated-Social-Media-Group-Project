@@ -5,6 +5,7 @@ import Make from './Make.js';
 import '../styling/Post.css';
 export class Post extends Component {
     render() {
+        const url = "/api/posts" + this.props.post.id + "/comments";
         // If the list of commnts is empty print out a message saying so else print out comments
         if (this.props.comments.commentList.length === 0) {
             return (
@@ -22,7 +23,7 @@ export class Post extends Component {
                         Make posts here means make comment. Will be fixed later.
                     </p>
                     <div>
-                        <Make mode="comment" url="/api/posts/1/comments" /> {/*hard-coded in for now, will be fixed when proper navigation implemented*/}
+                        <Make mode="comment" url={url} />
                     </div>
                     <div>
                         <h>Comments:</h>
@@ -64,7 +65,7 @@ export class Post extends Component {
                         Make posts here means make comment. Will be fixed later.
                     </p>
                     <div>
-                        <Make mode="comment" url="/api/posts/1/comments" /> {/*hard-coded in for now, will be fixed when proper navigation implemented*/}
+                        <Make mode="comment" url={url} />
                     </div>
                     <div>
                         <h>Comments:</h>

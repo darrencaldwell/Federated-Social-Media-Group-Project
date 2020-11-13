@@ -17,7 +17,7 @@ class Title extends React.Component {
     }
 
     handleFocus() {
-        if (this.props.value == this.props.default) {
+        if (this.props.value === this.props.default) {
             this.props.onChange('');
         }
     }
@@ -53,7 +53,7 @@ class Body extends React.Component {
     }
 
     handleFocus() {
-        if (this.props.value == this.props.default) {
+        if (this.props.value === this.props.default) {
             this.props.onChange('');
         }
     }
