@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
 import Comments from '../components/Comments';
+import Make from './Make.js';
 import '../styling/Post.css';
 export class Post extends Component {
     render() {
@@ -16,6 +17,9 @@ export class Post extends Component {
                     <p>
                         <button onClick={() => this.props.loadPosts()}>Go back to list of posts</button>
                     </p>
+                    <div>
+                        <Make mode="comment" url="/api/posts/1/comments" /> {/*hard-coded in for now, will be fixed when proper navigation implemented*/}
+                    </div>
                     <div>
                         <h>Comments:</h>
                         <p>No comments have been made yet.</p>

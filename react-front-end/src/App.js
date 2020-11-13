@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PostList from "./pages/PostList";
-import Title from "./pages/MakePost.js";
+import Title from "./pages/Make.js";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
 class App extends React.Component {
@@ -36,7 +36,8 @@ class App extends React.Component {
                                 <Route exact path="/" component={() => <Home user={this.state.user}/>}/>
                                 <Route exact path="/login" component={() => <Login login={this.login}/>}/>
                                 <Route exact path="/register" component={Register}/>
-                                <Route exact path="/makePost" component={Title}/>
+                                {/*url hardcoded for now, will be fixed later */}
+                                <Route exact path="/makePost" component={() => <Make url="/api/subforums/1/posts"/>}/>
                             </Switch>
                         </div>
                     </div>

@@ -30,7 +30,7 @@ class Title extends React.Component {
     }
 }
 
-class Text extends React.Component {
+class Body extends React.Component {
     constructor(props) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
@@ -68,29 +68,32 @@ function SendButton(props) {
         </button>
     );
 }
-
-class Page extends React.Component {
+//props: url, mode
+class Make extends React.Component {
     constructor(props) {
         super(props);
         this.changeTitle = this.changeTitle.bind(this);
         this.changeBody = this.changeBody.bind(this);
+        mode = this.props.mode === "comment" ? true : false;
         this.state = {
-            buttonText: 'Create Post',
-            titleText: 'Title',
+            mode: mode,
+            buttonText: m ? 'Create Comment' : 'Create Post',
             defaultTitle: 'Title',
-            bodyText: 'Put the body of your post here',
-            defaultBody: 'Put the body of your post here',
+            titleText: defaultTitle,
+            defaultBody: m ? 'Put the body of your comment here' : 'Put the body of your post here',
+            bodyText: defaultBody,
         };
     }
 
     handleSubmit = e => {
         e.preventDefault()
         // if no text has been entered, it will return to default before the button is pressed
-        if (this.state.titleText === this.state.defaultTitle ||
+        // don't worry about title if in comment mode
+        if ((this.state.titleText === this.state.defaultTitle && !mode) ||
             this.state.bodyText === this.state.defaultBody) {
             alert('Please enter a title and body');
         } else {
-            fetch("api/subforums/1/posts", {
+            fetch(this.props.url, {
                 method: "POST",
                 withCredentials: true,
                 credentials: 'include',
@@ -98,7 +101,13 @@ class Page extends React.Component {
                     'Authorization': "Bearer " + localStorage.getItem('token'),
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
+                body: mode ? JSON.stringify(
+                    {
+                        "commentContent": this.state.bodyText,
+                        "userID": parseInt(localStorage.getItem('userId')),
+                        "username":localStorage.getItem('username')
+                    }
+                ) : JSON.stringify({
                     "postTitle": this.state.titleText,
                     "postMarkup": this.state.bodyText,
                     "userId": parseInt(localStorage.getItem('userId'))
@@ -120,7 +129,7 @@ class Page extends React.Component {
     }
 
     renderTitle() {
-        return (
+        return ( mode ? null :
             <Title
                 value={this.state.titleText}
                 default={this.state.defaultTitle}
@@ -131,7 +140,7 @@ class Page extends React.Component {
 
     renderText() {
         return (
-            <Text
+            <Body
                 value={this.state.bodyText}
                 default={this.state.defaultBody}
                 onChange={this.changeBody}
@@ -171,4 +180,4 @@ class Page extends React.Component {
     }
 }
 
-export default Page
+export default Make
