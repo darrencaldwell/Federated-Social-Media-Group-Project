@@ -17,6 +17,9 @@ class Nav extends React.Component {
                     <li className="nav-item">
                         <Link to={'/makePost'} className="nav-link">Make Post</Link>
                     </li>
+                    <li className="nav-item">
+                        <Link to={'/api/subforums/1/posts'} className="nav-link">List of posts</Link>
+                    </li>
                 </ul>)
         } else {
             buttons = (

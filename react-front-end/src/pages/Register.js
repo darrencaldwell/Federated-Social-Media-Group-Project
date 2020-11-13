@@ -92,7 +92,7 @@ class Register extends React.Component {
                     <input type="password" className="form-control" placeholder="Confirm Password"
                            onChange={e => this.confirmPassword = e.target.value}/>
                 </div>
-
+                
                 <button className="btn btn-primary btn-block">Register</button>
             </form>
         );
