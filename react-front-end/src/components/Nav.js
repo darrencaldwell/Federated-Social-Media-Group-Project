@@ -19,7 +19,7 @@ class Nav extends React.Component {
                         <Link to={'/makePost'} className="nav-link">Make Post</Link>
                     </li>
                     <li className="nav-item">
-                        <Link to={'/api/subforums/1/posts'} className="nav-link">List of posts</Link>
+                        <Link to={'/posts'} className="nav-link">List of posts</Link>
                     </li>
                 </ul>)
         } else { // If user is not logged in, display login and register buttons

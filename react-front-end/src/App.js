@@ -38,7 +38,7 @@ class App extends React.Component {
                     <div className="auth-wrapper">
                         <div className="auth-inner">
                             <Switch>
-                                <Route exact path="/api/subforums/1/posts" component={() => <PostList/>} />
+                                <Route exact path="/posts" component={() => <PostList/>} />
                                 <Route exact path="/" component={() => <Home user={this.state.user}/>}/>
                                 <Route exact path="/login" component={() => <Login login={this.login}/>}/>
                                 <Route exact path="/register" component={Register}/>
