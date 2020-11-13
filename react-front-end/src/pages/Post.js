@@ -58,6 +58,9 @@ export class Post extends Component {
                         <button onClick={() => this.props.loadPosts()}>Go back to list of posts</button>
                     </p>
                     <div>
+                        <Make mode="comment" url="/api/posts/1/comments" /> {/*hard-coded in for now, will be fixed when proper navigation implemented*/}
+                    </div>
+                    <div>
                         <h>Comments:</h>
                         {this.props.comments.commentList.map((comment) => (
                             <Comments key={comment.id} comment={comment} ></Comments>
