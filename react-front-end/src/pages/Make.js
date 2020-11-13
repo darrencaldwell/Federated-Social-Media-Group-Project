@@ -86,8 +86,7 @@ class Make extends React.Component {
         };
     }
 
-    handleSubmit = e => {
-        e.preventDefault()
+    submit () {
         // if no text has been entered, it will return to default before the button is pressed
         // don't worry about title if in comment mode
         if ((this.state.titleText === this.state.defaultTitle && !this.mode) ||
@@ -153,7 +152,7 @@ class Make extends React.Component {
         return (
             <SendButton
                 value={this.state.buttonText}
-                onClick={() => this.handleSubmit()}
+                onClick={() => this.submit()}
             />
         );
     }
