@@ -1,24 +1,21 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Link } from 'react-router-dom';
+import '../styling/Post.css';
 
 export class Posts extends Component {
     render() {
         return (
             <div>
-                <h1>
+                <h1 className="postTitle">
                     {this.props.post.postTitle}
                 </h1>
-                <p>
-                    {this.props.post.postContents}
+                <p className="postMarkup">
+                    {this.props.post.postMarkup}
                 </p>
-                <Router>
-                    <p>
-                        <Link to={this.props.post._links.self.href} onClick={() => this.props.expandPost(this.props.post._links.self.href)}>
-                            Expand Post (only one that works rn).
-                        </Link>
-                    </p>
-
-                </Router>
+                <p>
+                    <button className="expandPostButton" onClick={() => this.props.expandPost(this.props.post.postId)}>
+                            ^Expand post to see comments and stuff.^
+                    </button>
+                </p>     
             </div>
         )
     }
