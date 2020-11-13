@@ -74,7 +74,7 @@ class Make extends React.Component {
         super(props);
         this.changeTitle = this.changeTitle.bind(this);
         this.changeBody = this.changeBody.bind(this);
-        this.mode = this.props.mode === "comment" ? true : false;
+        this.mode = this.props.mode === "comment";
         const defaultBody = this.mode ? 'Put the body of your comment here' : 'Put the body of your post here';
         const defaultTitle = 'Title';
         this.state = {
@@ -115,7 +115,7 @@ class Make extends React.Component {
             }).then(responseJson => {
                 console.log(responseJson);
             }).catch(error => this.setState({
-                message: "Error postintg post: " + error
+                message: "Error posting post: " + error
             }));
         }
     }
