@@ -7,15 +7,16 @@ class PostList extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            loading: true,
-            info: {},
-            post: {},
-            comments: {},
-            listingPosts: false,
-            listingPost: false
+            loading: true, // Set to true if loading
+            info: {}, // Stores list of posts
+            post: {}, // Stores a specific post
+            comments: {}, // Stores a list of comments for a post
+            listingPosts: false, // Set to true when rendering a list of posts
+            listingPost: false // Set to true when rendering a specific post
         }
     }
 
+    // Loads a list of posts, hard coded for now
     componentDidMount = async () => {
         try {
             this.setState({loading: true, listingPosts: false, listingPost: false});
@@ -41,6 +42,8 @@ class PostList extends Component {
 
     }
 
+    // Takes the url of a specific post and displays extra things like comments and other things that will be
+    // implemented in the future.
     expandPost = async (id) => {
         try {
             this.setState({loading: true, listingPosts: false, listingPost: false});
@@ -92,7 +95,7 @@ class PostList extends Component {
 
             )
         } else if (!this.state.loading && this.state.listingPosts) {
-
+            // If we are rendering a list of posts go through the returned array of posts and display them.
             return (
                 <div className="container">
                     {this.state.info._embedded.postList.map((post) => (
@@ -100,6 +103,7 @@ class PostList extends Component {
                     ))}
                 </div>)
         } else if (!this.state.loading && this.state.listingPost) {
+            // If we are rendering a singular post display everything like comments and other things to be implemented later
             return (
                 <div>
                     <Post post={this.state.post} comments={this.state.comments._embedded}
@@ -107,6 +111,7 @@ class PostList extends Component {
                 </div>
             )
         } else {
+            // If for some reason loading is over but something can't be displayed
             return (
                 <div>
                     Error has occurred and nothing is loaded :(

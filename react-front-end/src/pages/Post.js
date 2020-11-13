@@ -41,12 +41,6 @@ export class Post extends Component {
                                 user that posted this (not working, prints hello to console).
                             </Link>
                         </p>
-                        <p>
-                            <Link to={this.props.post._links.comments.href} onClick={() => { console.log("hello") }}>
-                                comments of post (not working, prints hello to console).
-                            </Link>
-                        </p>
-    
                     </Router> */}
                 </div>
             )
@@ -85,12 +79,6 @@ export class Post extends Component {
                                 user that posted this (not working, prints hello to console).
                             </Link>
                         </p>
-                        <p>
-                            <Link to={this.props.post._links.comments.href} onClick={() => { console.log("hello") }}>
-                                comments of post (not working, prints hello to console).
-                            </Link>
-                        </p>
-    
                     </Router> */}
                 </div>
             )
