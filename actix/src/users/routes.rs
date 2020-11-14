@@ -1,9 +1,10 @@
 use super::user;
-use crate::auth;
+use crate::auth::{self, decode_jwt};
 use actix_web::{get, post, web, HttpResponse, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
+use auth_macro::*;
 
 #[derive(Serialize, Deserialize)]
 struct UserRequest {
@@ -71,13 +72,8 @@ async fn get_users(pool: web::Data<MySqlPool>) -> impl Responder {
 }
 
 #[get("/test")]
-async fn test(auth: BearerAuth) -> String {
-    let s = auth.token();
-
-    match auth::decode_jwt(s) {
-        Ok(user) => user.to_string(),
-        Err(e) => format!("error: {}", e),
-    }
+async fn test(auth: BearerAuth) -> impl Responder {
+    HttpResponse::Accepted().body("yeeeet")
 }
 
 pub fn init(cfg: &mut web::ServiceConfig) {

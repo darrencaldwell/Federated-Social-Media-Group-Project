@@ -21,3 +21,4 @@ futures = "*"
 serde_json = "*"
 bcrypt = "*"
 jsonwebtoken = "*"
+auth_macro = { path = "auth_macro" }
