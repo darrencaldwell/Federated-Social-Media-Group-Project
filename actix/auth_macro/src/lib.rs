@@ -3,7 +3,7 @@ use quote::quote;
 use syn::{parse_macro_input, Block};
 
 #[proc_macro_attribute]
-pub fn protected(attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn protected(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::ItemFn);
     let vis = input.vis;
     let mut sig = input.sig;
@@ -13,8 +13,10 @@ pub fn protected(attr: TokenStream, input: TokenStream) -> TokenStream {
     (quote! { #vis #sig {
             if let Some(token) = req.headers().get("Authorization") {
                 if let Ok(token) = token.to_str() {
-                    if let Ok(user_id) = decode_jwt(&token[7..]) {
-                        return #block
+                    if token.len() > 8 {
+                        if let Ok(user_id) = decode_jwt(&token[7..]) {
+                            return #block
+                        }
                     }
                 }
             }
@@ -37,9 +39,11 @@ pub fn auth_user(attr: TokenStream, input: TokenStream) -> TokenStream {
         #vis #sig {
             if let Some(token) = req.headers().get("Authorization") {
                 if let Ok(token) = token.to_str() {
-                    if let Ok(user_id) = decode_jwt(&token[7..]) {
-                        if user_id == #attr {
-                            return #block
+                    if token.len() > 8 {
+                        if let Ok(user_id) = decode_jwt(&token[7..]) {
+                            if user_id == #attr {
+                                return #block
+                            }
                         }
                     }
                 }

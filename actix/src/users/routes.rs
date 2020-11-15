@@ -1,6 +1,6 @@
 use super::user;
 use crate::auth::{self, decode_jwt};
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
