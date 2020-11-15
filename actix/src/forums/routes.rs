@@ -3,6 +3,7 @@ use actix_web::{web, get, post, HttpResponse, Responder};
 use sqlx::MySqlPool;
 
 #[get("/api/forums/{id}")]
+#[protected]
 async fn get_forum(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
     match model::get_forum(id, &pool).await {
         Ok(forum) => HttpResponse::Ok().json(forum),
@@ -11,6 +12,7 @@ async fn get_forum(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) ->
 }
 
 #[get("/api/subforums/{id}")]
+#[protected]
 async fn get_subforum(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
     match model::get_subforum(id, &pool).await {
         Ok(subforum) => HttpResponse::Ok().json(subforum),
@@ -19,6 +21,7 @@ async fn get_subforum(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>)
 }
 
 #[get("/api/forums")]
+#[protected]
 async fn get_forums(pool: web::Data<MySqlPool>) -> impl Responder {
     match model::get_forums(&pool).await {
         Ok(forums) => HttpResponse::Ok().json(forums),
@@ -27,6 +30,7 @@ async fn get_forums(pool: web::Data<MySqlPool>) -> impl Responder {
 }
 
 #[get("/api/forums/{id}/subforums")]
+#[protected]
 async fn get_subforums(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
     match model::get_subforums(id, &pool).await {
         Ok(subforums) => HttpResponse::Ok().json(subforums),
