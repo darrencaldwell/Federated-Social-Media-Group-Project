@@ -6,7 +6,9 @@ use syn::{parse_macro_input, Block};
 pub fn protected(attr: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::ItemFn);
     let vis = input.vis;
-    let sig = input.sig;
+    let mut sig = input.sig;
+    let auth = (quote! {auth: BearerAuth}).into();
+    sig.inputs.push(parse_macro_input!(auth as syn::FnArg));
     let block: Block = *input.block;
     (quote! {
         #vis #sig {
