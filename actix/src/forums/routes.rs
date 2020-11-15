@@ -1,5 +1,7 @@
 use super::model;
-use actix_web::{web, get, post, HttpResponse, Responder};
+use actix_web::{web, get, post, HttpResponse, HttpRequest, Responder};
+use auth_macro::*;
+use crate::auth::decode_jwt;
 use sqlx::MySqlPool;
 
 #[get("/api/forums/{id}")]
