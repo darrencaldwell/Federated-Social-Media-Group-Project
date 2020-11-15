@@ -56,6 +56,7 @@ async fn login(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl
 }
 
 #[get("/api/users/{id}")]
+#[protected]
 async fn get_user(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
     match user::get_user(id, &pool).await {
         Ok(user) => HttpResponse::Ok().json(user),
@@ -64,6 +65,7 @@ async fn get_user(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> 
 }
 
 #[get("/api/users")]
+#[protected]
 async fn get_users(pool: web::Data<MySqlPool>) -> impl Responder {
     match user::get_users(&pool).await {
         Ok(user) => HttpResponse::Ok().json(user),

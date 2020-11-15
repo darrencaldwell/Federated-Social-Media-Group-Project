@@ -7,13 +7,16 @@ pub fn protected(attr: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::ItemFn);
     let vis = input.vis;
     let mut sig = input.sig;
-    let auth = (quote! {auth: BearerAuth}).into();
-    sig.inputs.push(parse_macro_input!(auth as syn::FnArg));
+    let req = (quote! {req: HttpRequest}).into();
+    sig.inputs.push(parse_macro_input!(req as syn::FnArg));
     let block: Block = *input.block;
-    (quote! {
-        #vis #sig {
-            if let Ok(user_id) = decode_jwt(auth.token()) {
-                return #block
+    (quote! { #vis #sig {
+            if let Some(token) = req.headers().get("Authorization") {
+                if let Ok(token) = token.to_str() {
+                    if let Ok(user_id) = decode_jwt(&token[7..]) {
+                        return #block
+                    }
+                }
             }
 
             HttpResponse::Forbidden().body("Invalid token")
@@ -25,14 +28,20 @@ pub fn protected(attr: TokenStream, input: TokenStream) -> TokenStream {
 pub fn auth_user(attr: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::ItemFn);
     let vis = input.vis;
-    let sig = input.sig;
     let block: Block = *input.block;
     let attr = parse_macro_input!(attr as syn::ExprField);
+    let mut sig = input.sig;
+    let req = (quote! {req: HttpRequest}).into();
+    sig.inputs.push(parse_macro_input!(req as syn::FnArg));
     (quote! {
         #vis #sig {
-            if let Ok(user_id) = decode_jwt(auth.token()) {
-                if user_id == #attr {
-                    return #block
+            if let Some(token) = req.headers().get("Authorization") {
+                if let Ok(token) = token.to_str() {
+                    if let Ok(user_id) = decode_jwt(&token[7..]) {
+                        if user_id == #attr {
+                            return #block
+                        }
+                    }
                 }
             }
 
