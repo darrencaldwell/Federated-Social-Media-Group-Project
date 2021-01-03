@@ -45,7 +45,7 @@ export class Post extends Component {
 
                     <CreateComment url={url}/>
 
-                    <Dropdown>
+                    <Dropdown className="mt-3">
                         <Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>
                         <Dropdown.Menu>
                             {this.props.comments.commentList.map((comment) => (

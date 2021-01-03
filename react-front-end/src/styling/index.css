@@ -16,10 +16,15 @@
 /*  font-family: 'Fira Sans', sans-serif;*/
 /*}*/
 
-body, html, .NavigationBar, #root, .auth-wrapper {
+body, html, .NavigationBar, #root {
   width: 100%;
   height: 100%;
   padding-top: 30px;
+}
+
+.jumbotron {
+  justify-content: center;
+  text-align: center;
 }
 
 /*.navbar-light {*/

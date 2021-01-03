@@ -87,9 +87,11 @@ class PostList extends Component {
 
 
     render() {
+        const style = { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }
+
         if (this.state.loading) {
             return (
-                <Spinner animation="border" role="status">
+                <Spinner animation="border" role="status" style={style}>
                     <span className="sr-only">Loading...</span>
                 </Spinner>
             )
