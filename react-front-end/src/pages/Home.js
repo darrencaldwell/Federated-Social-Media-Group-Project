@@ -12,7 +12,7 @@ class Home extends React.Component {
         // Otherwise just return a home page
         return (
             <div>
-                <h1> Home Page </h1>
+                <h1>nusyba</h1>
             </div>
         );
     }

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
-import Posts from './Posts';
+import Posts from '../components/Posts';
 import Post from './Post';
+import {Spinner} from "react-bootstrap";
 
 class PostList extends Component {
 
@@ -88,11 +89,9 @@ class PostList extends Component {
     render() {
         if (this.state.loading) {
             return (
-                <div>
-                    <p className="loader"/>
-                    <p>Loading...</p>
-                </div>
-
+                <Spinner animation="border" role="status">
+                    <span className="sr-only">Loading...</span>
+                </Spinner>
             )
         } else if (!this.state.loading && this.state.listingPosts) {
             // If we are rendering a list of posts go through the returned array of posts and display them.
