@@ -9,6 +9,9 @@ import Make from "./pages/Make.js";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
 class App extends React.Component {
+    componentDidMount() {
+        document.title = 'St BeeFives'
+    }
     constructor(props) {
         super(props);
         this.state = {token: localStorage.getItem('token')}; // set initial state
