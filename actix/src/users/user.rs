@@ -142,7 +142,9 @@ pub async fn verify(
     };
 
     match bcrypt::verify(password, &rec_result.password_hash) {
-        Ok(o) => o,
+        Ok(boolean) => if !boolean { // if password hash doesn't match
+            return Err(LoginError::InvalidHash)
+        },
         Err(_) => return Err(LoginError::InvalidHash),
     };
 
