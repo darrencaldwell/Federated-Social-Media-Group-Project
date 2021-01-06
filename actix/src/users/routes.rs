@@ -1,7 +1,6 @@
 use super::user;
 use crate::auth::{self, decode_jwt};
 use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
-use actix_web_httpauth::extractors::bearer::BearerAuth;
 use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
 use auth_macro::*;
@@ -73,15 +72,9 @@ async fn get_users(pool: web::Data<MySqlPool>) -> impl Responder {
     }
 }
 
-#[get("/test")]
-async fn test(auth: BearerAuth) -> impl Responder {
-    HttpResponse::Accepted().body("yeeeet")
-}
-
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
-    cfg.service(test);
     cfg.service(get_users);
     cfg.service(get_user);
 }
