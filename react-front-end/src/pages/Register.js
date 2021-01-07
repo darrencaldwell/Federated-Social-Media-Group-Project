@@ -1,9 +1,7 @@
-import React, {useState} from 'react';
+import React from 'react';
 import axios from 'axios'
-import {Redirect, useHistory} from "react-router-dom";
+import {Redirect} from "react-router-dom";
 import {Button, Container, Form, FormGroup} from "react-bootstrap";
-
-// import { useFormFields } from "../libs/hooksLib";
 
 class Register extends React.Component {
     constructor(props) {
@@ -14,25 +12,6 @@ class Register extends React.Component {
             confirmPassword: ''
         }; // set initial state
     }
-
-    // checkPassword() {
-    //     if (!this.state.password || this.state.password !== this.state.confirmPassword) {
-    //         this.setState({password_has_error: true});
-    //     } else {
-    //         this.setState({password_has_error: false});
-    //     }
-    // }
-    //
-    // handleChange(event) {
-    //     const {name, value} = event.target
-    //     this.setState({
-    //             [name]: value
-    //         }, () => {
-    //             if (name === 'password' || name === 'confirmPassword')
-    //                 this.checkPassword();
-    //         }
-    //     );
-    // }
 
 
     handleSubmit = e => {
@@ -45,8 +24,6 @@ class Register extends React.Component {
             password: this.password,
             confirmPassword: this.confirmPassword,
         }
-
-        const {password, confirmPassword} = this.state
 
         if (data.password !== data.confirmPassword) {
             console.log("password " + data.password + " doesnt match " + data.confirmPassword)

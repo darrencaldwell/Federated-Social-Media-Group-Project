@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
 import Comments from '../components/Comments';
-import CreatePost from './CreatePost.js';
+// import CreatePost from './CreatePost.js';
 import CreateComment from '../components/CreateComment'
 // import '../styling/Post.css';
 import {Button, Card, Container, Dropdown} from "react-bootstrap";
