@@ -1,5 +1,7 @@
 import React from 'react';
-import {Container, Jumbotron} from "react-bootstrap";
+import {Container, Jumbotron, Button} from "react-bootstrap";
+import {Link} from 'react-router-dom'
+
 
 class Home extends React.Component {
 
@@ -14,6 +16,8 @@ class Home extends React.Component {
                         The home page currently doesn't contain anything useful but hopefully
                         it will in the future.
                     </p>
+                    <Link to={'/posts'}><Button variant='light' as="input" type="button" value="Go to view posts" />{' '}</Link>
+                    <Link to={'/makePost'}><Button variant='light' as="input" type="button" value="Go to create a post" />{' '}</Link>
                 </Jumbotron>
             )
         }
@@ -27,6 +31,10 @@ class Home extends React.Component {
                         The home page currently doesn't contain anything useful but hopefully
                         it will in the future.
                     </p>
+                    <>
+                        <Link to={'/login'}><Button variant='light' as="input" type="button" value="Go to login page" />{' '}</Link>
+                        <Link to={'/register'}><Button variant='light' as="input" type="button" value="Go to register page" />{' '}</Link>
+                    </>
                 </Jumbotron>
             </Container>
         );
