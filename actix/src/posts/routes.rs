@@ -19,12 +19,14 @@ async fn post_post(
 }
 
 #[get("/api/subforums/{id}/posts")]
-#[protected]
+//#[protected]
 async fn get_posts(
+    req: HttpRequest,
     web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
 ) -> impl Responder {
     let result = Post::get_all(id, pool.get_ref()).await;
+    print!("{:?}", req.connection_info());
     match result {
         Ok(posts) => HttpResponse::Ok().json(posts),
         _ => HttpResponse::BadRequest().body("Error trying to retrieve all posts"),
