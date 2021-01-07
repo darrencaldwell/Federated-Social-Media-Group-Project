@@ -12,22 +12,39 @@ export class Post extends Component {
         // If the list of comments is empty print out a message saying so else print out comments
         if (this.props.comments.commentList.length === 0) {
             return (
-                <div>
-                    <h1 className="postTitle">
-                        {this.props.post.postTitle}
-                    </h1>
-                    <p className="postMarkup">
-                        {this.props.post.postMarkup}
-                    </p>
-                    <Button variant="light" onClick={() => this.props.loadPosts()}>Go back to list of posts</Button>
-                    <div>
-                        <CreatePost mode="comment" url={url}/>
+
+                <Container>
+                    <Button variant="light" onClick={() => this.props.loadPosts()}>Go back to post list</Button>
+                    <div className="mt-3">
+                        <Card border="dark">
+                            <Card.Body>
+                                <Card.Title>{this.props.post.postTitle}</Card.Title>
+                                <Card.Subtitle className="text-muted">Post made by user Id: {this.props.post.postId}</Card.Subtitle>
+                                <Card.Text>{this.props.post.postMarkup}</Card.Text>
+                            </Card.Body>
+                        </Card>
                     </div>
-                    <div>
-                        <h>Comments:</h>
-                        <p>No comments have been made yet.</p>
-                    </div>
-                </div>
+
+                    <CreateComment url={url}/>
+
+                    <h5>No comments.</h5>
+                </Container>
+                // <div>
+                //     <h1 className="postTitle">
+                //         {this.props.post.postTitle}
+                //     </h1>
+                //     <p className="postMarkup">
+                //         {this.props.post.postMarkup}
+                //     </p>
+                //     <Button variant="light" onClick={() => this.props.loadPosts()}>Go back to list of posts</Button>
+                //     <div>
+                //         <CreatePost mode="comment" url={url}/>
+                //     </div>
+                //     <div>
+                //         <h>Comments:</h>
+                //         <p>No comments have been made yet.</p>
+                //     </div>
+                // </div>
             )
         } else {
             return (

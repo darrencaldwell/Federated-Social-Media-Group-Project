@@ -7,7 +7,7 @@ export class Comment extends Component {
         return (
             <Card>
                 <Card.Body>
-                    UserID:{this.props.comment.userId}-    {this.props.comment.commentContent}
+                    UserID:{this.props.comment.userId}-  {this.props.comment.commentContent}
                 </Card.Body>
             </Card>
         )

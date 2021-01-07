@@ -1,7 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import axios from 'axios'
-import {Redirect} from "react-router-dom";
+import {Redirect, useHistory} from "react-router-dom";
 import {Button, Container, Form, FormGroup} from "react-bootstrap";
+
+// import { useFormFields } from "../libs/hooksLib";
 
 class Register extends React.Component {
     constructor(props) {
@@ -13,6 +15,25 @@ class Register extends React.Component {
         }; // set initial state
     }
 
+    // checkPassword() {
+    //     if (!this.state.password || this.state.password !== this.state.confirmPassword) {
+    //         this.setState({password_has_error: true});
+    //     } else {
+    //         this.setState({password_has_error: false});
+    //     }
+    // }
+    //
+    // handleChange(event) {
+    //     const {name, value} = event.target
+    //     this.setState({
+    //             [name]: value
+    //         }, () => {
+    //             if (name === 'password' || name === 'confirmPassword')
+    //                 this.checkPassword();
+    //         }
+    //     );
+    // }
+
 
     handleSubmit = e => {
         e.preventDefault()
@@ -22,19 +43,17 @@ class Register extends React.Component {
             email: this.email,
             username: this.username,
             password: this.password,
+            confirmPassword: this.confirmPassword,
         }
 
         const {password, confirmPassword} = this.state
 
-        if (password !== confirmPassword) {
+        if (data.password !== data.confirmPassword) {
+            console.log("password " + data.password + " doesnt match " + data.confirmPassword)
             alert("Passwords don't match")
         } else {
-            // api/users/register
-            // register
-            // POST registration data to backend
             axios.post('api/users/register', data)
                 .then(res => {
-                    console.log("success")
                     this.setState({
                         registered: true
                     })
@@ -60,40 +79,41 @@ class Register extends React.Component {
                 <Form className="register" onSubmit={this.handleSubmit}>
                     <h3>Register</h3>
 
-                    <FormGroup>
-                        <label>First Name</label>
-                        <input type="text" className="form-control" placeholder="First Name"
-                               onChange={e => this.firstName = e.target.value}/>
+                    <FormGroup controlId="fname">
+                        <Form.Label>First Name</Form.Label>
+                        <Form.Control type="text" placeholder="First Name"
+                                      onChange={e => this.firstName = e.target.value}/>
                     </FormGroup>
 
-                    <FormGroup>
+                    <FormGroup controlId="lname">
                         <label>Last Name</label>
-                        <input type="text" className="form-control" placeholder="Last Name"
-                               onChange={e => this.lastName = e.target.value}/>
+                        <Form.Control type="text" placeholder="Last Name"
+                                      onChange={e => this.lastName = e.target.value}/>
                     </FormGroup>
 
-                    <FormGroup>
-                        <label>Email</label>
-                        <input type="email" className="form-control" placeholder="Email"
-                               onChange={e => this.email = e.target.value}/>
+                    <FormGroup controlId="email">
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control type="email" placeholder="Email"
+                                      onChange={e => this.email = e.target.value}/>
+                        <Form.Text className="text-muted">We'll never share your email with anyone else</Form.Text>
                     </FormGroup>
 
-                    <FormGroup>
-                        <label>Username</label>
-                        <input type="text" className="form-control" placeholder="Username"
-                               onChange={e => this.username = e.target.value}/>
+                    <FormGroup controlId="uname">
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control type="text" placeholder="Username"
+                                      onChange={e => this.username = e.target.value}/>
                     </FormGroup>
 
-                    <FormGroup>
-                        <label>Password</label>
-                        <input type="password" className="form-control" placeholder="Password"
-                               onChange={e => this.password = e.target.value}/>
+                    <FormGroup controlId="pword">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control type="password" className="form-control" placeholder="Password"
+                                      onChange={e => this.password = e.target.value}/>
                     </FormGroup>
 
-                    <FormGroup>
-                        <label>Confirm Password</label>
-                        <input type="password" className="form-control" placeholder="Confirm Password"
-                               onChange={e => this.confirmPassword = e.target.value}/>
+                    <FormGroup controlId="cpword">
+                        <Form.Label>Confirm Password</Form.Label>
+                        <Form.Control type="password" placeholder="Confirm Password"
+                                      onChange={e => this.confirmPassword = e.target.value}/>
                     </FormGroup>
 
                     <Button variant="light" type="submit">Register</Button>

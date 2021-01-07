@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import Posts from '../components/Posts';
 import Post from './Post';
-import {Spinner} from "react-bootstrap";
+import {Alert, Container, Spinner} from "react-bootstrap";
 
-class PostList extends Component {
+class ViewPosts extends Component {
 
     constructor(props) {
         super(props)
@@ -98,28 +98,28 @@ class PostList extends Component {
         } else if (!this.state.loading && this.state.listingPosts) {
             // If we are rendering a list of posts go through the returned array of posts and display them.
             return (
-                <div className="container">
+                <Container>
                     {this.state.info._embedded.postList.map((post) => (
                         <Posts key={post.id} post={post} expandPost={this.expandPost}/>
                     ))}
-                </div>)
+                </Container>)
         } else if (!this.state.loading && this.state.listingPost) {
             // If we are rendering a singular post display everything like comments and other things to be implemented later
             return (
-                <div>
+                <Container>
                     <Post post={this.state.post} comments={this.state.comments._embedded}
                           loadPosts={this.componentDidMount}/>
-                </div>
+                </Container>
             )
         } else {
             // If for some reason loading is over but something can't be displayed
             return (
-                <div>
-                    Error has occurred and nothing is loaded :(
-                </div>
+                <Container>
+                    <Alert>Error has occurred.</Alert>
+                </Container>
             )
         }
     }
 }
 
-export default PostList;
+export default ViewPosts;
