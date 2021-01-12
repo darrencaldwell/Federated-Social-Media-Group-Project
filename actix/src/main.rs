@@ -12,10 +12,8 @@ use std::rc::Rc;
 use std::task::{Context, Poll};
 
 use actix_service::{Service, Transform};
-use actix_web::web::BytesMut;
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage, HttpResponse};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse};
 use futures::future::{ok, Future, Ready};
-use futures::stream::StreamExt;
 
 mod posts;
 mod users;
@@ -51,6 +49,7 @@ where
 
 pub struct AuthMiddleware<S> {
     // This is special: We need this to avoid lifetime issues.
+    // TODO: I didn't write this comment or code, looks like we have some magic lifetime code!
     service: Rc<RefCell<S>>,
 }
 
@@ -70,14 +69,21 @@ where
         self.service.poll_ready(cx)
     }
 
-    fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
+    fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let mut srv = self.service.clone();
 
         Box::pin(async move {
             let headers = req.headers();
-            match headers.get("Authorization") {
-                Some(token) => srv.call(req).await,
+            match headers.get("Authorization") { // if auth is here check for JWT token
+                Some(token) => { // TODO: Euan, make this actually check the token,
+                    // You'll probably need to read the body to get the user id, heres some middleware that does that
+                    // https://github.com/actix/examples/blob/master/middleware/src/read_request_body.rs
+                    // good luck
+                    println!("{:?}", token);
+                    srv.call(req).await
+                },
                 None => {
+                    // creates an error response and sends it back to the sender
                     return Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
                 }
             }
