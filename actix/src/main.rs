@@ -24,6 +24,8 @@ mod forums;
 
 // This is ALL boilerplate for a middleware,
 // TODO: Move to another file when its done
+// https://github.com/casbin-rs/actix-casbin-auth/blob/master/src/middleware.rs
+// a link to a helpful implementation of a middleware thats kinda auth
 
 pub struct Auth;
 
