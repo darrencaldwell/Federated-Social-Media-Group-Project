@@ -80,7 +80,7 @@ where
                     // https://github.com/actix/examples/blob/master/middleware/src/read_request_body.rs
                     // good luck
                     println!("{:?}", token);
-                    srv.call(req).await
+                    srv.call(req).await // basically, carry out the request, route it to our functions? etc maybe idk
                 },
                 None => {
                     // creates an error response and sends it back to the sender
