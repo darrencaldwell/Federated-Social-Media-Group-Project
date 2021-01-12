@@ -13,7 +13,7 @@ use std::task::{Context, Poll};
 
 use actix_service::{Service, Transform};
 use actix_web::web::BytesMut;
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage, HttpResponse};
 use futures::future::{ok, Future, Ready};
 use futures::stream::StreamExt;
 
@@ -27,9 +27,9 @@ mod forums;
 // This is ALL boilerplate for a middleware,
 // TODO: Move to another file when its done
 
-pub struct Logging;
+pub struct Auth;
 
-impl<S: 'static, B> Transform<S> for Logging
+impl<S: 'static, B> Transform<S> for Auth
 where
     S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
@@ -39,22 +39,22 @@ where
     type Response = ServiceResponse<B>;
     type Error = Error;
     type InitError = ();
-    type Transform = LoggingMiddleware<S>;
+    type Transform = AuthMiddleware<S>;
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(LoggingMiddleware {
+        ok(AuthMiddleware {
             service: Rc::new(RefCell::new(service)),
         })
     }
 }
 
-pub struct LoggingMiddleware<S> {
+pub struct AuthMiddleware<S> {
     // This is special: We need this to avoid lifetime issues.
     service: Rc<RefCell<S>>,
 }
 
-impl<S, B> Service for LoggingMiddleware<S>
+impl<S, B> Service for AuthMiddleware<S>
 where
     S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>
         + 'static,
@@ -71,19 +71,17 @@ where
     }
 
     fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
-        let test: bool = false;
-        if test {
-            let fut = self.service.call(req);
-            Box::pin(async move {
-                let res = fut.await?;
-                Ok(res)
-            })
-        } else {
-            Box::pin(async move {
-                    Response::Unauthorized().finish()
-            })
+        let mut srv = self.service.clone();
 
-        }
+        Box::pin(async move {
+            let headers = req.headers();
+            match headers.get("Authorization") {
+                Some(token) => srv.call(req).await,
+                None => {
+                    return Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
+                }
+            }
+        })
     }
 }
 
@@ -103,9 +101,9 @@ async fn main() -> Result<()> {
             .max_age(3600);
 
         App::new()
-            .wrap(Logger::default())
+            .wrap(Auth)
             .wrap(cors)
-            .wrap(Logging)
+            .wrap(Logger::default())
             .data(pool.clone())
             .configure(posts::init)
             .configure(users::init)
