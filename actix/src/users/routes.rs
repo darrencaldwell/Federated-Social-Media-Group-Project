@@ -15,7 +15,7 @@ struct UserRequest {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LoginResponse {
-    pub user_id: u64,
+    pub user_id: String,
     pub username: String,
     pub token: String,
 }
@@ -27,7 +27,7 @@ async fn register(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> i
 
     match user {
         Ok(user) => HttpResponse::Ok().json(user),
-        Err(_) => HttpResponse::BadRequest().body("Error registering user"),
+        Err(e) => HttpResponse::BadRequest().body(e.to_string()),
     }
 }
 
@@ -40,7 +40,8 @@ async fn login(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
-    let token = match auth::encode_jwt(user_id, post.username.clone()) {
+    println!("after verify: {}", user_id);
+    let token = match auth::encode_jwt(user_id.clone(), post.username.clone()) {
         Ok(token) => token,
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
@@ -56,7 +57,7 @@ async fn login(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl
 
 #[get("/api/users/{id}")]
 #[protected]
-async fn get_user(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn get_user(web::Path(id): web::Path<String>, pool: web::Data<MySqlPool>) -> impl Responder {
     match user::get_user(id, &pool).await {
         Ok(user) => HttpResponse::Ok().json(user),
         Err(_) => HttpResponse::InternalServerError().body(""),

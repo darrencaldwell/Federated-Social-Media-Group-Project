@@ -7,7 +7,7 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug)]
 pub struct CommentRequest {
     pub comment_content: String,
-    pub user_id: u64,
+    pub user_id: String,
     pub username: String,
 }
 
@@ -16,7 +16,7 @@ pub struct CommentRequest {
 pub struct Comment {
     pub id: u64,
     pub comment_content: String,
-    pub user_id: u64,
+    pub user_id: String,
     pub post_id: u64,
     #[serde(rename = "_links")]
     pub links: Links,
@@ -49,7 +49,7 @@ pub struct CommentList {
     pub comment_list: Vec<Comment>,
 }
 
-fn gen_links(comment_id: u64, user_id: u64, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
+fn gen_links(comment_id: u64, user_id: String, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
     Links {
         _self: Link { href: format!("<url>/api/comments/{}", comment_id) },
         post: Link { href: format!("<url>/api/posts/{}", post_id) },
@@ -83,7 +83,7 @@ pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
     println!("{:?}", comment_request);
 
     let comment_id = sqlx::query!(
-        "INSERT INTO comments (comment, user_id, post_id) VALUES (?, ?, ?)",
+        "INSERT INTO comments (comment, user_id, post_id) VALUES (?, UuidToBin(?), ?)",
         comment_request.comment_content,
         comment_request.user_id,
         post_id)
@@ -99,7 +99,7 @@ pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
     Ok(Comment {
         id: comment_id,
         comment_content: comment_request.comment_content,
-        user_id: comment_request.user_id,
+        user_id: comment_request.user_id.clone(),
         post_id,
         links: gen_links(comment_id, comment_request.user_id, post_id, subforum_id, forum_id)
     })
@@ -108,7 +108,7 @@ pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
 
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        "SELECT comment, user_id, comment_id FROM comments WHERE post_id = ?",
+        r#"SELECT comment, UuidFromBin(user_id) AS "user_id: String", comment_id FROM comments WHERE post_id = ?"#,
         post_id)
         .fetch_all(pool)
         .await?;
@@ -120,20 +120,20 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
         .map(|rec| Comment {
             id: rec.comment_id,
             comment_content: rec.comment,
-            user_id: rec.user_id,
+            user_id: rec.user_id.clone().unwrap().to_string(),
             post_id,
-            links: gen_links(rec.comment_id, rec.user_id, post_id,
+            links: gen_links(rec.comment_id, rec.user_id.unwrap().to_string(), post_id,
                              subforum_id, forum_id)
         }).collect();
 
     Ok(Comments {
-        embedded: CommentList { comment_list: comments } 
+        embedded: CommentList { comment_list: comments }
     })
 }
 
 pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
     let rec = sqlx::query!(
-        "SELECT comment, user_id, post_id FROM comments WHERE comment_id = ?",
+        r#"SELECT comment, UuidFromBin(user_id) AS "user_id: String", post_id FROM comments WHERE comment_id = ?"#,
         comment_id)
         .fetch_one(pool)
         .await?;
@@ -144,9 +144,9 @@ pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
     Ok(Comment {
         id: comment_id,
         comment_content: rec.comment,
-        user_id: rec.user_id,
+        user_id: rec.user_id.clone().unwrap().to_string(),
         post_id: rec.post_id,
-        links: gen_links(comment_id, rec.user_id, rec.post_id, subforum_id, forum_id),
+        links: gen_links(comment_id, rec.user_id.unwrap().to_string(), rec.post_id, subforum_id, forum_id),
     })
 
 }
