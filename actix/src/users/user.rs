@@ -51,7 +51,7 @@ pub enum LoginError {
     InvalidHash,
 }
 
-fn gen_links(user_id: String) -> UserLinks {
+fn gen_links(user_id: &String) -> UserLinks {
     UserLinks {
         _self: Link {
             href: format!("<url>/api/users/{}", user_id),
@@ -70,25 +70,28 @@ pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
 
     Ok(User {
         username,
-        links: gen_links(user_id.clone()),
+        links: gen_links(&user_id),
         user_id,
     })
 }
 
 pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
-    let result = sqlx::query!("SELECT UuidFromBin(user_id) AS user_id, username FROM users")
+    let result = sqlx::query!(r#"SELECT UuidFromBin(user_id) AS "user_id: String", username FROM users"#)
         .fetch_all(pool)
         .await?;
 
-    // TODO: check this, feels like a lot of shenanignas. - darren
     let users: Vec<User> = result
         .into_iter()
-        .map(|rec| User {
-            username: rec.username,
-            links: gen_links(rec.user_id.clone().unwrap().as_str().unwrap().to_string()),
-            user_id: rec.user_id.unwrap().as_str().unwrap().to_string()
+        .map(|rec| {
+            let user_id = rec.user_id.unwrap();
+            User {
+                username: rec.username,
+                links: gen_links(&user_id),
+                user_id,
+            }
         })
         .collect();
+
 
     Ok(Users {
         embedded: UsersList { user_list: users },
@@ -123,11 +126,11 @@ pub async fn register(username: String, password: String, pool: &MySqlPool) -> R
     .fetch_one(pool)
     .await?;
 
-    let uuid: String = user_id.user_id.unwrap().as_str().to_string();
-    println!("{:?}", uuid.clone());
+    let uuid: String = user_id.user_id.unwrap();
+    println!("{:?}", &uuid);
     let new_user = User {
         username,
-        links: gen_links(uuid.clone()),
+        links: gen_links(&uuid),
         user_id: uuid
     };
 
@@ -162,5 +165,5 @@ pub async fn verify(
         Err(_) => return Err(LoginError::InvalidHash),
     };
 
-    Ok(rec_result.user_id.unwrap().as_str().to_string())
+    Ok(rec_result.user_id.unwrap())
 }

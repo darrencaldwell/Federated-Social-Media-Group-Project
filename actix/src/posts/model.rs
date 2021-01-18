@@ -111,7 +111,7 @@ impl Post {
             user_id: post.user_id.clone(),
             post_id: post_id,
             subforum_id: subforum_id,
-            links: generate_post_links(post_id, subforum_id, forum_id.forum_id, post.user_id),
+            links: generate_post_links(post_id, subforum_id, forum_id.forum_id, &post.user_id),
         };
         Ok(new_post)
     }
@@ -138,18 +138,19 @@ impl Post {
         .await?;
 
         for rec in recs {
+            let user_id = rec.user_id.unwrap();
             posts.push(Post {
                 post_id: rec.post_id,
                 post_title: rec.post_title,
                 post_markup: rec.post_markup,
-                user_id: rec.user_id.clone().unwrap(),
                 subforum_id: rec.subforum_id,
                 links: generate_post_links(
                     rec.post_id,
                     rec.subforum_id,
                     forum_id.forum_id,
-                    rec.user_id.unwrap(),
+                    &user_id,
                 ),
+                user_id,
             });
         }
         let post_list = PostList { post_list: posts };
@@ -178,24 +179,25 @@ impl Post {
         .fetch_one(pool)
         .await?;
 
+        let user_id = rec.user_id.unwrap();
         let post = Post {
             post_id: rec.post_id,
             post_title: rec.post_title,
             post_markup: rec.post_markup,
-            user_id: rec.user_id.clone().unwrap(),
             subforum_id: rec.subforum_id,
             links: generate_post_links(
                 rec.post_id,
                 rec.subforum_id,
                 forum_id.forum_id,
-                rec.user_id.unwrap(),
+                &user_id,
             ),
+            user_id,
         };
         Ok(post)
     }
 }
 
-fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: String) -> PostLinks {
+fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: &String) -> PostLinks {
     let self_link = format!(
         "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums/{}/posts/{}",
         forum_id, subforum_id, post_id
