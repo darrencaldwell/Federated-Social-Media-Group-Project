@@ -35,7 +35,6 @@ async fn main() -> Result<()> {
             .configure(comments::init)
             .configure(forums::init)
     })
-    .workers(1)
     .bind("127.0.0.1:21450")?
     .run()
     .await?;
