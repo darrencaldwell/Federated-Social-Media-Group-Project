@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer, middleware::Logger};
+use actix_web::{App, HttpServer, middleware::Logger, web::Data};
 use actix_cors::Cors;
 use anyhow::Result;
 use dotenv::dotenv;
@@ -82,7 +82,7 @@ where
                     // https://github.com/actix/examples/blob/master/middleware/src/read_request_body.rs
                     // good luck
                     println!("{:?}", token);
-                    println!("{:?}", req.app_data());
+                    println!("{:?}", req.app_data::<Data<String>>());
                     srv.call(req).await // basically, carry out the request, route it to our functions? etc maybe idk
                 },
                 None => {
@@ -92,10 +92,6 @@ where
             }
         })
     }
-}
-
-struct PrivateKey {
-    key: String,
 }
 
 #[actix_web::main]
@@ -114,7 +110,7 @@ async fn main() -> Result<()> {
             .max_age(3600);
 
         App::new()
-            .data(PrivateKey { key: "yeehaw".to_string() })
+            .data("yeehaw".to_string())
             .wrap(Auth)
             .wrap(cors)
             .wrap(Logger::default())
