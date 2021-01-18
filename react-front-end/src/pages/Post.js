@@ -19,7 +19,8 @@ export class Post extends Component {
                         <Card border="dark">
                             <Card.Body>
                                 <Card.Title>{this.props.post.postTitle}</Card.Title>
-                                <Card.Subtitle className="text-muted">Post made by user Id: {this.props.post.postId}</Card.Subtitle>
+                                <Card.Subtitle className="text-muted">Post made by user
+                                    Id: {this.props.post.postId}</Card.Subtitle>
                                 <Card.Text>{this.props.post.postMarkup}</Card.Text>
                             </Card.Body>
                         </Card>
@@ -54,7 +55,8 @@ export class Post extends Component {
                         <Card border="dark">
                             <Card.Body>
                                 <Card.Title>{this.props.post.postTitle}</Card.Title>
-                                <Card.Subtitle className="text-muted">Post made by user Id: {this.props.post.postId}</Card.Subtitle>
+                                <Card.Subtitle className="text-muted">Post made by user
+                                    Id: {this.props.post.postId}</Card.Subtitle>
                                 <Card.Text>{this.props.post.postMarkup}</Card.Text>
                             </Card.Body>
                         </Card>
@@ -62,14 +64,14 @@ export class Post extends Component {
 
                     <CreateComment url={url}/>
 
-                    <Dropdown className="mt-3">
-                        <Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            {this.props.comments.commentList.map((comment) => (
-                                <Comments key={comment.id} comment={comment}></Comments>
-                            ))}
-                        </Dropdown.Menu>
-                    </Dropdown>
+                    {/*<Dropdown className="mt-3">*/}
+                    {/*<Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>*/}
+                    {/*<Dropdown.Menu>*/}
+                    {this.props.comments.commentList.map((comment) => (
+                        <Comments key={comment.id} comment={comment}></Comments>
+                    ))}
+                    {/*</Dropdown.Menu>*/}
+                    {/*</Dropdown>*/}
 
 
                 </Container>

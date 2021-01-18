@@ -7,7 +7,6 @@ class CreateComment extends React.Component {
             <Container className="mt-3">
                 <Button variant="light">Create Comment</Button>
             </Container>
-
         )
     }
 }

@@ -6,7 +6,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ViewPosts from "./pages/ViewPosts";
 import CreatePost from "./pages/CreatePost.js";
+import Account from "./pages/Account";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
+import BackButton from "./components/BackButton";
 
 class App extends React.Component {
     constructor(props) {
@@ -36,12 +38,13 @@ class App extends React.Component {
                 <div className="App">
                     {/* Pass the state onto Nav bar about state of user login /*/}
                     <NavigationBar isLoggedIn={token} logout={this.logout}/>
+                    {/*<BackButton/>*/}
                     <Switch>
                         <Route exact path="/posts" component={() => <ViewPosts/>}/>
                         <Route exact path="/" component={() => <Home user={this.state.user}/>}/>
                         <Route exact path="/login" component={() => <Login login={this.login}/>}/>
                         <Route exact path="/register" component={Register}/>
-                        {/*url hardcoded for now, will be fixed later */}
+                        <Route exact="/account" component={Account}/>
                         <Route exact path="/makePost" component={() => <CreatePost url="/api/subforums/1/posts"/>}/>
                     </Switch>
 

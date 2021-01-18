@@ -40,7 +40,6 @@ class ViewPosts extends Component {
         } catch (e) {
             this.setState({loading: false});
         }
-
     }
 
     // Takes the url of a specific post and displays extra things like comments and other things that will be

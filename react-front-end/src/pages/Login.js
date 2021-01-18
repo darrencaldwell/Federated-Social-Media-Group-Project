@@ -30,7 +30,7 @@ class Login extends React.Component {
                 })
                 this.props.login()
             }).catch(err => {
-                
+            alert("Incorrect username or password")
             this.setState({
                 message: err.response.data.message
             })
