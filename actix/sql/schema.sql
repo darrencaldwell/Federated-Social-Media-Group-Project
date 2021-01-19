@@ -61,7 +61,7 @@ CREATE TABLE `comments` (
   CONSTRAINT `post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE DEFINER=`root`@`%` FUNCTION `test`.`UuidFromBin`(_bin BINARY(16)) RETURNS binary(36)
+CREATE DEFINER=`root`@`%` FUNCTION `cs3099user-b5_project`.`UuidFromBin`(_bin BINARY(16)) RETURNS binary(36)
     DETERMINISTIC
     SQL SECURITY INVOKER
 RETURN
@@ -73,7 +73,7 @@ RETURN
             HEX(SUBSTR(_bin, 11))
                  ));
 
-CREATE DEFINER=`root`@`%` FUNCTION `test`.`UuidToBin`(_uuid BINARY(36)) RETURNS binary(16)
+CREATE DEFINER=`root`@`%` FUNCTION `cs3099user-b5_project`.`UuidToBin`(_uuid BINARY(36)) RETURNS binary(16)
     DETERMINISTIC
     SQL SECURITY INVOKER
 RETURN
