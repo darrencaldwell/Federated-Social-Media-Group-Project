@@ -19,8 +19,9 @@ async fn post_post(
 }
 
 #[get("/api/subforums/{id}/posts")]
-#[protected]
+//#[protected]
 async fn get_posts(
+    req: HttpRequest,
     web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
 ) -> impl Responder {

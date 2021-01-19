@@ -11,7 +11,7 @@ use sqlx::{FromRow, MySqlPool};
 pub struct PostRequest {
     pub post_title: String,
     pub post_markup: String,
-    pub user_id: u64,
+    pub user_id: String,
 }
 
 // database record
@@ -20,7 +20,7 @@ pub struct PostRequest {
 pub struct Post {
     pub post_title: String,
     pub post_markup: String,
-    pub user_id: u64,
+    pub user_id: String,
     pub post_id: u64,
     pub subforum_id: u64,
     #[serde(rename = "_links")]
@@ -82,7 +82,7 @@ impl Post {
         let post_id = sqlx::query!(
             r#"
     insert into posts (post_title, user_id, post_markup, subforum_id)
-    values( ?, ?, ?, ? )
+    values( ?, UuidToBin(?), ?, ? )
         "#,
             post.post_title,
             post.user_id,
@@ -108,10 +108,10 @@ impl Post {
         let new_post = Post {
             post_title: post.post_title,
             post_markup: post.post_markup,
-            user_id: post.user_id,
+            user_id: post.user_id.clone(),
             post_id: post_id,
             subforum_id: subforum_id,
-            links: generate_post_links(post_id, subforum_id, forum_id.forum_id, post.user_id),
+            links: generate_post_links(post_id, subforum_id, forum_id.forum_id, &post.user_id),
         };
         Ok(new_post)
     }
@@ -120,7 +120,7 @@ impl Post {
         let mut posts = vec![];
         let recs = sqlx::query!(
             r#"
-            SELECT post_id, post_title, user_id, post_markup, subforum_id FROM posts WHERE subforum_id = ?
+            SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_markup, subforum_id FROM posts WHERE subforum_id = ?
             ORDER BY post_id
             "#,
             subforum_id
@@ -138,18 +138,19 @@ impl Post {
         .await?;
 
         for rec in recs {
+            let user_id = rec.user_id.unwrap();
             posts.push(Post {
                 post_id: rec.post_id,
                 post_title: rec.post_title,
                 post_markup: rec.post_markup,
-                user_id: rec.user_id,
                 subforum_id: rec.subforum_id,
                 links: generate_post_links(
                     rec.post_id,
                     rec.subforum_id,
                     forum_id.forum_id,
-                    rec.user_id,
+                    &user_id,
                 ),
+                user_id,
             });
         }
         let post_list = PostList { post_list: posts };
@@ -162,7 +163,7 @@ impl Post {
     pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
         let rec = sqlx::query!(
             r#"
-            SELECT post_id, post_title, user_id, post_markup, subforum_id FROM posts WHERE post_id = ?
+            SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_markup, subforum_id FROM posts WHERE post_id = ?
             "#,
             post_id
         )
@@ -178,24 +179,25 @@ impl Post {
         .fetch_one(pool)
         .await?;
 
+        let user_id = rec.user_id.unwrap();
         let post = Post {
             post_id: rec.post_id,
             post_title: rec.post_title,
             post_markup: rec.post_markup,
-            user_id: rec.user_id,
             subforum_id: rec.subforum_id,
             links: generate_post_links(
                 rec.post_id,
                 rec.subforum_id,
                 forum_id.forum_id,
-                rec.user_id,
+                &user_id,
             ),
+            user_id,
         };
         Ok(post)
     }
 }
 
-fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: u64) -> PostLinks {
+fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: &String) -> PostLinks {
     let self_link = format!(
         "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums/{}/posts/{}",
         forum_id, subforum_id, post_id
