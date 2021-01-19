@@ -14,7 +14,7 @@ rust-latest:
     - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
     - apt update -y
     - apt-get install -y mariadb-client
-    - mysql --user=root --password=password -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
+    - mysql --user=root --password=pass -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
     - cargo build --verbose
     - cargo test --verbose
 
