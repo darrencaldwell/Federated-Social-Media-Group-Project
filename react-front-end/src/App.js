@@ -8,7 +8,7 @@ import ViewPosts from "./pages/ViewPosts";
 import CreatePost from "./pages/CreatePost.js";
 import Account from "./pages/Account";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
-import BackButton from "./components/BackButton";
+// import BackButton from "./components/BackButton";
 
 class App extends React.Component {
     componentDidMount() {
