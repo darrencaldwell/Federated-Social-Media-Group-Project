@@ -10,7 +10,7 @@ use sqlx::{FromRow, MySqlPool};
 #[serde(rename_all = "camelCase")]
 pub struct PostRequest {
     pub post_title: String,
-    pub post_markup: String,
+    pub post_contents: String,
     pub user_id: String,
 }
 
@@ -19,7 +19,7 @@ pub struct PostRequest {
 #[serde(rename_all = "camelCase")]
 pub struct Post {
     pub post_title: String,
-    pub post_markup: String,
+    pub post_contents: String,
     pub user_id: String,
     pub post_id: u64,
     pub subforum_id: u64,
@@ -81,12 +81,12 @@ impl Post {
         // insert into db
         let post_id = sqlx::query!(
             r#"
-    insert into posts (post_title, user_id, post_markup, subforum_id)
+    insert into posts (post_title, user_id, post_contents, subforum_id)
     values( ?, UuidToBin(?), ?, ? )
         "#,
             post.post_title,
             post.user_id,
-            post.post_markup,
+            post.post_contents,
             subforum_id
         )
         .execute(&mut tx)
@@ -107,7 +107,7 @@ impl Post {
         // return the post as if it was retrieved by a GET
         let new_post = Post {
             post_title: post.post_title,
-            post_markup: post.post_markup,
+            post_contents: post.post_contents,
             user_id: post.user_id.clone(),
             post_id: post_id,
             subforum_id: subforum_id,
@@ -120,7 +120,7 @@ impl Post {
         let mut posts = vec![];
         let recs = sqlx::query!(
             r#"
-            SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_markup, subforum_id FROM posts WHERE subforum_id = ?
+            SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, subforum_id FROM posts WHERE subforum_id = ?
             ORDER BY post_id
             "#,
             subforum_id
@@ -142,7 +142,7 @@ impl Post {
             posts.push(Post {
                 post_id: rec.post_id,
                 post_title: rec.post_title,
-                post_markup: rec.post_markup,
+                post_contents: rec.post_contents,
                 subforum_id: rec.subforum_id,
                 links: generate_post_links(
                     rec.post_id,
@@ -163,7 +163,7 @@ impl Post {
     pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
         let rec = sqlx::query!(
             r#"
-            SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_markup, subforum_id FROM posts WHERE post_id = ?
+            SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, subforum_id FROM posts WHERE post_id = ?
             "#,
             post_id
         )
@@ -183,7 +183,7 @@ impl Post {
         let post = Post {
             post_id: rec.post_id,
             post_title: rec.post_title,
-            post_markup: rec.post_markup,
+            post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
             links: generate_post_links(
                 rec.post_id,
