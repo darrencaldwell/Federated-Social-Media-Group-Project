@@ -119,16 +119,19 @@ class Make extends React.Component {
                 body: this.mode ? JSON.stringify(
                     {
                         "commentContent": this.state.bodyText,
-                        "userId": parseInt(localStorage.getItem('userId')),
+                        "userId": localStorage.getItem('userId'),
                         "username": localStorage.getItem('username')
                     }
                 ) : JSON.stringify({
                     "postTitle": this.state.titleText,
-                    "postMarkup": this.state.bodyText,
-                    "userId": parseInt(localStorage.getItem('userId'))
+                    "postContents": this.state.bodyText,
+                    "userId": localStorage.getItem('userId')
                 })
             }).then(responseJson => {
                 console.log(responseJson);
+                console.log(this.state.titleText);
+                console.log(this.state.bodyText);
+                console.log(localStorage.getItem('userId'));
             }).catch(error => this.setState({
                 message: "Error posting post: " + error
             }));
@@ -174,33 +177,33 @@ class Make extends React.Component {
 
     render() {
         return (
-            <Container>
-                <Form className="createPost">
-                    <Form.Label>Create Post</Form.Label>
-                    <FormGroup controlId="create-title">
-                        <Form.Control type="text" placeholder="Type title here.."/>
-                        <Form.Control as="textarea" rows={3} placeholder="Type main body of text here.."/>
-                    </FormGroup>
-                    <Button variant="light" onClick={() => this.submit()}>Create</Button>
-                </Form>
-            </Container>
-            // <form>
-            //     <h3>Make Posts</h3>
-            //     <div>
-            //         <div className="title">
-            //             {this.renderTitle()}
-            //         </div>
-            //
-            //         <div className="text">
-            //             {this.renderText()}
-            //         </div>
-            //
-            //         <div className="sendButton">
-            //             {this.renderButton()}
-            //         </div>
-            //
-            //     </div>
-            // </form>
+            // <Container>
+            //     <Form className="createPost">
+            //         <Form.Label>Create Post</Form.Label>
+            //         <FormGroup controlId="create-title">
+            //             <Form.Control type="text" placeholder="Type title here.."/>
+            //             <Form.Control as="textarea" rows={3} placeholder="Type main body of text here.."/>
+            //         </FormGroup>
+            //         <Button variant="light" onClick={() => this.submit()}>Create</Button>
+            //     </Form>
+            // </Container>
+            <form>
+                <h3>Make Posts</h3>
+                <div>
+                    <div className="title">
+                        {this.renderTitle()}
+                    </div>
+            
+                    <div className="text">
+                        {this.renderText()}
+                    </div>
+            
+                    <div className="sendButton">
+                        {this.renderButton()}
+                    </div>
+            
+                </div>
+            </form>
         );
     }
 }
