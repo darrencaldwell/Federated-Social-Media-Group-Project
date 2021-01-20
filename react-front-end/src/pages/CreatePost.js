@@ -2,130 +2,42 @@ import React from 'react';
 import {Button, Container, Form, FormGroup} from 'react-bootstrap'
 import '../styling/create-post.css'
 
-class Title extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleChange = this.handleChange.bind(this);
-    }
-
-    handleChange(e) {
-        this.props.onChange(e.target.value);
-    }
-
-    handleBlur() {
-        if (this.props.value === '') {
-            this.props.onChange(this.props.default);
-        }
-    }
-
-    handleFocus() {
-        if (this.props.value === this.props.default) {
-            this.props.onChange('');
-        }
-    }
-
-    render() {
-        const value = this.props.value;
-        return (
-            <div>
-                <input
-                    value={value}
-                    onChange={this.handleChange}
-                    onFocus={() => this.handleFocus()}
-                    onBlur={() => this.handleBlur()}/>
-            </div>
-        );
-    }
-}
-
-class Body extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleChange = this.handleChange.bind(this);
-    }
-
-    handleChange(e) {
-        this.props.onChange(e.target.value);
-    }
-
-    handleBlur() {
-        if (this.props.value === '') {
-            this.props.onChange(this.props.default);
-        }
-    }
-
-    handleFocus() {
-        if (this.props.value === this.props.default) {
-            this.props.onChange('');
-        }
-    }
-
-    render() {
-        return (
-            <div>
-    <textarea
-        className="text" value={this.props.value} onChange={this.handleChange}
-        onFocus={() => this.handleFocus()}
-        onBlur={() => this.handleBlur()}>
-    </textarea>
-            </div>
-        );
-    }
-}
-
-function SendButton(props) {
-    return (
-        <button
-            className="sendButton"
-            onClick={(props.onClick)}>
-            {props.value}
-        </button>
-    );
-}
-
-//props: url, mode
+//props: url
 class Make extends React.Component {
     constructor(props) {
         super(props);
-        this.changeTitle = this.changeTitle.bind(this);
+        this.changeTitle = this.changeTitle.bind(this); // bind these functions so they can override the onChange functions
         this.changeBody = this.changeBody.bind(this);
-        this.mode = this.props.mode === "comment";
-        const defaultBody = this.mode ? 'Put the body of your comment here' : 'Put the body of your post here';
-        const defaultTitle = 'Title';
+        // declare these as constants here so 2 different state attributes can be set to each
+        const defaultBody = 'Put the body of your post here'; // the placeholder text in the body
+        const defaultTitle = 'Title'; // the placeholder text for the title
         this.state = {
-            buttonText: this.mode ? 'Create Comment' : 'Create Post',
-            defaultTitle: defaultTitle,
-            titleText: defaultTitle,
-            defaultBody: defaultBody,
-            bodyText: defaultBody,
+            buttonText: 'Create Post',
+            defaultTitle: defaultTitle, // the default title needs to be preserved
+            titleText: defaultTitle, // the title starts as the default
+            defaultBody: defaultBody, // the default body needs to be preserved
+            bodyText: defaultBody, // the body starts as the default
         };
     }
 
     submit() {
         // if no text has been entered, it will return to default before the button is pressed
-        // don't worry about title if in comment mode
-        if ((this.state.titleText === this.state.defaultTitle && !this.mode) ||
-            this.state.bodyText === this.state.defaultBody) {
+        if ((this.state.titleText === this.state.defaultTitle) || this.state.bodyText === this.state.defaultBody) {
             alert('Please enter a title and body');
         } else {
+            // the HTML request
             fetch(this.props.url, {
                 method: "POST",
                 withCredentials: true,
                 credentials: 'include',
                 headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token'),
+                    'Authorization': "Bearer " + localStorage.getItem('token'), // need to get the auth token from localStorage
                     'Content-Type': 'application/json'
                 },
-                body: this.mode ? JSON.stringify(
-                    {
-                        "commentContent": this.state.bodyText,
-                        "userId": parseInt(localStorage.getItem('userId')),
-                        "username": localStorage.getItem('username')
-                    }
-                ) : JSON.stringify({
+                body: JSON.stringify({
                     "postTitle": this.state.titleText,
-                    "postMarkup": this.state.bodyText,
-                    "userId": parseInt(localStorage.getItem('userId'))
+                    "postContents": this.state.bodyText,
+                    "userId": localStorage.getItem('userId') // userId is a string in localStorage
                 })
             }).then(responseJson => {
                 console.log(responseJson);
@@ -135,41 +47,15 @@ class Make extends React.Component {
         }
     }
 
+    /* these two functions override the onChange functions for the title and body, 
+        updating state with the value for the submit function to use */
+
     changeTitle(v) {
-        this.setState({titleText: v})
+        this.setState({titleText: v.target.value})
     }
 
     changeBody(v) {
-        this.setState({bodyText: v})
-    }
-
-    renderTitle() {
-        return (this.mode ? null :
-                <Title
-                    value={this.state.titleText}
-                    default={this.state.defaultTitle}
-                    onChange={this.changeTitle}
-                />
-        );
-    }
-
-    renderText() {
-        return (
-            <Body
-                value={this.state.bodyText}
-                default={this.state.defaultBody}
-                onChange={this.changeBody}
-            />
-        );
-    }
-
-    renderButton() {
-        return (
-            <SendButton
-                value={this.state.buttonText}
-                onClick={() => this.submit()}
-            />
-        );
+        this.setState({bodyText: v.target.value})
     }
 
     render() {
@@ -178,29 +64,13 @@ class Make extends React.Component {
                 <Form className="createPost">
                     <Form.Label>Create Post</Form.Label>
                     <FormGroup controlId="create-title">
-                        <Form.Control type="text" placeholder="Type title here.."/>
-                        <Form.Control as="textarea" rows={3} placeholder="Type main body of text here.."/>
+                        {/*These are the input forms for title and body, with placeholder text. They call the above change methods when you type in them.*/}
+                        <Form.Control onChange={this.changeTitle} type="text" placeholder={this.state.defaultTitle}/>
+                        <Form.Control onChange={this.changeBody} as="textarea" rows={3} placeholder={this.state.defaultBody}/>
                     </FormGroup>
-                    <Button variant="light" onClick={() => this.submit()}>Create</Button>
+                    <Button variant="light" onClick={() => this.submit()}>{this.state.buttonText}</Button> {/*this button calls the submit function on click*/}
                 </Form>
             </Container>
-            // <form>
-            //     <h3>Make Posts</h3>
-            //     <div>
-            //         <div className="title">
-            //             {this.renderTitle()}
-            //         </div>
-            //
-            //         <div className="text">
-            //             {this.renderText()}
-            //         </div>
-            //
-            //         <div className="sendButton">
-            //             {this.renderButton()}
-            //         </div>
-            //
-            //     </div>
-            // </form>
         );
     }
 }

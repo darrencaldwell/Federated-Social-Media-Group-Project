@@ -47,7 +47,7 @@ class App extends React.Component {
                         <Route exact path="/" component={() => <Home user={this.state.user}/>}/>
                         <Route exact path="/login" component={() => <Login login={this.login}/>}/>
                         <Route exact path="/register" component={Register}/>
-                        <Route exact="/account" component={Account}/>
+                        <Route exact path="/account" component={Account}/>
                         <Route exact path="/makePost" component={() => <CreatePost url="/api/subforums/1/posts"/>}/>
                     </Switch>
 
