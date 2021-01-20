@@ -6,6 +6,9 @@ By Darren Caldwell, Raiyan Chowdhury, Dean Kuyser, Donald Enwan, Euan Lacy
 API Reference:
 https://gist.github.com/11wykessam/f88fdac4a40faeca11922835c25d4c32
 
+Confuence Blog: Basic Setup
+https://cs3099b5.atlassian.net/wiki/spaces/CS3099/blog/2021/01/19/182288385/Local+Dev+Setup
+
 To start the Actix backend, in the "actix" folder type:
 
 ```cmd
