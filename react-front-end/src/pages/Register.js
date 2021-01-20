@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios'
 import {Redirect} from "react-router-dom";
-import {Alert, Button, Container, Form, FormGroup} from "react-bootstrap";
+import {Button, Container, Form, FormGroup} from "react-bootstrap";
 // import {set} from "mobx";
 
 class Register extends React.Component {
