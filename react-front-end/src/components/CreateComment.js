@@ -6,67 +6,59 @@ import '../styling/create-post.css'
 class Make extends React.Component {
     constructor(props) {
         super(props);
-        this.changeTitle = this.changeTitle.bind(this);
-        this.changeBody = this.changeBody.bind(this);
+        this.changeBody = this.changeBody.bind(this); // bind this so it can override onChange
         const defaultBody = 'Put the body of your comment here';
-        const defaultTitle = 'Title';
         this.state = {
             buttonText: 'Create Comment',
-            defaultTitle: defaultTitle,
-            titleText: defaultTitle,
-            defaultBody: defaultBody,
-            bodyText: defaultBody,
+            defaultBody: defaultBody, // default body needs to be preserved
+            bodyText: defaultBody, // body starts as default
         };
     }
 
     submit() {
         // if no text has been entered, it will return to default before the button is pressed
-        // don't worry about title if in comment mode
-        if ((this.state.titleText === this.state.defaultTitle && !this.mode) ||
-            this.state.bodyText === this.state.defaultBody) {
+        if (this.state.bodyText === this.state.defaultBody) {
             alert('Please enter a title and body');
         } else {
+            // this is the HTML request
             fetch(this.props.url, {
                 method: "POST",
                 withCredentials: true,
                 credentials: 'include',
                 headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token'),
+                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(
                     {
                         "commentContent": this.state.bodyText,
-                        "userId": localStorage.getItem('userId'),
+                        "userId": localStorage.getItem('userId'), //userId and username are strings in localStorage
                         "username": localStorage.getItem('username')
                     }
                 )
-            }).then(responseJson => {
+
+            }).then(responseJson => { // log the response for debugging
                 console.log(responseJson);
-            }).catch(error => this.setState({
+            }).catch(error => this.setState({ // catch any error
                 message: "Error posting post: " + error
             }));
         }
     }
 
-    changeTitle(v) {
-        this.setState({titleText: v.target.value})
-    }
-
-    changeBody(v) {
+    changeBody(v) { // update state with the new value of the body
         this.setState({bodyText: v.target.value})
     }
 
     render() {
         return (
             <Container>
-                <Form className="createPost">
-                    <Form.Label>Create Post</Form.Label>
+                <Form className="createComment">
+                    <Form.Label>Create Comment</Form.Label>
                     <FormGroup controlId="create-title">
-                        <Form.Control onChange={this.changeTitle} type="text" placeholder={this.state.defaultTitle}/>
+                        {/*Clicking in this box removes the placeholder, typing in it calls the change function to update state*/}
                         <Form.Control onChange={this.changeBody} as="textarea" rows={3} placeholder={this.state.defaultBody}/>
                     </FormGroup>
-                    <Button variant="light" onClick={() => this.submit()}>{this.state.buttonText}</Button>
+                    <Button variant="light" onClick={() => this.submit()}>{this.state.buttonText}</Button> {/*Clicking this button calls the submit method*/}
                 </Form>
             </Container>
         );
