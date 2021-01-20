@@ -1,4 +1,6 @@
 import React from 'react';
+import {Button, Container, Form, FormGroup} from 'react-bootstrap'
+import '../styling/create-post.css'
 
 class Title extends React.Component {
     constructor(props) {
@@ -80,6 +82,7 @@ function SendButton(props) {
         </button>
     );
 }
+
 //props: url, mode
 class Make extends React.Component {
     constructor(props) {
@@ -98,7 +101,7 @@ class Make extends React.Component {
         };
     }
 
-    submit () {
+    submit() {
         // if no text has been entered, it will return to default before the button is pressed
         // don't worry about title if in comment mode
         if ((this.state.titleText === this.state.defaultTitle && !this.mode) ||
@@ -117,7 +120,7 @@ class Make extends React.Component {
                     {
                         "commentContent": this.state.bodyText,
                         "userId": parseInt(localStorage.getItem('userId')),
-                        "username":localStorage.getItem('username')
+                        "username": localStorage.getItem('username')
                     }
                 ) : JSON.stringify({
                     "postTitle": this.state.titleText,
@@ -141,12 +144,12 @@ class Make extends React.Component {
     }
 
     renderTitle() {
-        return ( this.mode ? null :
-            <Title
-                value={this.state.titleText}
-                default={this.state.defaultTitle}
-                onChange={this.changeTitle}
-            />
+        return (this.mode ? null :
+                <Title
+                    value={this.state.titleText}
+                    default={this.state.defaultTitle}
+                    onChange={this.changeTitle}
+                />
         );
     }
 
@@ -171,23 +174,33 @@ class Make extends React.Component {
 
     render() {
         return (
-            <form>
-                <h3>Make Posts</h3>
-                <div>
-                    <div className="title">
-                        {this.renderTitle()}
-                    </div>
-
-                    <div className="text">
-                        {this.renderText()}
-                    </div>
-
-                    <div className="sendButton">
-                        {this.renderButton()}
-                    </div>
-
-                </div>
-            </form>
+            <Container>
+                <Form className="createPost">
+                    <Form.Label>Create Post</Form.Label>
+                    <FormGroup controlId="create-title">
+                        <Form.Control type="text" placeholder="Type title here.."/>
+                        <Form.Control as="textarea" rows={3} placeholder="Type main body of text here.."/>
+                    </FormGroup>
+                    <Button variant="light" onClick={() => this.submit()}>Create</Button>
+                </Form>
+            </Container>
+            // <form>
+            //     <h3>Make Posts</h3>
+            //     <div>
+            //         <div className="title">
+            //             {this.renderTitle()}
+            //         </div>
+            //
+            //         <div className="text">
+            //             {this.renderText()}
+            //         </div>
+            //
+            //         <div className="sendButton">
+            //             {this.renderButton()}
+            //         </div>
+            //
+            //     </div>
+            // </form>
         );
     }
 }

@@ -1,0 +1,38 @@
+.createPost {
+    width: 450px;
+    margin: auto;
+    background: #ffffff;
+    box-shadow: 0 14px 80px rgba(34, 35, 58, 0.2);
+    padding: 40px 55px 45px 55px;
+    border-radius: 15px;
+    transition: all .3s;
+}
+
+
+
+/*.postTitle {*/
+/*    background-color: #66ccff;*/
+/*}*/
+
+/*.postMarkup {*/
+/*    background-color: #ccffff;*/
+/*}*/
+
+/*.loader {*/
+/*    border: 16px solid #f3f3f3;*/
+/*    border-top: 16px solid #3498db;*/
+/*    border-radius: 50%;*/
+/*    margin: auto;*/
+/*    width: 120px;*/
+/*    height: 120px;*/
+/*    animation: spin 2s linear infinite;*/
+/*}*/
+
+/*@keyframes spin {*/
+/*    0% {*/
+/*        transform: rotate(0deg);*/
+/*    }*/
+/*    100% {*/
+/*        transform: rotate(360deg);*/
+/*    }*/
+/*}*/

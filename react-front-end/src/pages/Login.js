@@ -1,6 +1,8 @@
 import React from 'react';
 import axios from 'axios'
 import {Redirect} from "react-router-dom";
+import {Form, FormGroup, Button, Container} from 'react-bootstrap'
+import '../styling/forms.css';
 
 
 class Login extends React.Component {
@@ -28,6 +30,7 @@ class Login extends React.Component {
                 })
                 this.props.login()
             }).catch(err => {
+            alert("Incorrect username or password")
             this.setState({
                 message: err.response.data.message
             })
@@ -41,37 +44,28 @@ class Login extends React.Component {
             return <Redirect to={'/'}/>
         }
 
-        let error = ''
-
-        if (this.state.message) {
-            error = (
-                <div className="alert alert-danger" role="alert">
-                    {this.state.message}
-                </div>
-            )
-        }
         return (
-            <form onSubmit={this.handleSubmit}>
-                <h3>Login</h3>
+            <Container>
+                <Form className="login" onSubmit={this.handleSubmit}>
+                    <h3>Login</h3>
 
-                {error} {/* // if invalid login. if valid then empty string shown*/}
+                    {/* Username Input */}
+                    <FormGroup>
+                        <label>Username</label>
+                        <input type="text" className="form-control" placeholder="Username"
+                               onChange={e => this.username = e.target.value}/>
+                    </FormGroup>
 
-                {/* Username Input */}
-                <div className="form-group">
-                    <label>Username</label>
-                    <input type="text" className="form-control" placeholder="Username"
-                           onChange={e => this.username = e.target.value}/>
-                </div>
+                    {/* Password Input */}
+                    <FormGroup>
+                        <label>Password</label>
+                        <input type="password" className="form-control" placeholder="Password"
+                               onChange={e => this.password = e.target.value}/>
+                    </FormGroup>
 
-                {/* Password Input */}
-                <div className="form-group">
-                    <label>Password</label>
-                    <input type="password" className="form-control" placeholder="Password"
-                           onChange={e => this.password = e.target.value}/>
-                </div>
-
-                <button className="btn btn-primary btn-block">Login</button>
-            </form>
+                    <Button variant="light" type="submit">Login</Button>
+                </Form>
+            </Container>
         );
     }
 }
