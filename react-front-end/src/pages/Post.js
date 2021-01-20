@@ -4,7 +4,7 @@ import Comments from '../components/Comments';
 // import CreatePost from './CreatePost.js';
 import CreateComment from '../components/CreateComment'
 // import '../styling/Post.css';
-import {Button, Card, Container, Dropdown} from "react-bootstrap";
+import {Button, Card, Container} from "react-bootstrap";
 
 export class Post extends Component {
     render() {
