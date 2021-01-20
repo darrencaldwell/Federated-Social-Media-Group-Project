@@ -35,7 +35,7 @@ CREATE TABLE `subforums` (
 CREATE TABLE `posts` (
   `post_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `post_title` varchar(100) COLLATE utf8_bin NOT NULL,
-  `post_markup` text COLLATE utf8_bin NOT NULL,
+  `post_contents` text COLLATE utf8_bin NOT NULL,
   `subforum_id` bigint(20) unsigned NOT NULL,
   `user_id` binary(16) NOT NULL,
   PRIMARY KEY (`post_id`),
