@@ -147,9 +147,10 @@ pub async fn register(username: String, password: String, pool: &MySqlPool) -> R
     // need the second one. - Darren
     let user_id = sqlx::query!(
         //"insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID())) RETURNING user_id",
-        r#"insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID())) RETURNING UuidFromBin(user_id) AS user_id"#,
+        r#"insert into users (username, password_hash, user_id, server) values(?, ?, UuidToBin(UUID()), ?) RETURNING UuidFromBin(user_id) AS user_id"#,
         username,
-        password_hash
+        password_hash,
+        "local"
     )
     .fetch_one(pool)
     .await?;
