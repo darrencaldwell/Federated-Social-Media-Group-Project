@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Serialize, Deserialize};
 use bcrypt::hash;
-use sqlx::{FromRow, MySqlPool};
+use sqlx::{Row, FromRow, MySqlPool};
 
 /// Represents an entire user
 #[derive(Serialize, FromRow)]
@@ -135,24 +135,26 @@ pub async fn register(username: String, password: String, pool: &MySqlPool) -> R
 
     // TODO: if fixit update mariaDB we can just return the ID after this first query and no longer
     // need the second one. - Darren
-    sqlx::query!(
+    let user_id = sqlx::query!(
         //"insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID())) RETURNING user_id",
-        "insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID()))",
+        r#"insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID())) RETURNING UuidFromBin(user_id) AS "user_id: String""#,
         username,
         password_hash
     )
-    .execute(&mut tx)
+    .fetch_one(pool)
     .await?;
+
     tx.commit().await?;
 
     // Note need to grab user_id as STRING else we all cry
+    /*
     let user_id = sqlx::query!(
         r#"SELECT UuidFromBin(user_id) AS "user_id: String" FROM users WHERE username = ?"#, username
     )
     .fetch_one(pool)
     .await?;
-
-    let uuid: String = user_id.user_id.unwrap();
+    */
+    let uuid: String = user_id.get(0);
     println!("{:?}", &uuid);
     let new_user = User {
         username,
