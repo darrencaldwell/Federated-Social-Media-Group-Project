@@ -54,10 +54,10 @@ pub enum LoginError {
 fn gen_links(user_id: &String) -> UserLinks {
     UserLinks {
         _self: Link {
-            href: format!("<url>/api/users/{}", user_id),
+            href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/{}", user_id),
         },
         users: Link {
-            href: format!("<url>/api/users"),
+            href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users"),
         },
     }
 }
@@ -97,7 +97,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
         embedded: UsersList { user_list: users },
         links: UsersLinks {
             _self: Link {
-                href: format!("<url>/api/users"),
+                href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users"),
             },
         },
     })

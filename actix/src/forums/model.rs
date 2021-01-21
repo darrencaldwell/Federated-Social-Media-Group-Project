@@ -85,17 +85,17 @@ pub struct Link {
 
 fn gen_forum_links(forum_id: u64) -> ForumLinks {
     ForumLinks {
-        _self: Link { href: format!("<url>/api/forums/{}", forum_id) },
-        forums: Link { href: format!("<url>/api/forums") },
-        subforums: Link { href: format!("<url>/api/forums/{}/subforums", forum_id) },
+        _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}", forum_id) },
+        forums: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums") },
+        subforums: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums", forum_id) },
     }
 }
 
 fn gen_sub_links(subforum_id: u64, forum_id: u64) -> SubforumLinks {
     SubforumLinks {
-        _self: Link { href: format!("<url>/api/subforums/{}", subforum_id) },
-        forum: Link { href: format!("<url>/api/forums/{}", forum_id) },
-        posts: Link { href: format!("<url>/api/forums/{}/subforums", forum_id) },
+        _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/{}", subforum_id) },
+        forum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}", forum_id) },
+        posts: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums", forum_id) },
     }
 }
 
@@ -210,6 +210,6 @@ pub async fn get_forums(pool: &MySqlPool) -> Result<Forums> {
 
         Ok(Forums {
             _embedded: ForumList { forum_list: forums },
-            _links: ForumsLinks { _self: Link { href: format!("<url>/api/forums") } },
+            _links: ForumsLinks { _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums") } },
         })
 }

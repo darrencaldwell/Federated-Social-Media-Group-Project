@@ -51,11 +51,11 @@ pub struct CommentList {
 
 fn gen_links(comment_id: u64, user_id: &String, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
     Links {
-        _self: Link { href: format!("<url>/api/comments/{}", comment_id) },
-        post: Link { href: format!("<url>/api/posts/{}", post_id) },
-        subforum: Link { href: format!("<url>/api/subforums/{}", subforum_id) },
-        forum: Link { href: format!("<url>/api/forums/{}", forum_id) },
-        user: Link { href: format!("<url>/api/user/{}", user_id) },
+        _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}", comment_id) },
+        post: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}", post_id) },
+        subforum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/{}", subforum_id) },
+        forum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}", forum_id) },
+        user: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/user/{}", user_id) },
     }
 }
 
@@ -80,8 +80,6 @@ async fn get_forum(subforum_id: u64, pool: &MySqlPool) -> Result<u64> {
 pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
                             pool: &MySqlPool) -> Result<Comment> {
     let mut tx = pool.begin().await?;
-    println!("{:?}", comment_request);
-
     let comment_id = sqlx::query!(
         "INSERT INTO comments (comment, user_id, post_id) VALUES (?, UuidToBin(?), ?)",
         comment_request.comment_content,
