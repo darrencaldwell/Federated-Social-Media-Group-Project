@@ -1,26 +1,23 @@
-use actix_web::{App, HttpServer, middleware::Logger, web::Data};
-use actix_cors::Cors;
+use actix_web::{App, HttpServer, middleware::Logger, web::Data, dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse};
+use actix_service::{Service, Transform};
+
 use anyhow::Result;
 use dotenv::dotenv;
 use env_logger::Env;
 use sqlx::MySqlPool;
-use std::env;
+use futures::future::{ok, Future, Ready};
 
+use std::env;
 use std::cell::RefCell;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
-
-use actix_service::{Service, Transform};
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse};
-use futures::future::{ok, Future, Ready};
 
 mod posts;
 mod users;
 mod auth;
 mod comments;
 mod forums;
-
 
 // This is ALL boilerplate for a middleware,
 // TODO: Move to another file when its done
@@ -51,7 +48,6 @@ where
 
 pub struct AuthMiddleware<S> {
     // This is special: We need this to avoid lifetime issues.
-    // TODO: I didn't write this comment or code, looks like we have some magic lifetime code!
     service: Rc<RefCell<S>>,
 }
 
@@ -96,25 +92,24 @@ where
 
 #[actix_web::main]
 async fn main() -> Result<()> {
-    dotenv().unwrap(); // update env with .env file.
+    // update env with .env file.
+    dotenv().unwrap();
+    // initiates logger for actix middleware
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+    // pool used for database connections, gets databse url from env file
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await?;
 
     HttpServer::new(move || {
 
-    let cors = Cors::default()
-            .allow_any_origin()
-            .allowed_methods(vec!["GET", "POST"])
-            .allow_any_header()
-            .supports_credentials()
-            .max_age(3600);
-
         App::new()
+            // example of being able to add any data to App
+            // Data is functionally a map of Type:Value
             .data("yeehaw".to_string())
-            .wrap(Auth)
-            .wrap(cors)
-            .wrap(Logger::default())
             .data(pool.clone())
+            // wrap is for "wrapping" middlewaare
+            .wrap(Auth)
+            .wrap(Logger::default())
+            // adds routes from subdirectories
             .configure(posts::init)
             .configure(users::init)
             .configure(comments::init)

@@ -1,27 +1,11 @@
 use super::user;
 use crate::auth::{self, decode_jwt};
 use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
-use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
 use auth_macro::*;
 
-#[derive(Serialize, Deserialize)]
-struct UserRequest {
-    username: String,
-    password: String,
-}
-
-// i want to move this to users euan u meanie >:(
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct LoginResponse {
-    pub user_id: String,
-    pub username: String,
-    pub token: String,
-}
-
 #[post("/api/users/register")]
-async fn register(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn register(post: web::Json<user::UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     let post = post.into_inner();
     let user = user::register(post.username, post.password, &pool).await;
 
@@ -32,7 +16,7 @@ async fn register(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> i
 }
 
 #[post("/api/users/login")]
-async fn login(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn login(post: web::Json<user::UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     let result = user::verify(&post.username, &post.password, &pool).await;
 
     let user_id = match result {
@@ -46,7 +30,7 @@ async fn login(post: web::Json<UserRequest>, pool: web::Data<MySqlPool>) -> impl
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
-    let res = LoginResponse {
+    let res = user::LoginResponse {
         user_id,
         username: post.username.clone(),
         token,

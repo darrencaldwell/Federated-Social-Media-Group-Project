@@ -1,9 +1,9 @@
 use anyhow::Result;
-use serde::Serialize;
-
+use serde::{Serialize, Deserialize};
 use bcrypt::hash;
 use sqlx::{FromRow, MySqlPool};
 
+/// Represents an entire user
 #[derive(Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
@@ -13,6 +13,7 @@ pub struct User {
     pub links: UserLinks,
 }
 
+/// The links sent with a [User] object
 #[derive(Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct UserLinks {
@@ -20,6 +21,7 @@ pub struct UserLinks {
     pub users: Link,
 }
 
+/// A list of [User] objects with links
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Users {
@@ -29,28 +31,49 @@ pub struct Users {
     pub links: UsersLinks,
 }
 
+/// Component of [Users] containing the list of users
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UsersList {
     pub user_list: Vec<User>,
 }
 
+/// Component of [Users] containing the links
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UsersLinks {
     pub _self: Link,
 }
 
+/// A single link used by [UsersLink] and [UserLinks]
 #[derive(Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct Link {
     pub href: String,
 }
 
+/// Represents the request to both login and register a [User]
+#[derive(Serialize, Deserialize)]
+pub struct UserRequest {
+    pub username: String,
+    pub password: String,
+}
+
+/// Represents the response from the server upon logging in
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LoginResponse {
+    pub user_id: String,
+    pub username: String,
+    pub token: String,
+}
+
+/// Enumeration of all login errors
 pub enum LoginError {
     InvalidHash,
 }
 
+/// Generates links to point to user and users endpoint
 fn gen_links(user_id: &String) -> UserLinks {
     UserLinks {
         _self: Link {
@@ -62,6 +85,7 @@ fn gen_links(user_id: &String) -> UserLinks {
     }
 }
 
+/// Given a user_id and db pool queries for that user and returns it
 pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
     let username = sqlx::query!("SELECT username FROM users WHERE user_id = (UuidToBin(?))", user_id.clone())
         .fetch_one(pool)
@@ -75,6 +99,7 @@ pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
     })
 }
 
+/// Returns a list of ALL users within our database, should probably not be used.
 pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
     let result = sqlx::query!(r#"SELECT UuidFromBin(user_id) AS "user_id: String", username FROM users"#)
         .fetch_all(pool)
@@ -103,6 +128,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
     })
 }
 
+/// Registers a [user] into the database and returns a [user] object
 pub async fn register(username: String, password: String, pool: &MySqlPool) -> Result<User> {
     let mut tx = pool.begin().await?;
     let password_hash: String = hash(password, 10)?;
@@ -137,6 +163,7 @@ pub async fn register(username: String, password: String, pool: &MySqlPool) -> R
     Ok(new_user)
 }
 
+/// Used for verifying a login attempt, checks that the credentials match
 pub async fn verify(
     username: &String,
     password: &String,

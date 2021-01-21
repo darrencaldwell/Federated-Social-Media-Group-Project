@@ -1,4 +1,4 @@
-use crate::posts::model::{Post, PostRequest};
+use super::posts::{Post, PostRequest};
 use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
 use sqlx::MySqlPool;
 use crate::auth::decode_jwt;
@@ -19,7 +19,7 @@ async fn post_post(
 }
 
 #[get("/api/subforums/{id}/posts")]
-//#[protected]
+//#[protected] TODO: doesn't like this? Double bound parameter?
 async fn get_posts(
     req: HttpRequest,
     web::Path(id): web::Path<u64>,
