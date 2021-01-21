@@ -11,8 +11,9 @@ CREATE TABLE `forums` (
 
 CREATE TABLE `users` (
   `username` varchar(30) COLLATE utf8_bin NOT NULL,
-  `password_hash` varchar(60) COLLATE utf8_bin NOT NULL,
+  `password_hash` varchar(60) COLLATE utf8_bin DEFAULT NULL,
   `user_id` binary(16) NOT NULL,
+  `server` varchar(100) COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
