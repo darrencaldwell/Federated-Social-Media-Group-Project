@@ -187,7 +187,15 @@ pub async fn verify(
         },
     };
 
-    match bcrypt::verify(password, &rec_result.password_hash) {
+    let password_hash = match rec_result.password_hash {
+        Some(password_hash) => password_hash,
+        None => {
+            println!("Trying to login foreign user.");
+            return Err(LoginError::InvalidHash)
+        },
+    };
+
+    match bcrypt::verify(password, &password_hash) {
         Ok(boolean) => if !boolean { // if password hash doesn't match
             return Err(LoginError::InvalidHash)
         },
