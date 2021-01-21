@@ -28,6 +28,7 @@ class Register extends React.Component {
         if ((data.password !== data.confirmPassword)) {
             alert("Passwords don't match")
         } else {
+            delete data.confirmPassword;
             axios.post('api/users/register', data)
             .then(res => {
                 this.setState({

@@ -52,13 +52,23 @@ pub struct Link {
     pub href: String,
 }
 
-/// Represents the request to both login and register a [User]
+/// Represents the request to login a [User]
 #[derive(Serialize, Deserialize)]
-pub struct UserRequest {
+pub struct UserLoginRequest {
     pub username: String,
     pub password: String,
 }
 
+/// Represents the request to register a [User]
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserRegisterRequest {
+    pub email: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub password: String,
+    pub username: String,
+}
 /// Represents the response from the server upon logging in
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -137,7 +147,7 @@ pub async fn register(username: String, password: String, pool: &MySqlPool) -> R
     // need the second one. - Darren
     let user_id = sqlx::query!(
         //"insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID())) RETURNING user_id",
-        r#"insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID())) RETURNING UuidFromBin(user_id) AS "user_id: String""#,
+        r#"insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID())) RETURNING UuidFromBin(user_id) AS user_id"#,
         username,
         password_hash
     )

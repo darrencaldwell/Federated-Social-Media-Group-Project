@@ -5,7 +5,7 @@ use sqlx::MySqlPool;
 use auth_macro::*;
 
 #[post("/api/users/register")]
-async fn register(post: web::Json<user::UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn register(post: web::Json<user::UserRegisterRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     let post = post.into_inner();
     let user = user::register(post.username, post.password, &pool).await;
 
@@ -16,7 +16,7 @@ async fn register(post: web::Json<user::UserRequest>, pool: web::Data<MySqlPool>
 }
 
 #[post("/api/users/login")]
-async fn login(post: web::Json<user::UserRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn login(post: web::Json<user::UserLoginRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     let result = user::verify(&post.username, &post.password, &pool).await;
 
     let user_id = match result {
