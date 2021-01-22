@@ -2,7 +2,6 @@ use anyhow::Result;
 use serde::{Serialize, Deserialize};
 use bcrypt::hash;
 use sqlx::{Row, FromRow, MySqlPool};
-use sqlx::types::Uuid;
 
 /// Represents an entire user
 #[derive(Serialize, FromRow)]
@@ -98,7 +97,7 @@ fn gen_links(user_id: &String) -> UserLinks {
 
 /// Given a user_id and db pool queries for that user and returns it
 pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
-    let username = sqlx::query!("SELECT username FROM users WHERE user_id = (UuidToBin(?))", user_id.clone())
+    let username = sqlx::query!("SELECT username FROM users WHERE user_id = (UuidToBin(?))", &user_id)
         .fetch_one(pool)
         .await?
         .username;
@@ -116,6 +115,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
         .fetch_all(pool)
         .await?;
 
+    println!("{:?}",result);
     let users: Vec<User> = result
         .into_iter()
         .map(|rec| {
@@ -141,41 +141,28 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
 
 /// Registers a [user] into the database and returns a [user] object
 pub async fn register(username: String, password: String, pool: &MySqlPool) -> Result<User> {
-    let mut tx = pool.begin().await?;
+    let tx = pool.begin().await?;
     let password_hash: String = hash(password, 10)?;
 
-    // TODO: if fixit update mariaDB we can just return the ID after this first query and no longer
-    // need the second one. - Darren
-    let user_id = sqlx::query!(
-        //"insert into users (username, password_hash, user_id) values(?, ?, UuidToBin(UUID())) RETURNING user_id",
-        r#"insert into users (username, password_hash, user_id, server) values(?, ?, UuidToBin(UUID()), ?) RETURNING user_id"#,
+    let user_id: String = sqlx::query!(
+        r#"insert into users (username, password_hash, user_id, server) values(?, ?, UuidToBin(UUID()), ?) RETURNING UuidFromBin(user_id) AS user_id"#,
         username,
         password_hash,
         "local"
     )
     .fetch_one(pool)
-    .await?;
+    .await?
+    // Due to either mariaDB or sqlx, it seems to think the return result is a binary and not a
+    // string, since we know it will be a valid string we can use this get_unchecked to get the
+    // UUID string.
+    .get_unchecked(0);
 
     tx.commit().await?;
 
-    // Note need to grab user_id as STRING else we all cry
-    /*
-    let user_id = sqlx::query!(
-        r#"SELECT UuidFromBin(user_id) AS "user_id: String" FROM users WHERE username = ?"#, username
-    )
-    .fetch_one(pool)
-    .await?;
-    */
-    let uuid = Uuid::from_slice(user_id.get(0))
-        .unwrap()
-        .to_hyphenated()
-        .to_string();
-
-    println!("{:?}", &uuid);
     let new_user = User {
         username,
-        links: gen_links(&uuid),
-        user_id: uuid
+        links: gen_links(&user_id),
+        user_id: user_id
     };
 
     Ok(new_user)
