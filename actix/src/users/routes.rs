@@ -11,12 +11,14 @@ async fn register(post: web::Json<user::UserRegisterRequest>, pool: web::Data<My
 
     match user {
         Ok(user) => HttpResponse::Ok().json(user),
-        Err(e) => HttpResponse::BadRequest().body(e.to_string()),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 
 #[post("/api/users/login")]
 async fn login(post: web::Json<user::UserLoginRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
+    // very login by checking username and password matches the hash of the password in the
+    // database
     let result = user::verify(&post.username, &post.password, &pool).await;
 
     let user_id = match result {
@@ -25,6 +27,7 @@ async fn login(post: web::Json<user::UserLoginRequest>, pool: web::Data<MySqlPoo
     };
 
     println!("after verify: {}", user_id);
+    // if successful, returns the token in the response
     let token = match auth::encode_jwt(user_id.clone(), post.username.clone()) {
         Ok(token) => token,
         Err(_) => return HttpResponse::Forbidden().body(""),

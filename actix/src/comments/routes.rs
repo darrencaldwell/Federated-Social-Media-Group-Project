@@ -10,7 +10,7 @@ use auth_macro::*;
 async fn get_comment(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
     match comments::get_comment(id, &pool).await {
         Ok(comment) => HttpResponse::Ok().json(comment),
-        Err(_) => HttpResponse::InternalServerError().body(""),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 
@@ -19,7 +19,7 @@ async fn get_comment(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) 
 async fn get_comments(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
     match comments::get_comments(id, &pool).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
-        Err(_) => HttpResponse::InternalServerError().body(""),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 
@@ -32,7 +32,7 @@ async fn post_comment(web::Path(id): web::Path<u64>,
 ) -> impl Responder {
     match comments::insert_comment(id, comment.into_inner(), &pool).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
-        Err(_) => HttpResponse::InternalServerError().body(""),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 

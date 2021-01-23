@@ -2,6 +2,7 @@ use sqlx::MySqlPool;
 use anyhow::Result;
 use serde::{Serialize, Deserialize};
 
+/// Represents a forum
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Forum {
@@ -11,18 +12,21 @@ pub struct Forum {
     pub links: ForumLinks,
 }
 
+/// Represents a request to create a new [Forum]
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PostForumRequest {
     pub forum_name: String,
 }
 
+/// Root of list of [Forum]
 #[derive(Serialize)]
 pub struct Forums {
     _embedded: ForumList,
     _links: ForumsLinks,
 }
 
+/// Represents a single subforum within the database
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Subforum {
@@ -33,6 +37,7 @@ pub struct Subforum {
     links: SubforumLinks,
 }
 
+/// Represents a request to create a new [Subforum]
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PostSubforumRequest {
@@ -40,23 +45,28 @@ pub struct PostSubforumRequest {
     pub forum_id: u64,
 }
 
+/// Root of list of [Subforum]
 #[derive(Serialize)]
 pub struct Subforums {
     _embedded: SubforumList,
+    _links: SubForumsLinks,
 }
 
+/// List of [Subforum]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubforumList {
     subforum_list: Vec<Subforum>,
 }
 
+/// List of [Forum]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ForumList {
     forum_list: Vec<Forum>,
 }
 
+/// Links used for each [Forum]
 #[derive(Serialize)]
 pub struct ForumLinks {
     #[serde(rename = "self")]
@@ -65,6 +75,7 @@ pub struct ForumLinks {
     pub subforums: Link,
 }
 
+/// Links used for each [Subforum]
 #[derive(Serialize)]
 pub struct SubforumLinks {
     #[serde(rename = "self")]
@@ -72,9 +83,18 @@ pub struct SubforumLinks {
     pub forum: Link,
     pub posts: Link,
 }
+
+/// Links used for list [Forums]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ForumsLinks {
+    _self: Link,
+}
+
+/// Links used for list [SubforumsForums]
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubForumsLinks {
     _self: Link,
 }
 
@@ -153,7 +173,10 @@ pub async fn get_subforums(forum_id: u64, pool: &MySqlPool) -> Result<Subforums>
         })
         .collect();
 
-    Ok(Subforums { _embedded: SubforumList { subforum_list: subforums } })
+    Ok(Subforums {
+        _embedded: SubforumList { subforum_list: subforums },
+        _links: SubForumsLinks { _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums", forum_id) } },
+    })
 
 }
 
