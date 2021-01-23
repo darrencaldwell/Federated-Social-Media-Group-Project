@@ -72,19 +72,28 @@ where
 
         Box::pin(async move {
             let headers = req.headers();
-            match headers.get("Authorization") { // if auth is here check for JWT token
-                Some(token) => { // TODO: Euan, make this actually check the token,
-                    // You'll probably need to read the body to get the user id, heres some middleware that does that
-                    // https://github.com/actix/examples/blob/master/middleware/src/read_request_body.rs
-                    // good luck
+
+            if headers.contains_key("Authorization") {
+                let token = headers.get("Authorization").unwrap();
                     println!("{:?}", token);
-                    println!("{:?}", req.app_data::<Data<String>>());
+                    // TODO: VERIFY TOKEN
                     srv.call(req).await // basically, carry out the request, route it to our functions? etc maybe idk
-                },
-                None => {
-                    // creates an error response and sends it back to the sender
-                    return Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
-                }
+            }
+            else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
+                // TODO: VERIFY DIG SIG
+
+                // read sig input to get what to recreate signature with
+                // recreate signature String
+                // get key from keyid field / header, or from db,
+                // if from db, and invalid, get new key and retry
+                // check signature
+                // if valid -> srv.call(req).await
+                // else Unauthorized -> inc error message?
+                srv.call(req).await // basically, carry out the request, route it to our functions? etc maybe idk
+            }
+            else {
+                // creates an error response and sends it back to the sender
+                return Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
             }
         })
     }
