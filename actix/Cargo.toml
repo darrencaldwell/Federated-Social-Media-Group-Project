@@ -24,3 +24,4 @@ bcrypt = "0.9"
 jsonwebtoken = "7.2"
 auth_macro = { path = "auth_macro" }
 actix-service = "1.0.6"
+ring = "0.16"
