@@ -1,103 +1,18 @@
-use actix_web::{App, HttpServer, middleware::Logger, web::Data, dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse};
-use actix_service::{Service, Transform};
+use actix_web::{App, HttpServer, middleware::Logger};
 
 use anyhow::Result;
 use dotenv::dotenv;
 use env_logger::Env;
 use sqlx::MySqlPool;
-use futures::future::{ok, Future, Ready};
-
 use std::env;
-use std::cell::RefCell;
-use std::pin::Pin;
-use std::rc::Rc;
-use std::task::{Context, Poll};
 
 mod posts;
 mod users;
 mod auth;
 mod comments;
 mod forums;
+mod digital_signing;
 
-// This is ALL boilerplate for a middleware,
-// TODO: Move to another file when its done
-// https://github.com/casbin-rs/actix-casbin-auth/blob/master/src/middleware.rs
-// a link to a helpful implementation of a middleware thats kinda auth
-
-pub struct Auth;
-
-impl<S: 'static, B> Transform<S> for Auth
-where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-    S::Future: 'static,
-    B: 'static,
-{
-    type Request = ServiceRequest;
-    type Response = ServiceResponse<B>;
-    type Error = Error;
-    type InitError = ();
-    type Transform = AuthMiddleware<S>;
-    type Future = Ready<Result<Self::Transform, Self::InitError>>;
-
-    fn new_transform(&self, service: S) -> Self::Future {
-        ok(AuthMiddleware {
-            service: Rc::new(RefCell::new(service)),
-        })
-    }
-}
-
-pub struct AuthMiddleware<S> {
-    // This is special: We need this to avoid lifetime issues.
-    service: Rc<RefCell<S>>,
-}
-
-impl<S, B> Service for AuthMiddleware<S>
-where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>
-        + 'static,
-    S::Future: 'static,
-    B: 'static,
-{
-    type Request = ServiceRequest;
-    type Response = ServiceResponse<B>;
-    type Error = Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
-
-    fn poll_ready(&mut self, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
-        self.service.poll_ready(cx)
-    }
-
-    fn call(&mut self, req: ServiceRequest) -> Self::Future {
-        let mut srv = self.service.clone();
-
-        Box::pin(async move {
-            let headers = req.headers();
-
-            if headers.contains_key("Authorization") {
-                let token = headers.get("Authorization").unwrap();
-                    println!("{:?}", token);
-                    // TODO: VERIFY TOKEN
-                    srv.call(req).await // basically, carry out the request, route it to our functions? etc maybe idk
-            }
-            else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
-                // TODO: VERIFY DIG SIG
-
-                // read sig input to get what to recreate signature with
-                // recreate signature String
-                // get key from keyid field / header, or from db,
-                // if from db, and invalid, get new key and retry
-                // check signature
-                // if valid -> srv.call(req).await
-                // else Unauthorized -> inc error message?
-                srv.call(req).await // basically, carry out the request, route it to our functions? etc maybe idk
-            }
-            else {
-                // creates an error response and sends it back to the sender
-                return Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
-            }
-        })
-    }
-}
 
 #[actix_web::main]
 async fn main() -> Result<()> {
@@ -116,7 +31,8 @@ async fn main() -> Result<()> {
             .data("yeehaw".to_string())
             .data(pool.clone())
             // wrap is for "wrapping" middlewaare
-            .wrap(Auth)
+            .wrap(digital_signing::RequestAuth)
+            .wrap(digital_signing::ResponseSign)
             .wrap(Logger::default())
             // adds routes from subdirectories
             .configure(posts::init)

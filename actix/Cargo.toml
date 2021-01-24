@@ -7,7 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = "3.2"
+actix-web = {version = "3.2", features = ["rustls"]}
+rustls = "*"
 actix-files = "0.5"
 actix-cors = "0.5.4"
 actix-web-httpauth = "0.5"
@@ -25,3 +26,4 @@ jsonwebtoken = "7.2"
 auth_macro = { path = "auth_macro" }
 actix-service = "1.0.6"
 ring = "0.16"
+regex = "1"
