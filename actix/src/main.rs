@@ -13,6 +13,22 @@ mod comments;
 mod forums;
 mod digital_signing;
 
+use serde::{Serialize, Deserialize};
+use actix_web::{web, Responder, get, HttpResponse};
+use std::path::Path;
+use std::fs;
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
+pub struct Key {
+    pub key: String,
+}
+
+#[get("/api/key")]
+async fn get_key(key: web::Data<String>) -> impl Responder {
+        HttpResponse::Ok().json(Key {key: key.to_string()})
+}
 
 #[actix_web::main]
 async fn main() -> Result<()> {
@@ -23,18 +39,22 @@ async fn main() -> Result<()> {
     // pool used for database connections, gets databse url from env file
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await?;
 
+    let pubPath = Path::new("/home/dc228/Documents/uni/cs3099/project-code/actix/src/public_key.pem");
+    let public_key = fs::read_to_string(pubPath).unwrap();
+
     HttpServer::new(move || {
 
         App::new()
             // example of being able to add any data to App
             // Data is functionally a map of Type:Value
-            .data("yeehaw".to_string())
+            .data(public_key.clone())
             .data(pool.clone())
             // wrap is for "wrapping" middlewaare
             .wrap(digital_signing::RequestAuth)
             .wrap(digital_signing::ResponseSign)
             .wrap(Logger::default())
             // adds routes from subdirectories
+            .service(get_key)
             .configure(posts::init)
             .configure(users::init)
             .configure(comments::init)
