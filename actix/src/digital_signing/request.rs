@@ -124,7 +124,22 @@ where
                         return Ok(req.into_response(HttpResponse::BadRequest().body(body).into_body()))
                     }
                 }
-                // check covered_content is valid with headers
+                // check covered_content / sig1= is valid with headers
+
+                // check starts and ends with parenthesis
+                if !sig_input_struct.covered_content.starts_with("()") && !sig_input_struct.covered_content.ends_with(")") {
+                    // error
+                    let body = format!("Invalid sig1= not surrounded by parenthesis: {}", sig_input_struct.covered_content);
+                    println!("Error: request for: {}, {}", req.path(), body);
+                    return Ok(req.into_response(HttpResponse::BadRequest().body(body).into_body()))
+                }
+                // seperate by commas
+                let mut iter = sig_input_struct.covered_content.split(",");
+                for thing in iter {
+                    println!("{}",thing);
+                }
+                // check each one against headers, dealing with speical * cases
+
 
                 // make request for key
                let client = Client::default();
@@ -133,7 +148,7 @@ where
                   .send()     // <- Send request
                   .await;     // <- Wait for response
 
-               println!("Response: {:?}", response);
+               println!("Response: {:?}", response.unwrap().body().await);
 
                // if got key, build string to check signature against
                // authorise or don't
