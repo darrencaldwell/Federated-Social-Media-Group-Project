@@ -1,8 +1,8 @@
 use super::user;
-use crate::auth::{self, decode_jwt};
-use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
+use crate::auth;
+use actix_web::{get, post, web, HttpResponse, Responder};
 use sqlx::MySqlPool;
-use auth_macro::*;
+use crate::id_extractor::UserId;
 
 #[post("/api/users/register")]
 async fn register(post: web::Json<user::UserRegisterRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
@@ -43,8 +43,11 @@ async fn login(post: web::Json<user::UserLoginRequest>, pool: web::Data<MySqlPoo
 }
 
 #[get("/api/users/{id}")]
-#[protected]
-async fn get_user(web::Path(id): web::Path<String>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn get_user(
+    web::Path(id): web::Path<String>,
+    pool: web::Data<MySqlPool>,
+    UserId(_user_id): UserId,
+) -> impl Responder {
     match user::get_user(id, &pool).await {
         Ok(user) => HttpResponse::Ok().json(user),
         Err(_) => HttpResponse::InternalServerError().body(""),
@@ -52,8 +55,10 @@ async fn get_user(web::Path(id): web::Path<String>, pool: web::Data<MySqlPool>) 
 }
 
 #[get("/api/users")]
-#[protected]
-async fn get_users(pool: web::Data<MySqlPool>) -> impl Responder {
+async fn get_users(
+    pool: web::Data<MySqlPool>,
+    UserId(_user_id): UserId,
+) -> impl Responder {
     match user::get_users(&pool).await {
         Ok(user) => HttpResponse::Ok().json(user),
         Err(_) => HttpResponse::InternalServerError().body(""),

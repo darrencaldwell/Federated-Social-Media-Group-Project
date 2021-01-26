@@ -1,8 +1,6 @@
 use super::posts;
-use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use sqlx::MySqlPool;
-use crate::auth::decode_jwt;
-use auth_macro::*;
 use crate::id_extractor::UserId;
 
 #[post("/api/subforums/{id}/posts")]
@@ -21,11 +19,10 @@ async fn post_post(
 }
 
 #[get("/api/subforums/{id}/posts")]
-//#[protected] TODO: doesn't like this? Double bound parameter?
 async fn get_posts(
     web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
-    UserId(user_id): UserId,
+    UserId(_user_id): UserId,
 ) -> impl Responder {
     let result = posts::get_all(id, pool.get_ref()).await;
     match result {
@@ -35,10 +32,10 @@ async fn get_posts(
 }
 
 #[get("/api/forums/{forum_id}/subforums/{subforum_id}/posts/{post_id}")]
-#[protected]
 async fn get_post(
     web::Path(post_id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
+    UserId(_user_id): UserId,
 ) -> impl Responder {
     let result = posts::get_one(post_id, pool.get_ref()).await;
     match result {
