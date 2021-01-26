@@ -8,7 +8,14 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
 
-use regex::Regex;
+use ring::{
+    rand,
+    signature::{self, KeyPair},
+};
+
+use serde::{Serialize, Deserialize};
+use openssl::pkey::PKey;
+use openssl::rsa::Rsa;
 
 #[derive(Debug)]
 struct SignatureInput {
@@ -133,33 +140,105 @@ where
                 // check covered_content / sig1= is valid with headers
 
                 // check starts and ends with parenthesis
-                if !sig_input_struct.covered_content.starts_with("()") && !sig_input_struct.covered_content.ends_with(")") {
+                if !sig_input_struct.covered_content.starts_with("(") || !sig_input_struct.covered_content.ends_with(")") {
                     // error
                     let body = format!("Invalid sig1= not surrounded by parenthesis: {}", sig_input_struct.covered_content);
                     println!("Error: request for: {}, {}", req.path(), body);
                     return Ok(req.into_response(HttpResponse::BadRequest().body(body).into_body()))
                 }
+                // remove parenthesis
+                sig_input_struct.covered_content = sig_input_struct.covered_content.strip_prefix("(").unwrap().to_string();
+                sig_input_struct.covered_content = sig_input_struct.covered_content.strip_suffix(")").unwrap().to_string();
                 // seperate by commas
-                let mut iter = sig_input_struct.covered_content.split(",");
-                for thing in iter {
-                    println!("{}",thing);
-                }
+                let iter = sig_input_struct.covered_content.split(",");
                 // check each one against headers, dealing with speical * cases
+                // meanwhile building signature input
 
+                /* * cases
+                 * *request-target
+                 * *created - not impl
+                 * *expires - not impl
+                 */
+
+                let mut signature_strings = Vec::new();
+                for field in iter {
+                    let field_trim = field.trim();
+                    let req_tar_string = "*request-target";
+
+                    if field_trim.starts_with(req_tar_string) {
+                        signature_strings.push(format!("{}: {}", req_tar_string, req.path()));
+                    }
+                    // TODO: if statements for *created and *expires
+
+                    else {
+                        // check field against headers, if exist add, else error
+                        if !headers.contains_key(field_trim) {
+                            let body = format!("No header exists for: {}", field_trim);
+                            println!("Error: request for: {}, {}", req.path(), body);
+                            return Ok(req.into_response(HttpResponse::BadRequest().body(body).into_body()))
+                        }
+
+                        // add to vector
+                        signature_strings.push(
+                            // TODO: header might not contain valid ascii, worker will panic right
+                            // now, should return error if fail
+                            format!("{}: {}", field_trim, headers.get(field_trim).unwrap().to_str().unwrap())
+                        );
+                    }
+                }
+                println!("{:?}", signature_strings);
+
+                #[derive(Deserialize)]
+                struct Key {
+                    key: String,
+                };
 
                 // make request for key
+                // TODO: store key in database, query that, then make request, or be a bad noodle
+                // and just always ask for it
+                //
+                // honestly this client code is horrendous and it's not even my fault
                let client = Client::default();
-               // Create request builder and send request
                let response = client.get(sig_input_struct.key_id)
                   .send()     // <- Send request
-                  .await;     // <- Wait for response
+                  .await      // <- Wait for response
+                  .unwrap()
+                  .json::<Key>()
+                  .await;
 
-               println!("Response: {:?}", response.unwrap().body().await);
+               // TODO: check we got a valid key response
+               let key = response.unwrap().key;
 
-               // if got key, build string to check signature against
-               // authorise or don't
+               //let rsa = Rsa::generate(2048).unwrap();
+               let response_key = PKey::public_key_from_pem(key.as_ref()).unwrap();
+               //let response_key = PKey::from_rsa(rsa).unwrap();
 
-                srv.call(req).await // basically, carry out the request, route it to our functions? etc maybe idk
+               // build signature input to verify
+
+               let size = signature_strings.len();
+               let mut index: usize = 1;
+               let mut string_to_sign = String::with_capacity(300); // arbritary alloc, should be enough for most signature inputs without any reallocs
+               for field in signature_strings {
+                   if size == index {
+                       // just add
+                       string_to_sign.push_str(&field);
+                   }
+                   else {
+                       string_to_sign.push_str(&format!("{}\n", field));
+                       index = index + 1;
+                   }
+               }
+
+            // Verify the signature.
+            let public_key =
+                signature::UnparsedPublicKey::new(&signature::RSA_PKCS1_2048_8192_SHA512,
+                                                  response_key.public_key_to_der().unwrap());
+
+            match public_key.verify(string_to_sign.as_ref(), &headers.get("Signature").unwrap().as_ref()) {
+                Ok(_) => srv.call(req).await,
+                Err(_) => return Ok(req.into_response(HttpResponse::BadRequest().body("Error signing signature, may not match").into_body()))
+            }
+
             }
             else {
                 // creates an error response and sends it back to the sender
