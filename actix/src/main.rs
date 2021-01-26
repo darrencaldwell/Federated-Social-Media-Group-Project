@@ -12,6 +12,7 @@ mod auth;
 mod comments;
 mod forums;
 mod digital_signing;
+mod id_extractor;
 
 use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
