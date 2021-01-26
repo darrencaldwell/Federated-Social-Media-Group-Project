@@ -67,20 +67,26 @@ where
         self.service.poll_ready(cx)
     }
 
-    fn call(&mut self, req: ServiceRequest) -> Self::Future {
+    fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
         let mut srv = self.service.clone();
 
         Box::pin(async move {
-            let headers = req.headers();
+            let headers = req.headers_mut();
             println!("Hi from request! {:?}", headers);
-            println!("{}, {}", req.path(), req.method());
+            //println!("{}, {}", &req.path(), &req.method());
+            use actix_web::http::{HeaderName, HeaderValue};
 
-            if headers.contains_key("Authorization") {
-                let token = headers.get("Authorization").unwrap();
-                    // TODO: VERIFY TOKEN
-                    srv.call(req).await // basically, carry out the request, route it to our functions? etc maybe idk
-            }
-            else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
+            if let Some(token_field) = headers.get("Authorization") {
+                if let Ok(token_str) = token_field.to_str() {
+                    if token_str.len() > 8 {
+                        if let Ok(user_id) = crate::auth::decode_jwt(&token_str[7..]) {
+                            headers.insert(HeaderName::from_static("user_id"), HeaderValue::from_str(&user_id).unwrap());
+                            return srv.call(req).await
+                        }
+                    }
+                }
+                return srv.call(req).await
+            } else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
 
                 let mut sig_input_struct = SignatureInput {
                     alg: String::from(""),
