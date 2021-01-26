@@ -40,8 +40,10 @@ async fn main() -> Result<()> {
     // pool used for database connections, gets databse url from env file
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await?;
 
-    let pubPath = Path::new("/home/dc228/Documents/uni/cs3099/project-code/actix/src/public_key.pem");
-    let public_key = fs::read_to_string(pubPath).unwrap();
+    let pub_path = Path::new("/home/dc228/Documents/uni/cs3099/project-code/actix/src/public_key.pem");
+    let public_key = fs::read_to_string(pub_path).unwrap();
+    let priv_path = Path::new("/home/dc228/Documents/uni/cs3099/project-code/actix/src/private_key.der");
+    let private_key = fs::read(priv_path).unwrap();
 
     HttpServer::new(move || {
 
@@ -49,6 +51,7 @@ async fn main() -> Result<()> {
             // example of being able to add any data to App
             // Data is functionally a map of Type:Value
             .data(public_key.clone())
+            .data(private_key.clone())
             .data(pool.clone())
             // wrap is for "wrapping" middlewaare
             .wrap(digital_signing::RequestAuth)

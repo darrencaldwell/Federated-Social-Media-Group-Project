@@ -26,5 +26,4 @@ jsonwebtoken = "7.2"
 auth_macro = { path = "auth_macro" }
 actix-service = "1.0.6"
 ring = "0.16"
-regex = "1"
-base64 = "0.13"
+openssl= {version = "0.10", features = ["vendored"]}
