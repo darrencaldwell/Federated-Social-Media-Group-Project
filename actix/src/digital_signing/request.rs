@@ -78,7 +78,8 @@ where
         let mut srv = self.service.clone();
 
         Box::pin(async move {
-            let headers = req.headers_mut();
+            let headers = req.headers().clone();
+            let mut_headers = req.headers_mut();
             println!("Hi from request! {:?}", headers);
             //println!("{}, {}", &req.path(), &req.method());
             use actix_web::http::{HeaderName, HeaderValue};
@@ -87,7 +88,7 @@ where
                 if let Ok(token_str) = token_field.to_str() {
                     if token_str.len() > 8 {
                         if let Ok(user_id) = crate::auth::decode_jwt(&token_str[7..]) {
-                            headers.insert(HeaderName::from_static("user_id"), HeaderValue::from_str(&user_id).unwrap());
+                            mut_headers.insert(HeaderName::from_static("user_id"), HeaderValue::from_str(&user_id).unwrap());
                             return srv.call(req).await
                         }
                     }
