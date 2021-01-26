@@ -43,15 +43,15 @@ async fn main() -> Result<()> {
     let pub_path = Path::new("/home/dc228/Documents/uni/cs3099/project-code/actix/src/public_key.pem");
     let public_key = fs::read_to_string(pub_path).unwrap();
     let priv_path = Path::new("/home/dc228/Documents/uni/cs3099/project-code/actix/src/private_key.der");
-    let private_key = fs::read(priv_path).unwrap();
+    let private_key: Vec<u8> = fs::read(priv_path).unwrap();
 
     HttpServer::new(move || {
 
         App::new()
             // example of being able to add any data to App
             // Data is functionally a map of Type:Value
-            .data(public_key.clone())
-            .data(private_key.clone())
+            .app_data(public_key.clone())
+            .app_data(private_key.clone())
             .data(pool.clone())
             // wrap is for "wrapping" middlewaare
             .wrap(digital_signing::RequestAuth)

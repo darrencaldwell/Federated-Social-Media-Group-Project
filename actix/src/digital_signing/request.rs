@@ -8,6 +8,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
 
+use base64;
 use ring::{
     rand,
     signature::{self, KeyPair},
@@ -78,6 +79,8 @@ where
         let mut srv = self.service.clone();
 
         Box::pin(async move {
+            // TODO: reference shenanignas here now mean i need to clone the headers to read them
+            // later as you borrow them mutably
             let headers = req.headers().clone();
             let mut_headers = req.headers_mut();
             println!("Hi from request! {:?}", headers);
@@ -235,7 +238,7 @@ where
                 signature::UnparsedPublicKey::new(&signature::RSA_PKCS1_2048_8192_SHA512,
                                                   response_key.public_key_to_der().unwrap());
 
-            match public_key.verify(string_to_sign.as_ref(), &headers.get("Signature").unwrap().as_ref()) {
+            match public_key.verify(string_to_sign.as_ref(), base64::decode(&headers.get("Signature").unwrap()).as_ref().unwrap()) {
                 Ok(_) => srv.call(req).await,
                 Err(_) => return Ok(req.into_response(HttpResponse::BadRequest().body("Error signing signature, may not match").into_body()))
             }
