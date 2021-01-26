@@ -6,6 +6,12 @@ use futures::future::{ok, Future, Ready};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+use base64;
+use ring::{
+    rand,
+    signature::{self, KeyPair},
+};
+
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
 //    next service in chain as parameter.
@@ -57,8 +63,31 @@ where
 
         Box::pin(async move {
             let mut res = fut.await?;
-            // add headers
-            res.headers_mut().insert(HeaderName::from_static("signature"), HeaderValue::from_static("123"));
+
+            // create signature-input header
+
+            // need sig1=(x, y, z); keyId=x
+            let header_string = "sig1=(*request-target, host); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=hs2019";
+            res.headers_mut().insert(HeaderName::from_static("signature-input"), HeaderValue::from_static(header_string));
+
+            // sign
+            // TODO: check if we want to not just create our own host header, instead of using the
+            // others host
+            let string_to_sign = format!("*request-target: {}\nhost: {}", res.request().path(), res.request().headers().get("host").unwrap().to_str().unwrap());
+
+            // Create an `RsaKeyPair` from the DER-encoded bytes. This example uses
+            // a 2048-bit key, but larger keys are also supported.
+            let private_key_der = res.request().app_data::<Vec<u8>>().unwrap();
+            let key_pair = signature::RsaKeyPair::from_der(&private_key_der).unwrap();
+
+            // Sign the message "hello, world", using PKCS#1 v1.5 padding and the
+            // SHA256 digest algorithm.
+            let rng = rand::SystemRandom::new();
+            let mut signature = vec![0; key_pair.public_modulus_len()];
+            key_pair.sign(&signature::RSA_PKCS1_SHA512, &rng, string_to_sign.as_ref(), &mut signature).unwrap();
+            let enc_signature = base64::encode(signature);
+
+            res.headers_mut().insert(HeaderName::from_static("signature"), HeaderValue::from_str(&enc_signature).unwrap());
 
             println!("Hi from response: {:?}", res.headers());
             Ok(res)
