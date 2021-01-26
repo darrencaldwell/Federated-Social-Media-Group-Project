@@ -81,8 +81,7 @@ where
         Box::pin(async move {
             // TODO: reference shenanignas here now mean i need to clone the headers to read them
             // later as you borrow them mutably
-            let headers = req.headers().clone();
-            let mut_headers = req.headers_mut();
+            let headers = req.headers();
             println!("Hi from request! {:?}", headers);
             //println!("{}, {}", &req.path(), &req.method());
             use actix_web::http::{HeaderName, HeaderValue};
@@ -91,7 +90,7 @@ where
                 if let Ok(token_str) = token_field.to_str() {
                     if token_str.len() > 8 {
                         if let Ok(user_id) = crate::auth::decode_jwt(&token_str[7..]) {
-                            mut_headers.insert(HeaderName::from_static("user_id"), HeaderValue::from_str(&user_id).unwrap());
+                            req.headers_mut().insert(HeaderName::from_static("user_id"), HeaderValue::from_str(&user_id).unwrap());
                             return srv.call(req).await
                         }
                     }
