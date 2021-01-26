@@ -79,8 +79,6 @@ where
         let mut srv = self.service.clone();
 
         Box::pin(async move {
-            // TODO: reference shenanignas here now mean i need to clone the headers to read them
-            // later as you borrow them mutably
             let headers = req.headers();
             println!("Hi from request! {:?}", headers);
             //println!("{}, {}", &req.path(), &req.method());
