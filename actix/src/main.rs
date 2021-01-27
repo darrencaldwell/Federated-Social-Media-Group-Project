@@ -16,7 +16,7 @@ mod id_extractor;
 
 use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
-use openssl::pkey::PKey;
+use openssl::pkey::{PKey, Private};
 use openssl::rsa::Rsa;
 
 #[derive(Serialize, Deserialize)]
@@ -27,8 +27,9 @@ pub struct Key {
 }
 
 #[get("/api/key")]
-async fn get_key(key: web::Data<String>) -> impl Responder {
-        HttpResponse::Ok().json(Key {key: key.to_string()})
+async fn get_key(key_pair: web::Data<PKey<Private>>) -> impl Responder {
+        let public_key_pem = key_pair.public_key_to_pem().unwrap();
+        HttpResponse::Ok().json(std::str::from_utf8(&public_key_pem).unwrap())
 }
 
 #[actix_web::main]
@@ -41,7 +42,7 @@ async fn main() -> Result<()> {
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await?;
 
     let key_pair = Rsa::generate(2048).unwrap();
-    let key_pair = PKey::from_rsa(key_pair).unwrap();
+    let key_pair: PKey<Private> = PKey::from_rsa(key_pair).unwrap();
 
     HttpServer::new(move || {
 

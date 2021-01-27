@@ -88,8 +88,6 @@ where
 
         Box::pin(async move {
             let headers = req.headers();
-            println!("Hi from request! {:?}", headers);
-            //println!("{}, {}", &req.path(), &req.method());
             use actix_web::http::{HeaderName, HeaderValue};
 
             if let Some(token_field) = headers.get("Authorization") {
@@ -215,7 +213,6 @@ where
                   .await;
 
                // TODO: check we got a valid key response
-               //let key_pem = response.unwrap().key;
 
                // build string to sign
                let size = signature_strings.len();
@@ -232,26 +229,27 @@ where
                    }
                }
 
-               println!("request: {}", string_to_sign);
+            //let key_pair = req.app_data::<Data<PKey<Private>>>().unwrap().clone();
+            //let public_key_pem = key_pair.public_key_to_pem().unwrap();
 
-            let key_pair = req.app_data::<Data<PKey<Private>>>().unwrap().clone();
-            let public_key_pem = key_pair.public_key_to_pem().unwrap();
-            println!("{:?}", std::str::from_utf8(&public_key_pem));
-
+            /*
             let mut signer = Signer::new(MessageDigest::sha512(), &key_pair).unwrap();
             signer.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
             signer.update(string_to_sign.as_ref()).unwrap();
             let signature = signer.sign_to_vec().unwrap();
             let enc_signature = encode_block(&signature);
+            */
 
-            let public_key_read_in = PKey::public_key_from_pem(&public_key_pem).unwrap();
-            let mut verifier = Verifier::new(MessageDigest::sha512(), &public_key_read_in).unwrap();
+            // TODO: key could be send over as invalid, response should tell them that
+            let enc_signature = req.headers().get("signature").unwrap().to_str().unwrap();
+
+            let public_key_parsed = PKey::public_key_from_pem(&response.unwrap().key.as_ref()).unwrap();
+            let mut verifier = Verifier::new(MessageDigest::sha512(), &public_key_parsed).unwrap();
             verifier.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
             verifier.update(string_to_sign.as_ref()).unwrap();
 
             let denc_signature = decode_block(&enc_signature).unwrap();
             if verifier.verify(&denc_signature).unwrap() {
-                println!("this worked!");
                 return srv.call(req).await
             } else {
                 return Ok(req.into_response(HttpResponse::BadRequest().body("Error signing signature, may not match").into_body()))
