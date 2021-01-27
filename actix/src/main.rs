@@ -29,7 +29,7 @@ pub struct Key {
 #[get("/api/key")]
 async fn get_key(key_pair: web::Data<PKey<Private>>) -> impl Responder {
         let public_key_pem = key_pair.public_key_to_pem().unwrap();
-        HttpResponse::Ok().json(std::str::from_utf8(&public_key_pem).unwrap())
+        HttpResponse::Ok().json(Key{ key: std::str::from_utf8(&public_key_pem).unwrap().to_string() })
 }
 
 #[actix_web::main]
