@@ -101,6 +101,10 @@ where
                 }
                 return srv.call(req).await
             } else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
+                // just check if it wants our key, if so let it on through!
+                if req.path() == "/api/key" {
+                    return srv.call(req).await
+                }
 
                 let mut sig_input_struct = SignatureInput {
                     alg: String::from(""),
