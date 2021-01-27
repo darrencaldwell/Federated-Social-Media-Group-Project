@@ -87,6 +87,11 @@ where
         let mut srv = self.service.clone();
 
         Box::pin(async move {
+            // just check if it wants our key, if so let it on through!
+            if req.path() == "/api/key" {
+                return srv.call(req).await
+            }
+
             let headers = req.headers();
             use actix_web::http::{HeaderName, HeaderValue};
 
@@ -101,10 +106,6 @@ where
                 }
                 return srv.call(req).await
             } else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
-                // just check if it wants our key, if so let it on through!
-                if req.path() == "/api/key" {
-                    return srv.call(req).await
-                }
 
                 let mut sig_input_struct = SignatureInput {
                     alg: String::from(""),
