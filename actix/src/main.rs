@@ -16,8 +16,8 @@ mod id_extractor;
 
 use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
-use std::path::Path;
-use std::fs;
+use openssl::pkey::PKey;
+use openssl::rsa::Rsa;
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -40,19 +40,15 @@ async fn main() -> Result<()> {
     // pool used for database connections, gets databse url from env file
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await?;
 
-    println!("{:?}", env::current_exe());
-    let pub_path = Path::new("/public_key.pem");
-    let public_key = fs::read_to_string(pub_path).unwrap();
-    let priv_path = Path::new("/private_key.der");
-    let private_key: Vec<u8> = fs::read(priv_path).unwrap();
+    let key_pair = Rsa::generate(2048).unwrap();
+    let key_pair = PKey::from_rsa(key_pair).unwrap();
 
     HttpServer::new(move || {
 
         App::new()
             // example of being able to add any data to App
             // Data is functionally a map of Type:Value
-            .app_data(public_key.clone())
-            .app_data(private_key.clone())
+            .data(key_pair.clone())
             .data(pool.clone())
             // wrap is for "wrapping" middlewaare
             .wrap(digital_signing::RequestAuth)

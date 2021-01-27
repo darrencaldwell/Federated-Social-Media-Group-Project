@@ -1,4 +1,4 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, http::header::HeaderName, http::header::HeaderValue};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, http::header::HeaderName, http::header::HeaderValue, web::Data};
 use actix_service::{Service, Transform};
 
 use anyhow::Result;
@@ -6,11 +6,11 @@ use futures::future::{ok, Future, Ready};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use base64;
-use ring::{
-    rand,
-    signature::{self, KeyPair},
-};
+use openssl::sign::{Signer, Verifier};
+use openssl::rsa::Padding;
+use openssl::pkey::{PKey, Private};
+use openssl::hash::MessageDigest;
+use openssl::base64::{encode_block, decode_block};
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -59,10 +59,12 @@ where
     }
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
+        println!("oo");
         let fut = self.service.call(req);
 
         Box::pin(async move {
             let mut res = fut.await?;
+            println!("aa");
 
             // create signature-input header
 
@@ -74,18 +76,19 @@ where
             // TODO: check if we want to not just create our own host header, instead of using the
             // others host
             let string_to_sign = format!("*request-target: {}\nhost: {}", res.request().path(), res.request().headers().get("host").unwrap().to_str().unwrap());
+               println!("response: {}", string_to_sign);
 
-            // Create an `RsaKeyPair` from the DER-encoded bytes. This example uses
-            // a 2048-bit key, but larger keys are also supported.
-            let private_key_der = res.request().app_data::<Vec<u8>>().unwrap();
-            let key_pair = signature::RsaKeyPair::from_der(&private_key_der).unwrap();
+            println!("yeet");
+            let key_pair = res.request().app_data::<Data<PKey<Private>>>().unwrap().clone();
+            println!("yeet");
+            let public_key_pem = key_pair.public_key_to_pem().unwrap();
+            println!("{:?}", std::str::from_utf8(&public_key_pem));
 
-            // Sign the message "hello, world", using PKCS#1 v1.5 padding and the
-            // SHA256 digest algorithm.
-            let rng = rand::SystemRandom::new();
-            let mut signature = vec![0; key_pair.public_modulus_len()];
-            key_pair.sign(&signature::RSA_PKCS1_SHA512, &rng, string_to_sign.as_ref(), &mut signature).unwrap();
-            let enc_signature = base64::encode(signature);
+            let mut signer = Signer::new(MessageDigest::sha512(), &key_pair).unwrap();
+            signer.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
+            signer.update(string_to_sign.as_ref()).unwrap();
+            let signature = signer.sign_to_vec().unwrap();
+            let enc_signature = encode_block(&signature);
 
             res.headers_mut().insert(HeaderName::from_static("signature"), HeaderValue::from_str(&enc_signature).unwrap());
 
