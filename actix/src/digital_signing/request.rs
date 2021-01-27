@@ -1,4 +1,4 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client, web::Data};
 use actix_service::{Service, Transform};
 
 use anyhow::Result;
@@ -15,8 +15,11 @@ use ring::{
 };
 
 use serde::{Serialize, Deserialize};
-use openssl::pkey::PKey;
-use openssl::rsa::Rsa;
+use openssl::sign::{Signer, Verifier};
+use openssl::rsa::Padding;
+use openssl::pkey::{PKey, Private};
+use openssl::hash::MessageDigest;
+use openssl::base64::{encode_block, decode_block};
 
 #[derive(Debug)]
 struct SignatureInput {
@@ -31,6 +34,11 @@ struct SignatureInput {
 // TODO: Move to another file when its done
 // https://github.com/casbin-rs/actix-casbin-auth/blob/master/src/middleware.rs
 // a link to a helpful implementation of a middleware thats kinda auth
+
+pub struct Keys {
+    pub private: Vec<u8>,
+    pub public: Vec<u8>,
+}
 
 pub struct RequestAuth;
 
@@ -187,7 +195,6 @@ where
                         );
                     }
                 }
-                println!("{:?}", signature_strings);
 
                 #[derive(Deserialize)]
                 struct Key {
@@ -208,14 +215,9 @@ where
                   .await;
 
                // TODO: check we got a valid key response
-               let key = response.unwrap().key;
+               //let key_pem = response.unwrap().key;
 
-               //let rsa = Rsa::generate(2048).unwrap();
-               let response_key = PKey::public_key_from_pem(key.as_ref()).unwrap();
-               //let response_key = PKey::from_rsa(rsa).unwrap();
-
-               // build signature input to verify
-
+               // build string to sign
                let size = signature_strings.len();
                let mut index: usize = 1;
                let mut string_to_sign = String::with_capacity(300); // arbritary alloc, should be enough for most signature inputs without any reallocs
@@ -230,14 +232,29 @@ where
                    }
                }
 
-            // Verify the signature.
-            let public_key =
-                signature::UnparsedPublicKey::new(&signature::RSA_PKCS1_2048_8192_SHA512,
-                                                  response_key.public_key_to_der().unwrap());
+               println!("request: {}", string_to_sign);
 
-            match public_key.verify(string_to_sign.as_ref(), base64::decode(&headers.get("Signature").unwrap()).as_ref().unwrap()) {
-                Ok(_) => srv.call(req).await,
-                Err(_) => return Ok(req.into_response(HttpResponse::BadRequest().body("Error signing signature, may not match").into_body()))
+            let key_pair = req.app_data::<Data<PKey<Private>>>().unwrap().clone();
+            let public_key_pem = key_pair.public_key_to_pem().unwrap();
+            println!("{:?}", std::str::from_utf8(&public_key_pem));
+
+            let mut signer = Signer::new(MessageDigest::sha512(), &key_pair).unwrap();
+            signer.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
+            signer.update(string_to_sign.as_ref()).unwrap();
+            let signature = signer.sign_to_vec().unwrap();
+            let enc_signature = encode_block(&signature);
+
+            let public_key_read_in = PKey::public_key_from_pem(&public_key_pem).unwrap();
+            let mut verifier = Verifier::new(MessageDigest::sha512(), &public_key_read_in).unwrap();
+            verifier.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
+            verifier.update(string_to_sign.as_ref()).unwrap();
+
+            let denc_signature = decode_block(&enc_signature).unwrap();
+            if verifier.verify(&denc_signature).unwrap() {
+                println!("this worked!");
+                return srv.call(req).await
+            } else {
+                return Ok(req.into_response(HttpResponse::BadRequest().body("Error signing signature, may not match").into_body()))
             }
 
             }
