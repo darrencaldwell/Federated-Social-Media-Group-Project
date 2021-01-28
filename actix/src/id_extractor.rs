@@ -11,10 +11,10 @@ impl FromRequest for UserId {
     type Config = ();
 
     fn from_request(req: &HttpRequest, _payload: &mut dev::Payload) -> Self::Future {
-        match req.headers().get("user_id") {
+        match req.headers().get("user-id") {
             Some(user_id) => ok(UserId(user_id.to_str().unwrap().to_string())),
-            None => err(ErrorUnauthorized("No user_id in header")),
+            None => err(ErrorUnauthorized("No user-id in header")),
         }
-        
+
     }
 }
