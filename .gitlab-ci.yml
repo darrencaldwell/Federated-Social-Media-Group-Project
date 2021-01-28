@@ -20,7 +20,7 @@ rust-build:
 
 node-build:
   stage: build
-  image: node:current-alpine3.10
+  image: node:current-buster
   script:
     - cd react-front-end
     - npm install
