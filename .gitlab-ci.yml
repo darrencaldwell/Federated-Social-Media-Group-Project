@@ -38,7 +38,7 @@ deploy_staging:
     - mkdir -p .ssh
     - chmod 700 .ssh
   script:
-    - ssh cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk "cd Documents/project-code && git checkout master && git pull origin master && exit"
+    - ssh -o "StrictHostKeyChecking=no" cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk "cd Documents/project-code && git checkout master && git pull origin master && exit"
   only:
     - master
 
