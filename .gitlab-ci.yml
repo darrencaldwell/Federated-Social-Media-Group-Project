@@ -30,19 +30,27 @@ deploy_staging:
   type: deploy
   environment:
     name: staging
-  before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - chmod 600 .ssh/id_rsa
-    - ssh-add .ssh/id_rsa
-    - mkdir -p .ssh
-    - chmod 700 .ssh
+
   script:
     - ssh -o "StrictHostKeyChecking=no" cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk "cd Documents/project-code && git checkout master && git pull origin master && tmux kill-session -t 'deploy' &&tmux new-session -d -s 'deploy' './deploy.sh; exec $SHELL'"
   only:
     - master
 
+before_script:
+  - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - chmod 600 .ssh/id_rsa
+  - ssh-add .ssh/id_rsa
+  - mkdir -p .ssh
+  - chmod 700 .ssh
+
 variables:
     MYSQL_DATABASE: "cs3099user-b5_project"
     MYSQL_ROOT_PASSWORD: "pass"
     MYSQL_PASSWORD: "123"
+    CARGO_HOME: $CI_PROJECT_DIR/actix/cargo
+    
+cache:
+  paths:
+    - actix/cargo/
+    - actix/target/
