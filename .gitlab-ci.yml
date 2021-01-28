@@ -1,30 +1,30 @@
-#services:
-#  - mariadb
+services:
+  - mariadb
 
 stages:
   - build
   - test
   - deploy
 
-#rust-build:
-#  stage: build
-#  image: rust:latest
-#  script:
-#    - cd actix
-#    - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
-#    - apt update -y
-#    - apt-get install -y mariadb-client
-#    - mysql --user=root --password=pass -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
-#    - cargo build --verbose
-#    - cargo test --verbose
+rust-build:
+  stage: build
+  image: rust:latest
+  script:
+    - cd actix
+    - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
+    - apt update -y
+    - apt-get install -y mariadb-client
+    - mysql --user=root --password=pass -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
+    - cargo build --verbose
+    - cargo test --verbose
 
-#node-build:
-#  stage: build
-#  image: node:current-alpine3.10
-#  script:
-#    - cd react-front-end
-#    - npm install
-#    - npm run build
+node-build:
+  stage: build
+  image: node:current-alpine3.10
+  script:
+    - cd react-front-end
+    - npm install
+    - npm run build
 
 deploy_staging:
   type: deploy
