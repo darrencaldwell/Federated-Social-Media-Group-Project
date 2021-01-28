@@ -2,7 +2,7 @@ services:
   - mariadb
 
 stages:
-  - build
+  #- build
   - test
   - deploy
 
@@ -25,22 +25,17 @@ node-build:
     - cd react-front-end
     - npm install
     - npm run build
-    
 
-    
 deploy_staging:
   type: deploy
   environment:
     name: staging
   before_script:
-    - apt-get update -qq
-    - apt-get install -qq git
-    # Setup SSH deploy keys
-    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-    - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
   script:
     - ssh cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk "cd Documents/project-code && git checkout master && git pull origin master && exit"
   only:
