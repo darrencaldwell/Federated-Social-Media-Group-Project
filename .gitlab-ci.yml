@@ -57,5 +57,4 @@ cache:
     - actix/cargo/
     - actix/target/
     - apt/
-  directories:
-    - "$HOME/.npm"
+    - $HOME/.npm
