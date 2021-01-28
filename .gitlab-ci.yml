@@ -12,7 +12,6 @@ rust-build:
   script:
     - cd actix
     - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
-    - apt update -y
     - apt-get install -y mariadb-client
     - mysql --user=root --password=pass -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
     - cargo build --verbose
@@ -37,6 +36,8 @@ deploy_staging:
     - master
 
 before_script:
+  - apt-get update -yq
+  - apt-get install -o dir::cache::archives="$APT_CACHE_DIR" -y {{ DEPENDENCIES }}
   - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
   - eval $(ssh-agent -s)
   - chmod 600 .ssh/id_rsa
@@ -49,8 +50,10 @@ variables:
     MYSQL_ROOT_PASSWORD: "pass"
     MYSQL_PASSWORD: "123"
     CARGO_HOME: $CI_PROJECT_DIR/actix/cargo
+    APT_CACHE_DIR: $CI_PROJECT_DIR/apt
     
 cache:
   paths:
     - actix/cargo/
     - actix/target/
+    - apt/
