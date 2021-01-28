@@ -22,7 +22,7 @@ node-build:
   image: node:current-buster
   script:
     - cd react-front-end
-    - npm ci
+    - npm ci --cache $CI_PROJECT_DIR/.cache/npm --prefer-offline
     - npm run build
 
 deploy_staging:
@@ -36,6 +36,7 @@ deploy_staging:
     - master
 
 before_script:
+  - mkdir -p $CI_PROJECT_DIR/.cache/n\pm
   - apt-get update -yq
   - apt-get install -o dir::cache::archives="$APT_CACHE_DIR" -y openssh-client mariadb-client
   #- 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
@@ -57,4 +58,4 @@ cache:
     - actix/cargo/
     - actix/target/
     - apt/
-    - $HOME/.npm
+    - $CI_PROJECT_DIR/.cache/npm
