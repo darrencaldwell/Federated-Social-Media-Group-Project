@@ -22,7 +22,7 @@ node-build:
   image: node:current-buster
   script:
     - cd react-front-end
-    - npm install
+    - npm ci
     - npm run build
 
 deploy_staging:
