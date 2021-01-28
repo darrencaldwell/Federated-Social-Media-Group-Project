@@ -33,7 +33,7 @@ deploy_staging:
   before_script:
     - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - ssh-add ~/.ssh/id_rsa
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
   script:
@@ -45,42 +45,3 @@ variables:
     MYSQL_DATABASE: "cs3099user-b5_project"
     MYSQL_ROOT_PASSWORD: "pass"
     MYSQL_PASSWORD: "123"
-    SSH_PRIVATE_KEY: "-----BEGIN OPENSSH PRIVATE KEY-----
-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
------END OPENSSH PRIVATE KEY-----
-"
