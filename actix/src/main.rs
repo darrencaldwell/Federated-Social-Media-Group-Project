@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer, middleware::Logger};
+use actix_web::{App, HttpServer, middleware};
 
 use anyhow::Result;
 use dotenv::dotenv;
@@ -52,9 +52,10 @@ async fn main() -> Result<()> {
             .data(key_pair.clone())
             .data(pool.clone())
             // wrap is for "wrapping" middlewaare
+            .wrap(middleware::Compress::default())
             .wrap(digital_signing::RequestAuth)
             .wrap(digital_signing::ResponseSign)
-            .wrap(Logger::default())
+            .wrap(middleware::Logger::default())
             // adds routes from subdirectories
             .service(get_key)
             .configure(posts::init)
