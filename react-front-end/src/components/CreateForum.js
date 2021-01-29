@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button, Container, Form, FormGroup} from 'react-bootstrap'
+import BackButton from './BackButton';
 import '../styling/create-post.css'
 
 class Make extends React.Component {
@@ -31,7 +32,7 @@ class Make extends React.Component {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    "forumName": this.state.titleText,
+                    "forumName": this.state.titleText
                 })
             }).then(responseJson => {
                 console.log(responseJson);
@@ -51,7 +52,8 @@ class Make extends React.Component {
     render() {
         return (
             <Container>
-                <Form className="createPost">
+                <BackButton/>
+                <Form className="createForum">
                     <Form.Label>Create Post</Form.Label>
                     <FormGroup controlId="create-title">
                         {/*These are the input forms for title and body, with placeholder text. They call the above change methods when you type in them.*/}

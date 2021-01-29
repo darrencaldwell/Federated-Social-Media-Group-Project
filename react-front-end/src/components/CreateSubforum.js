@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button, Container, Form, FormGroup} from 'react-bootstrap'
+import BackButton from './BackButton';
 import '../styling/create-post.css'
 
 //props: forumID
@@ -53,6 +54,7 @@ class Make extends React.Component {
     render() {
         return (
             <Container>
+                <BackButton/>
                 <Form className="createPost">
                     <Form.Label>Create Post</Form.Label>
                     <FormGroup controlId="create-title">

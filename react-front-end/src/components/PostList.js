@@ -10,9 +10,7 @@ class PostList extends Component {
         this.state = {
             loading: true, // Set to true if loading
             postList: {}, // Stores list of posts
-            post: {}, // Stores a specific post
-            comments: {}, // Stores a list of comments for a post
-            listingPosts: false, // Set to true when rendering a list of posts
+            listingPosts: false // Set to true when rendering a list of posts
 
             // post listing has been moved to keep design in line with the new navigation structure
             // listingPost: false // Set to true when rendering a specific post
@@ -39,55 +37,11 @@ class PostList extends Component {
                 }
             );
             let result = await res.json();
-            this.setState({postList: result._embedded.postList, loading: false, listingPosts: true}
-            );
+            this.setState({postList: result._embedded.postList, loading: false, listingPosts: true});
         } catch (e) {
             this.setState({loading: false});
         }
     }
-
-    // Takes the url of a specific post and displays extra things like comments and other things that will be
-    // implemented in the future.
-    expandPost = async (id) => {
-        try {
-            this.setState({loading: true, listingPosts: false, listingPost: false});
-
-            this.state.info._embedded.postList.forEach((post) => {
-                if (post.postId === id) {
-                    this.state.post = post;
-                }
-            });
-            this.setState({listingPost: true});
-            this.getComments(this.state.post._links.comments.href);
-        } catch (e) {
-            this.setState({loading: false});
-        }
-    }
-
-    getComments = async (link) => {
-        try {
-            // Remove replace when CORS isn't blocking
-            let url = link.replace('https://cs3099user-b5.host.cs.st-andrews.ac.uk', '');
-            let res = await fetch(url
-                , {
-                    method: 'GET',
-                    withCredentials: true,
-                    credentials: 'include',
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token'),
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                }
-            );
-            let result = await res.json();
-            this.setState({comments: result, loading: false});
-        } catch (e) {
-            console.log(e);
-            console.log("Failed loading in comments");
-        }
-    }
-
 
     render() {
         // styling for the loading spinner - should be moved to a separate styling file if possible
