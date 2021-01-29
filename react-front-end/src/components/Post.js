@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
-import Comments from '../components/Comments';
+import Comments from './Comments';
 // import CreatePost from './CreatePost.js';
-import CreateComment from '../components/CreateComment'
+import CreateComment from './CreateComment'
 // import '../styling/Post.css';
 import {Button, Card, Container} from "react-bootstrap";
 

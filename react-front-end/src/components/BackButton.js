@@ -8,11 +8,11 @@ class BackButton extends React.Component {
 
     render() {
         return (
-            <Button
-                className="button icon-left"
+            <Fab className="button icon-left"
                 onClick={this.context.router.history.goBack}>
-                Back
-            </Button>
+                    <BackIcon />
+                    Back
+            </Fab>
         )
     }
 }

@@ -1,27 +1,31 @@
 import React, {Component} from 'react';
-import Posts from '../components/Posts';
+import PostPreview from './PostPreview';
 import Post from './Post';
 import {Alert, Container, Spinner} from "react-bootstrap";
 
-class ViewPosts extends Component {
+class PostList extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
             loading: true, // Set to true if loading
-            info: {}, // Stores list of posts
+            postList: {}, // Stores list of posts
             post: {}, // Stores a specific post
             comments: {}, // Stores a list of comments for a post
             listingPosts: false, // Set to true when rendering a list of posts
-            listingPost: false // Set to true when rendering a specific post
+
+            // post listing has been moved to keep design in line with the new navigation structure
+            // listingPost: false // Set to true when rendering a specific post
         }
     }
 
-    // Loads a list of posts, hard coded for now
+    // Runs when the component is loaded, fetching the list of posts into state
     componentDidMount = async () => {
         try {
+            // while fetching the list of posts, show a loading graphic
             this.setState({loading: true, listingPosts: false, listingPost: false});
-            let url = "/api/subforums/1/posts";
+            // the url needs the subforum id from the props
+            let url = "/api/subforums/${this.props.match.params.id}/posts";
             let res = await fetch(url
                 , {
                     method: 'get',
@@ -35,7 +39,7 @@ class ViewPosts extends Component {
                 }
             );
             let result = await res.json();
-            this.setState({info: result, loading: false, listingPosts: true}
+            this.setState({postList: result._embedded.postList, loading: false, listingPosts: true}
             );
         } catch (e) {
             this.setState({loading: false});
@@ -86,32 +90,39 @@ class ViewPosts extends Component {
 
 
     render() {
-        const style = { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }
+        // styling for the loading spinner - should be moved to a separate styling file if possible
+        const spinnerStyle = { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }
 
         if (this.state.loading) {
+            // while loading, show a loading spinner with the above style
             return (
-                <Spinner animation="border" role="status" style={style}>
+                <Spinner animation="border" role="status" style={spinnerStyle}>
                     <span className="sr-only">Loading...</span>
                 </Spinner>
             )
-        } else if (!this.state.loading && this.state.listingPosts) {
+
+        } else if (this.state.listingPosts) {
             // If we are rendering a list of posts go through the returned array of posts and display them.
             return (
                 <Container>
-                    {this.state.info._embedded.postList.map((post) => (
-                        <Posts key={post.id} post={post} expandPost={this.expandPost}/>
+                    {/*map is used to apply this html for each post in the list */}
+                    {this.state.postList.map((post) => (
+                        // the PostPreview element is used for this, which takes the post id and the post json
+                        <PostPreview key={post.id} post={post}/>
                     ))}
                 </Container>)
-        } else if (!this.state.loading && this.state.listingPost) {
-            // If we are rendering a singular post display everything like comments and other things to be implemented later
-            return (
-                <Container>
-                    <Post post={this.state.post} comments={this.state.comments._embedded}
-                          loadPosts={this.componentDidMount}/>
-                </Container>
-            )
+
+        // } else if (this.state.listingPost) {
+        //     // If we are rendering a singular post display everything like comments and other things to be implemented later
+        //     return (
+        //         <Container>
+        //             <Post post={this.state.post} comments={this.state.comments._embedded}
+        //                   loadPosts={this.componentDidMount}/>
+        //         </Container>
+        //     )
+
         } else {
-            // If for some reason loading is over but something can't be displayed
+            // if not loading, and not listing posts, an error must have happened
             return (
                 <Container>
                     <Alert>Error has occurred.</Alert>
@@ -121,4 +132,4 @@ class ViewPosts extends Component {
     }
 }
 
-export default ViewPosts;
+export default PostList;
