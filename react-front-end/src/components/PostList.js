@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import PostPreview from './PostPreview';
-import Post from './Post';
-import {Alert, Container, Spinner} from "react-bootstrap";
+import {Alert, Container, Spinner, Fab} from "react-bootstrap";
 
 class PostList extends Component {
 
@@ -64,7 +63,11 @@ class PostList extends Component {
                         // the PostPreview element is used for this, which takes the post id and the post json
                         <PostPreview key={post.id} post={post}/>
                     ))}
+                    <Fab className="new-post-button" variant="extended" href="/subforums/${subforumID}/new">
+                        <AddIcon/>  New Post
+                    </Fab>
                 </Container>)
+                
 
         // } else if (this.state.listingPost) {
         //     // If we are rendering a singular post display everything like comments and other things to be implemented later

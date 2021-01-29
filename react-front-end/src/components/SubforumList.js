@@ -52,7 +52,10 @@ class SubforumList extends Component {
                             </Card.Link> 
                         </Card.Body>                    
                     </Card>
-                    ))}
+                ))}
+                <Fab className="new-subform-button" variant="extended" href="/forums/${props.forumID}/new">
+                    <AddIcon/>  New Subforum
+                </Fab>
             </Container>)
     }
 }

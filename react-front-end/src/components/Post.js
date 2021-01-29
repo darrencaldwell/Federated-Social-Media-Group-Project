@@ -70,10 +70,8 @@ export class Post extends Component {
                 {/*</Dropdown.Menu>*/}
                 {/*</Dropdown>*/}
 
-
-                </Container>
-            )
-        }
+            </Container>
+        )
     }
 }
 

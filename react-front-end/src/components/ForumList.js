@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Alert, Container, Spinner} from "react-bootstrap";
+import {Fab, Card, Container} from "react-bootstrap";
 
 // no props
 class ForumList extends Component {
@@ -53,6 +53,9 @@ class ForumList extends Component {
                         </Card.Body>                    
                     </Card>
                     ))}
+                <Fab className="new-form-button" variant="extended" href="/forums/new">
+                    <AddIcon/>  New Forum
+                </Fab>
             </Container>)
     }
 }
