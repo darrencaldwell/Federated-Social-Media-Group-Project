@@ -1,10 +1,11 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, http::header::HeaderName, http::header::HeaderValue, web::Data};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, http::header::HeaderName, http::header::HeaderValue, web::Data, http::header::Date};
 use actix_service::{Service, Transform};
 
 use anyhow::Result;
 use futures::future::{ok, Future, Ready};
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use std::time::SystemTime;
 
 use openssl::sign::{Signer, Verifier};
 use openssl::rsa::Padding;
@@ -66,13 +67,16 @@ where
 
             // create signature-input header
             // need sig1=(x, y, z); keyId=x
-            let header_string = "sig1=(*request-target, host); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=hs2019";
+            let header_string = "sig1=(*request-target, date); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=RSASSA-PSS-SHA512";
             res.headers_mut().insert(HeaderName::from_static("signature-input"), HeaderValue::from_static(header_string));
+            let date = Date(SystemTime::now().into());
+            res.headers_mut().insert(HeaderName::from_static("date"), HeaderValue::from_str(&date.to_string()).unwrap());
 
             // sign
             // TODO: check if we want to not just create our own host header, instead of using the
             // others host
-            let string_to_sign = format!("*request-target: {}\nhost: {}", res.request().path(), res.request().headers().get("host").unwrap().to_str().unwrap());
+            let string_to_sign = format!("*request-target: {}\ndate: {}", res.request().path(),
+            date.to_string());
 
             let key_pair = res.request().app_data::<Data<PKey<Private>>>().unwrap().clone();
 
