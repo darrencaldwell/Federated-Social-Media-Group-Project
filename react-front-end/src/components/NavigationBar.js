@@ -31,6 +31,7 @@ class NavigationBar extends React.Component {
         document.removeEventListener("mousedown", this.handleClickOutside);
     }
 
+    // When Navbar is open and somewhere outside of nav bar is clicked. Close the navbar
     handleClickOutside = event => {
         if (this.container.current && !this.container.current.contains(event.target)) {
             this.setState({
@@ -52,6 +53,7 @@ class NavigationBar extends React.Component {
             buttons = (
                 <Nav className="mr-auto" onClick={this.setNavClose}>
                     <Nav.Link as={Link} to='/'>Home</Nav.Link>
+                    {/*<Nav.Link as={Link} to='/communities'>My Communities</Nav.Link>*/}
                     <Nav.Link as={Link} to='/account'>My account</Nav.Link>
                     <Nav.Link as={Link} to='/posts'>View Posts</Nav.Link>
                     <Nav.Link as={Link} to='/makePost'>Create Post</Nav.Link>
