@@ -4,16 +4,20 @@ import ForumList from '../components/ForumList';
 import SubforumList from '../components/SubforumList';
 import Post from '../components/Post';
 
-class Expanded extends React.Component{
+export default class ExpandedPost extends React.Component{
     constructor(props) {
-        const subforumID = fetchSubforumId(this.props.match.params.id);
-        const forumID = fetchForumId(subforumID);
+        super(props);
+        this.state = {
+            subforumID : {},
+            forumID : {}
+        }
     }
 
-    // fetch the subforum ID from the post
-    fetchSubforumId(postID) {
+    // fetch the subforum and forum ID from the post
+    componentDidMount = async() => {
+        let postURL = '/api/posts/' + this.props.match.params.id;
         try {
-            let res = await fetch(('/api/posts/${postID}') // we're making a request to this url
+            let res = await fetch((postURL) // we're making a request to this url
                 , {
                     method: 'GET', // this is a GET request
 
@@ -28,17 +32,11 @@ class Expanded extends React.Component{
             );
 
             let result = await res.json(); // we know the result is json
-            return result.subforumId; // we just want the subforum id from the json
-        } catch (e) {
-            console.log(e);
-            console.log("Failed to fetch forum ID");
-        }
-    }
+            this.setState( {subforumID : result.subforumId} ); // we just want the subforum id from the json
 
-    // as above, but for the forum
-    fetchForumId(subforumID) {
-        try {
-            let res = await fetch(('/api/subforums/${subforumID}')
+            let subforumURL = '/api/subforums/' + result.subforumId;
+
+            res = await fetch((subforumURL)
                 , {
                     method: 'GET',
                     withCredentials: true,
@@ -50,21 +48,20 @@ class Expanded extends React.Component{
                     }
                 }
             );
-            let result = await res.json();
-            return result.forumId;
+            result = await res.json();
+            this.setState( {forumID : result.forumId} );
         } catch (e) {
             console.log(e);
-            console.log("Failed to fetch subforum ID");
         }
     }
 
     render() {
         return(
             // display the forum list, subforum list and post side-by-side
-            <div className="rows">
+            <div className="columns">
                 <ForumList/>
-                <SubforumList forumID={this.forumID}/>
-                <Post postID={this.props.match.params.id}/>
+                <SubforumList forumID={this.state.forumID}/>
+                <Post postID={this.props.match.params.id} subforumID={this.state.subforumID}/>
             </div>
         );
     }

@@ -8,13 +8,13 @@ class Make extends React.Component {
     constructor(props) {
         super(props);
         this.changeTitle = this.changeTitle.bind(this); // bind these functions so they can override the onChange functions
-        const url = 'https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/${forumID}/subforums';
         // declare these as constants here so 2 different state attributes can be set to each
         const defaultTitle = 'Put your subforum name here'; // the placeholder text for the title
         this.state = {
-            buttonText: 'Create Post',
+            buttonText: 'Create Subforum',
             defaultTitle: defaultTitle, // the default title needs to be preserved
             titleText: defaultTitle, // the title starts as the default
+            url: 'https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/' + this.props.forumID + '/subforums'
         };
     }
 
@@ -56,7 +56,6 @@ class Make extends React.Component {
             <Container>
                 <BackButton/>
                 <Form className="createPost">
-                    <Form.Label>Create Post</Form.Label>
                     <FormGroup controlId="create-title">
                         {/*These are the input forms for title and body, with placeholder text. They call the above change methods when you type in them.*/}
                         <Form.Control onChange={this.changeTitle} type="text" placeholder={this.state.defaultTitle}/>

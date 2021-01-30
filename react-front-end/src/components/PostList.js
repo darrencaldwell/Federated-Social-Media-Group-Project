@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PostPreview from './PostPreview';
-import {Alert, Container, Spinner, Fab} from "react-bootstrap";
+import {Alert, Container, Spinner} from "react-bootstrap";
+import '../styling/container-pages.css';
 
 class PostList extends Component {
 
@@ -22,7 +23,7 @@ class PostList extends Component {
             // while fetching the list of posts, show a loading graphic
             this.setState({loading: true, listingPosts: false, listingPost: false});
             // the url needs the subforum id from the props
-            let url = "/api/subforums/${this.props.match.params.id}/posts";
+            let url = '/api/subforums/' + this.props.subforumID + '/posts';
             let res = await fetch(url
                 , {
                     method: 'get',
@@ -45,6 +46,7 @@ class PostList extends Component {
     render() {
         // styling for the loading spinner - should be moved to a separate styling file if possible
         const spinnerStyle = { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }
+        const fabHref = "/subforums/" + this.state.subforumID + "/new";
 
         if (this.state.loading) {
             // while loading, show a loading spinner with the above style
@@ -57,16 +59,18 @@ class PostList extends Component {
         } else if (this.state.listingPosts) {
             // If we are rendering a list of posts go through the returned array of posts and display them.
             return (
-                <Container>
-                    {/*map is used to apply this html for each post in the list */}
-                    {this.state.postList.map((post) => (
-                        // the PostPreview element is used for this, which takes the post id and the post json
-                        <PostPreview key={post.id} post={post}/>
-                    ))}
-                    <Fab className="new-post-button" variant="extended" href="/subforums/${subforumID}/new">
-                        <AddIcon/>  New Post
-                    </Fab>
-                </Container>)
+                <div className="post-container">
+                    <Container className="postlist">
+                        {/*map is used to apply this html for each post in the list */}
+                        {this.state.postList.map((post) => (
+                            // the PostPreview element is used for this, which takes the post id and the post json
+                            <PostPreview key={post.id} post={post}/>
+                        ))}
+                    </Container>
+                    <button className="new-post-button" href={fabHref}>
+                        New Post
+                    </button>
+                </div>)
                 
 
         // } else if (this.state.listingPost) {

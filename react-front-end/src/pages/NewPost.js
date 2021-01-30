@@ -2,15 +2,20 @@ import React from 'react';
 import '../styling/container-pages.css';
 import ForumList from '../components/ForumList';
 import SubforumList from '../components/SubforumList';
+import CreatePost from '../components/CreatePost';
 
-class Expanded extends React.Component{
+export default class NewPost extends React.Component{
     constructor(props) {
-        const forumID = fetchForumId(this.props.match.params.id);
+        super(props);
+        this.state = {
+            forumID: {}
+        }
     }
 
-    fetchForumId(subforumID) {
+    ComponentDidMount = async() => {
+        let url = '/api/subforums/' + this.props.match.params.id;
         try {
-            let res = await fetch(('/api/subforums/${subforumID}')
+            let res = await fetch((url)
                 , {
                     method: 'GET',
                     withCredentials: true,
@@ -23,7 +28,7 @@ class Expanded extends React.Component{
                 }
             );
             let result = await res.json();
-            return result.forumId;
+            this.setState({forumID : result.forumId});
         } catch (e) {
             console.log(e);
             console.log("Failed to fetch forum ID");
@@ -32,9 +37,9 @@ class Expanded extends React.Component{
 
     render() {
         return(
-            <div className="rows">
+            <div className="columns">
                 <ForumList/>
-                <SubforumList forumID={this.forumID}/>
+                <SubforumList forumID={this.state.forumID}/>
                 <CreatePost subforumID={this.props.match.params.id}/>
             </div>
         );

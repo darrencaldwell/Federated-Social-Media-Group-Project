@@ -7,10 +7,10 @@ import Register from "./pages/Register";
 import Root from "./pages/Root";
 import NewForum from "./pages/NewForum";
 import ForumRoot from "./pages/ForumRoot";
-import NewSubforum from "./NewSubforum";
-import SubforumRoot from "./SubforumRoot";
-import NewPost from "./NewPost";
-import ExpandedPost from "./ExpandedPost";
+import NewSubforum from "./pages/NewSubforum";
+import SubforumRoot from "./pages/SubforumRoot";
+import NewPost from "./pages/NewPost";
+import ExpandedPost from "./pages/ExpandedPost";
 import Account from "./pages/Account";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 // import BackButton from "./components/BackButton";

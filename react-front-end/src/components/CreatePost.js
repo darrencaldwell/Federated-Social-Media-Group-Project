@@ -9,7 +9,6 @@ class Make extends React.Component {
         super(props);
         this.changeTitle = this.changeTitle.bind(this); // bind these functions so they can override the onChange functions
         this.changeBody = this.changeBody.bind(this);
-        const url = 'https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/${subforumID}';
         // declare these as constants here so 2 different state attributes can be set to each
         const defaultBody = 'Put the body of your post here'; // the placeholder text in the body
         const defaultTitle = 'Title'; // the placeholder text for the title
@@ -19,6 +18,7 @@ class Make extends React.Component {
             titleText: defaultTitle, // the title starts as the default
             defaultBody: defaultBody, // the default body needs to be preserved
             bodyText: defaultBody, // the body starts as the default
+            url: 'https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/' + this.props.subforumID
         };
     }
 
@@ -28,7 +28,7 @@ class Make extends React.Component {
             alert('Please enter a title and body');
         } else {
             // the HTML request
-            fetch(this.url, {
+            fetch(this.state.url, {
                 method: "POST",
                 withCredentials: true,
                 credentials: 'include',

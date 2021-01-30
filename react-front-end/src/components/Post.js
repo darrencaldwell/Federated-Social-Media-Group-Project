@@ -6,7 +6,7 @@ import CreateComment from './CreateComment'
 // import '../styling/Post.css';
 import {Button, Card, Container} from "react-bootstrap";
 
-// props: postID
+// props: postID, subforumID
 export class Post extends Component {
 
     constructor(props) {
@@ -20,7 +20,7 @@ export class Post extends Component {
     componentDidMount = async () => {
         try {
             // the url needs the post id from the props
-            let url = "/api/posts/${this.props.postID}";
+            let url = '/api/posts/' + this.props.postID;
             let res = await fetch(url
                 , {
                     method: 'get', // we're making a GET request
@@ -43,18 +43,19 @@ export class Post extends Component {
     }
 
     render() {
-        const url = "/api/posts/" + this.props.post.postId + "/comments";
-        
+        const url = "/api/posts/" + this.state.post.postId + "/comments";
+        const backURL = "/subforums/" + this.props.subforumID;
+
         return (
             <Container>
-                <Button variant="light" onClick={() => this.props.loadPosts()}>Go back to post list</Button>
+                <Button variant="light" href={backURL}>Go back to post list</Button>
                 <div className="mt-3">
                     <Card border="dark">
                         <Card.Body>
-                            <Card.Title>{this.props.post.postTitle}</Card.Title>
-                            <Card.Subtitle className="text-muted">Post made by user
-                                Id: {this.props.post.postId}</Card.Subtitle>
-                            <Card.Text>{this.props.post.postMarkup}</Card.Text>
+                            <Card.Title>{this.state.post.postTitle}</Card.Title>
+                            <Card.Subtitle className="text-muted">
+                                Post made by user Id: {this.state.post.postId}</Card.Subtitle>
+                            <Card.Text>{this.state.post.postMarkup}</Card.Text>
                         </Card.Body>
                     </Card>
                 </div>
@@ -64,9 +65,7 @@ export class Post extends Component {
                 {/*<Dropdown className="mt-3">*/}
                 {/*<Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>*/}
                 {/*<Dropdown.Menu>*/}
-                {this.props.comments.commentList.map((comment) => (
-                    <Comments key={comment.id} comment={comment}></Comments>
-                ))}
+                <Comments postID={this.props.postID}/>
                 {/*</Dropdown.Menu>*/}
                 {/*</Dropdown>*/}
 

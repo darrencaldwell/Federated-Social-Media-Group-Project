@@ -2,18 +2,22 @@ import React from 'react';
 import '../styling/container-pages.css';
 import ForumList from '../components/ForumList';
 import SubforumList from '../components/SubforumList';
+import CreateSubforum from '../components/CreateSubforum';
 
-class Expanded extends React.Component{
+export default class NewSubforum extends React.Component{
     constructor(props) {
-        const forumID = this.props.match.params.id;
+        super(props);
+        this.state = {
+            forumID: this.props.match.params.id
+        }
     }
 
     render() {
         return(
-            <div className="rows">
+            <div className="columns">
                 <ForumList/>
-                <SubforumList forumID={this.forumID}/>
-                <CreateSubforum forumID={this.forumID}/>
+                <SubforumList forumID={this.state.forumID}/>
+                <CreateSubforum forumID={this.state.forumID}/>
             </div>
         );
     }

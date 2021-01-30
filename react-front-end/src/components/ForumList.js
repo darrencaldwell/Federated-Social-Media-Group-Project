@@ -1,13 +1,14 @@
 import React, {Component} from 'react';
-import {Fab, Card, Container} from "react-bootstrap";
+import {Card, Container} from "react-bootstrap";
+import '../styling/container-pages.css';
 
 // no props
-class ForumList extends Component {
+export default class ForumList extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            forumList: {} // the list of forums will be stored here, once loaded
+            forumList: [] // the list of forums will be stored here, once loaded
         }
     }
 
@@ -41,23 +42,26 @@ class ForumList extends Component {
 
     render() {
         return (
-            <Container>
+            <div className="forum-container">
+
+                <Container className="forumlist">
                 {/*Use the map function to apply the html to all forums in the list */}
                 {this.state.forumList.map((forum) => (
                     <Card className="forum" >  {/*each forum is displayed as a card with className forum */}
                         <Card.Body>
                             {/*The card consists of the name of the forum, which links to the forum itself */}
-                            <Card.Link href={forum._links.self.href.replace('/api', '')}>
+                            <Card.Link href={forum._links.self.href.replace('<url>/api', '')}>
                                 {forum.forumName}
                             </Card.Link> 
                         </Card.Body>                    
                     </Card>
                     ))}
-                <Fab className="new-form-button" variant="extended" href="/forums/new">
-                    <AddIcon/>  New Forum
-                </Fab>
-            </Container>)
+                </Container>
+                
+                <button className="new-forum-button" href="/forums/new">
+                    New Forum
+                </button>
+
+            </div>)
     }
 }
-
-export default ViewPosts;

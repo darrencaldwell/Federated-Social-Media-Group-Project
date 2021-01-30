@@ -3,17 +3,20 @@ import '../styling/container-pages.css';
 import ForumList from '../components/ForumList';
 import SubforumList from '../components/SubforumList';
 
-class Expanded extends React.Component{
+export default class ForumRoot extends React.Component{
     constructor(props) {
-        const forumID = this.props.match.params.id;
+        super(props);
+        this.state = {
+            forumID: this.props.match.params.id
+        }
     }
 
     render() {
         return(
-            <div className="rows">
+            <div className="columns">
                 <ForumList/>
-                <SubforumList forumID={this.forumID}/>
-                {/*Forum information goes here*/}
+                <SubforumList forumID={this.state.forumID}/>
+                Forum information goes here
             </div>
         );
     }

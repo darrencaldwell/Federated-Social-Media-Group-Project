@@ -3,14 +3,10 @@ import '../styling/container-pages.css';
 import ForumList from '../components/ForumList';
 import CreateForum from '../components/CreateForum';
 
-class Expanded extends React.Component{
-    constructor(props) {
-        const forumID = this.props.match.params.id;
-    }
-
+export default class NewForum extends React.Component{
     render() {
         return(
-            <div className="rows">
+            <div className="columns">
                 <ForumList/>
                 <CreateForum/>
             </div>

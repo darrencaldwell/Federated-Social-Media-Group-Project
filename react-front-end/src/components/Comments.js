@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
 import {Card} from "react-bootstrap";
+import PostPreview from './PostPreview';
+import {Container} from 'react-bootstrap';
 
 // props: comment (json)
-class comment extends Component {
-    constructor(props) {
-        super(props);
-    }
+class Comment extends Component {
     
     render() {
         return (
@@ -19,7 +18,7 @@ class comment extends Component {
 }
 
 // props: postID
-export class Comments extends Component {
+export default class Comments extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -31,7 +30,7 @@ export class Comments extends Component {
     componentDidMount = async () => {
         try {
             // the url needs the post id from the props
-            let url = "/api/posts/${this.props.postID}/comments";
+            let url = '/api/posts/' + this.props.postID + '/comments';
             
             let res = await fetch(url
                 , {
@@ -64,7 +63,7 @@ export class Comments extends Component {
                     {/*map is used to apply this html for each comment in the list */}
                     {this.state.commentList.map((comment) => (
                         // the Comment element above is used for this, which takes the comment json
-                        <PostPreview comment={comment}/>
+                        <Comment comment={comment}/>
                     ))}
                 </Container>
             )
@@ -82,5 +81,3 @@ export class Comments extends Component {
         }
     }
 }
-
-export default Comment
