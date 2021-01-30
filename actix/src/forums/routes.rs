@@ -39,13 +39,14 @@ async fn get_subforum(
     }
 }
 
-#[post("/api/subforums")]
+#[post("/api/forums/{id}/subforums")]
 async fn post_subforum(
+    web::Path(id): web::Path<u64>,
     subforum_request: web::Json<forums::PostSubforumRequest>,
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    match forums::post_subforum(subforum_request.into_inner(), &pool).await {
+    match forums::post_subforum(id, subforum_request.into_inner(), &pool).await {
         Ok(subforum) => HttpResponse::Ok().json(subforum),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }

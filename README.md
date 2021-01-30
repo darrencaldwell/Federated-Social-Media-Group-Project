@@ -20,6 +20,8 @@ To start the React frontend, in the "react-front-end" folder type:
 
 ```cmd
 npm install
+npm install @material-ui/core
+npm install @material-ui/icons
 npm run
 ```
 

@@ -42,7 +42,6 @@ pub struct Subforum {
 #[serde(rename_all = "camelCase")]
 pub struct PostSubforumRequest {
     pub subforum_name: String,
-    pub forum_id: u64,
 }
 
 /// Root of list of [Subforum]
@@ -135,14 +134,14 @@ pub async fn get_subforum(subforum_id: u64, pool: &MySqlPool) -> Result<Subforum
 
 }
 
-pub async fn post_subforum(subforum_request: PostSubforumRequest,
+pub async fn post_subforum(forum_id: u64, subforum_request: PostSubforumRequest,
                             pool: &MySqlPool) -> Result<Subforum> {
     let mut tx = pool.begin().await?;
 
     let subforum_id = sqlx::query!(
         "INSERT INTO subforums (subforum_name, forum_id) VALUES (?, ?)",
         subforum_request.subforum_name,
-        subforum_request.forum_id)
+        forum_id)
         .execute(&mut tx)
         .await?
         .last_insert_id();
@@ -151,9 +150,9 @@ pub async fn post_subforum(subforum_request: PostSubforumRequest,
 
     Ok(Subforum {
         subforum_name: subforum_request.subforum_name,
-        forum_id: subforum_request.forum_id,
+        forum_id: forum_id,
         id: subforum_id,
-        links: gen_sub_links(subforum_id, subforum_request.forum_id),
+        links: gen_sub_links(subforum_id, forum_id),
     })
 }
 

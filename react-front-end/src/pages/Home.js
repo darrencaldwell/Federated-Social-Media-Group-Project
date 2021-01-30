@@ -17,8 +17,7 @@ class Home extends React.Component {
                         it will in the future.
                     </p>
                     <Link to={'/account'}><Button variant='light' as="input" type="button" value="Go to your account"/>{' '}</Link>
-                    <Link to={'/posts'}><Button variant='light' as="input" type="button" value="Go to view posts"/>{' '}</Link>
-                    <Link to={'/makePost'}><Button variant='light' as="input" type="button" value="Go to create a post"/></Link>
+                    <Link to={'/forums'}><Button variant='light' as="input" type="button" value="Go to forums"/>{' '}</Link>
                 </Jumbotron>
             )
         }

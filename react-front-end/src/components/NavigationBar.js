@@ -53,8 +53,7 @@ class NavigationBar extends React.Component {
                 <Nav className="mr-auto" onClick={this.setNavClose}>
                     <Nav.Link as={Link} to='/'>Home</Nav.Link>
                     <Nav.Link as={Link} to='/account'>My account</Nav.Link>
-                    <Nav.Link as={Link} to='/posts'>View Posts</Nav.Link>
-                    <Nav.Link as={Link} to='/makePost'>Create Post</Nav.Link>
+                    <Nav.Link as={Link} to='/forums'>View Forums    </Nav.Link>
                     <Nav.Link as={Link} to='/' onClick={() => localStorage.clear()}>Logout</Nav.Link>
                 </Nav>
             )
