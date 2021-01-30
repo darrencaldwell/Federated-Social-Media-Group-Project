@@ -18,7 +18,7 @@ class Make extends React.Component {
             titleText: defaultTitle, // the title starts as the default
             defaultBody: defaultBody, // the default body needs to be preserved
             bodyText: defaultBody, // the body starts as the default
-            url: 'https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/' + this.props.subforumID
+            url: '/api/subforums/' + this.props.subforumID + '/posts'
         };
     }
 
@@ -49,7 +49,7 @@ class Make extends React.Component {
         }
     }
 
-    /* these two functions override the onChange functions for the title and body, 
+    /* these two functions override the onChange functions for the title and body,
         updating state with the value for the submit function to use */
 
     changeTitle(v) {

@@ -5,7 +5,7 @@ import Comments from './Comments';
 import CreateComment from './CreateComment';
 import BackButton from './BackButton';
 // import '../styling/Post.css';
-import {Button, Card, Container} from "react-bootstrap";
+import {Card, Container} from "react-bootstrap";
 
 // props: postID, subforumID, forumID
 export class Post extends Component {

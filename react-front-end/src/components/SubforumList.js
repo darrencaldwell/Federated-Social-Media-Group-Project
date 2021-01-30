@@ -19,7 +19,7 @@ export default class SubforumList extends Component {
         try {
             let url = "/api/forums/" + this.props.forumID + "/subforums";
 
-            let res = await fetch(url, 
+            let res = await fetch(url,
                 {
                     method: 'get',  // we're making a GET request
 
@@ -39,7 +39,7 @@ export default class SubforumList extends Component {
 
             let url2 = "/api/forums/" + this.props.forumID;
 
-            let res2 = await fetch(url2, 
+            let res2 = await fetch(url2,
                 {
                     method: 'get',  // we're making a GET request
 
@@ -61,7 +61,7 @@ export default class SubforumList extends Component {
 
 
     render() {
-        var name = this.state.forumName;
+        //var name = this.state.forumName;
         return (
             <div className="subforum-container">
                 <a className="button forum-info forum-info-container" href={'/' + this.props.forumID} body={this.state.forumName}>
@@ -75,8 +75,8 @@ export default class SubforumList extends Component {
                                 {/*The card consists of the name of the forum, which links to the forum itself */}
                                 <Card.Link href={'/' + this.props.forumID + '/' + subforum.id}>
                                     {subforum.subforumName}
-                                </Card.Link> 
-                            </Card.Body>                    
+                                </Card.Link>
+                            </Card.Body>
                         </Card>
                     ))}
                 </Container>

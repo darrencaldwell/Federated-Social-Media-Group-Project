@@ -13,7 +13,7 @@ class Make extends React.Component {
             buttonText: 'Create Forum',
             defaultTitle: defaultTitle, // the default title needs to be preserved
             titleText: defaultTitle, // the title starts as the default
-            url : 'https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/'
+            url : '/api/forums'
         };
     }
 
@@ -42,7 +42,7 @@ class Make extends React.Component {
         }
     }
 
-    /* these two functions override the onChange functions for the title and body, 
+    /* these two functions override the onChange functions for the title and body,
         updating state with the value for the submit function to use */
 
     changeTitle(v) {
