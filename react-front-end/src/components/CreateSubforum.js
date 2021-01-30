@@ -14,15 +14,12 @@ class Make extends React.Component {
         // JS seems to be weird with concat on undefined variables, this seemed to fix the undef issues
         var url = ""
         url = '/api/forums/' + this.props.forumID + '/subforums'
-        console.log(url)
         this.state = {
             buttonText: 'Create Subforum',
             defaultTitle: defaultTitle, // the default title needs to be preserved
             titleText: defaultTitle, // the title starts as the default
             url: url
         };
-            console.log(this.props.forumID)
-            console.log(this.url)
     }
 
     submit() {
