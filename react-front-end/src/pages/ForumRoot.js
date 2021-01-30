@@ -4,18 +4,12 @@ import ForumList from '../components/ForumList';
 import SubforumList from '../components/SubforumList';
 
 export default class ForumRoot extends React.Component{
-    constructor(props) {
-        super(props);
-        this.state = {
-            forumID: this.props.match.params.id
-        }
-    }
 
     render() {
         return(
             <div className="columns">
                 <ForumList/>
-                <SubforumList forumID={this.state.forumID}/>
+                <SubforumList forumID={this.props.match.params.forumID}/>
                 Forum information goes here
             </div>
         );

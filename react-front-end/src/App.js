@@ -56,14 +56,14 @@ class App extends React.Component {
                         <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
 
                         <Route exact path="/forums" component={Root}/> {/*shows the list of forums (for our server)*/}
-                        <Route exact path="/forums/new" component={NewForum}/> {/*page to create a new forum*/}
-                        <Route exact path="/forums/:id" component={ForumRoot}/> {/*page for a specific forum*/}
+                        <Route exact path="/new" component={NewForum}/> {/*page to create a new forum*/}
+                        <Route exact path="/:forumID" component={ForumRoot}/> {/*page for a specific forum*/}
 
-                        <Route exact path="/forums/:id/new" component={NewSubforum}/> {/*page to create a new subforum in the forum*/}
-                        <Route exact path="/subforums/:id" component={SubforumRoot}/> {/*page for a specific subforum*/}
+                        <Route exact path="/:forumID/new" component={NewSubforum}/> {/*page to create a new subforum in the forum*/}
+                        <Route exact path="/:forumID/:subforumID" component={SubforumRoot}/> {/*page for a specific subforum*/}
 
-                        <Route exact path="/subforums/:id/new" component={NewPost}/> {/*page to create a new post in a subforum*/}
-                        <Route exact path="/posts/:id" component={ExpandedPost}/> {/*page for a specific post, contains comments and ability to create a comment*/}
+                        <Route exact path="/:forumID/:subforumID/new" component={NewPost}/> {/*page to create a new post in a subforum*/}
+                        <Route exact path="/:forumID/:subforumID/:postID" component={ExpandedPost}/> {/*page for a specific post, contains comments and ability to create a comment*/}
                     </Switch>
                 </div>
             </Router>

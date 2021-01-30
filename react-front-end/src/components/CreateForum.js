@@ -52,7 +52,7 @@ class Make extends React.Component {
     render() {
         return (
             <Container>
-                <BackButton/>
+                <BackButton url={"/forums"}/>
                 <Form className="createForum">
                     <FormGroup controlId="create-title">
                         {/*These are the input forms for title and body, with placeholder text. They call the above change methods when you type in them.*/}

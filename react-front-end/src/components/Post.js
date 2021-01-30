@@ -2,11 +2,12 @@ import React, {Component} from 'react';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
 import Comments from './Comments';
 // import CreatePost from './CreatePost.js';
-import CreateComment from './CreateComment'
+import CreateComment from './CreateComment';
+import BackButton from './BackButton';
 // import '../styling/Post.css';
 import {Button, Card, Container} from "react-bootstrap";
 
-// props: postID, subforumID
+// props: postID, subforumID, forumID
 export class Post extends Component {
 
     constructor(props) {
@@ -44,18 +45,18 @@ export class Post extends Component {
 
     render() {
         const url = "/api/posts/" + this.state.post.postId + "/comments";
-        const backURL = "/subforums/" + this.props.subforumID;
+        const backURL = "/" + this.props.forumID + "/" + this.props.subforumID;
 
         return (
             <Container>
-                <Button variant="light" href={backURL}>Go back to post list</Button>
+                <BackButton url={backURL}/>
                 <div className="mt-3">
                     <Card border="dark">
                         <Card.Body>
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
                             <Card.Subtitle className="text-muted">
                                 Post made by user Id: {this.state.post.postId}</Card.Subtitle>
-                            <Card.Text>{this.state.post.postMarkup}</Card.Text>
+                            <Card.Text>{this.state.post.postContents}</Card.Text>
                         </Card.Body>
                     </Card>
                 </div>

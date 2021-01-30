@@ -46,7 +46,6 @@ class PostList extends Component {
     render() {
         // styling for the loading spinner - should be moved to a separate styling file if possible
         const spinnerStyle = { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }
-        const fabHref = "/subforums/" + this.state.subforumID + "/new";
 
         if (this.state.loading) {
             // while loading, show a loading spinner with the above style
@@ -64,12 +63,12 @@ class PostList extends Component {
                         {/*map is used to apply this html for each post in the list */}
                         {this.state.postList.map((post) => (
                             // the PostPreview element is used for this, which takes the post id and the post json
-                            <PostPreview key={post.id} post={post}/>
+                            <PostPreview key={post.id} post={post} forumID={this.props.forumID} subforumID={this.props.subforumID}/>
                         ))}
                     </Container>
-                    <button className="new-post-button" href={fabHref}>
+                    <a className="button" href={'/' + this.props.forumID + '/' + this.props.subforumID + '/new'}>
                         New Post
-                    </button>
+                    </a>
                 </div>)
                 
 

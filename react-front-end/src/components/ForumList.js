@@ -50,7 +50,7 @@ export default class ForumList extends Component {
                     <Card className="forum" >  {/*each forum is displayed as a card with className forum */}
                         <Card.Body>
                             {/*The card consists of the name of the forum, which links to the forum itself */}
-                            <Card.Link href={forum._links.self.href.replace('<url>/api', '')}>
+                            <Card.Link href={'/' + forum.id}>
                                 {forum.forumName}
                             </Card.Link> 
                         </Card.Body>                    
@@ -58,9 +58,9 @@ export default class ForumList extends Component {
                     ))}
                 </Container>
                 
-                <button className="new-forum-button" href="/forums/new">
+                <a className="button" href="/new">
                     New Forum
-                </button>
+                </a>
 
             </div>)
     }

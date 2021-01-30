@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import {Card} from "react-bootstrap";
-import PostPreview from './PostPreview';
 import {Container} from 'react-bootstrap';
 
 // props: comment (json)
