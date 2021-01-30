@@ -1,38 +1,43 @@
 use super::comments;
-use actix_web::{web, get, post, HttpResponse, Responder, HttpRequest};
-use actix_web_httpauth::extractors::bearer::BearerAuth;
+use actix_web::{web, get, post, HttpResponse, Responder};
 use sqlx::MySqlPool;
-use crate::auth::decode_jwt;
-use auth_macro::*;
+use crate::id_extractor::UserId;
 
 #[get("/api/comments/{id}")]
-#[protected]
-async fn get_comment(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn get_comment(
+    web::Path(id): web::Path<u64>,
+    pool: web::Data<MySqlPool>,
+    UserId(_user_id): UserId,
+) -> impl Responder {
     match comments::get_comment(id, &pool).await {
         Ok(comment) => HttpResponse::Ok().json(comment),
-        Err(_) => HttpResponse::InternalServerError().body(""),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 
 #[get("/api/posts/{id}/comments")]
-#[protected]
-async fn get_comments(web::Path(id): web::Path<u64>, pool: web::Data<MySqlPool>) -> impl Responder {
+async fn get_comments(
+    web::Path(id): web::Path<u64>,
+    pool: web::Data<MySqlPool>,
+    UserId(_user_id): UserId,
+) -> impl Responder {
     match comments::get_comments(id, &pool).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
-        Err(_) => HttpResponse::InternalServerError().body(""),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 
 #[post("/api/posts/{id}/comments")]
-#[auth_user(comment.user_id)]
-async fn post_comment(web::Path(id): web::Path<u64>,
-                      pool: web::Data<MySqlPool>,
-                      auth: BearerAuth,
-                      comment: web::Json::<comments::CommentRequest>
+async fn post_comment(
+    web::Path(id): web::Path<u64>,
+    pool: web::Data<MySqlPool>,
+    comment: web::Json::<comments::CommentRequest>,
+    UserId(user_id): UserId
 ) -> impl Responder {
+    if user_id != comment.user_id { return HttpResponse::Forbidden().finish(); }
     match comments::insert_comment(id, comment.into_inner(), &pool).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
-        Err(_) => HttpResponse::InternalServerError().body(""),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 

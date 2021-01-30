@@ -2,6 +2,7 @@ use sqlx::MySqlPool;
 use anyhow::Result;
 use serde::{Serialize, Deserialize};
 
+/// Represents a request o post a comment on a post
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -11,6 +12,7 @@ pub struct CommentRequest {
     pub username: String,
 }
 
+/// Represents an entire comment in the database
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Comment {
@@ -37,12 +39,14 @@ pub struct Link {
     pub href: String,
 }
 
+/// Root of list of [Comment]
 #[derive(Serialize)]
 pub struct Comments {
     #[serde(rename = "_embedded")]
     pub embedded: CommentList,
 }
 
+/// List of [Comment]
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommentList {
@@ -51,14 +55,15 @@ pub struct CommentList {
 
 fn gen_links(comment_id: u64, user_id: &String, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
     Links {
-        _self: Link { href: format!("<url>/api/comments/{}", comment_id) },
-        post: Link { href: format!("<url>/api/posts/{}", post_id) },
-        subforum: Link { href: format!("<url>/api/subforums/{}", subforum_id) },
-        forum: Link { href: format!("<url>/api/forums/{}", forum_id) },
-        user: Link { href: format!("<url>/api/user/{}", user_id) },
+        _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}", comment_id) },
+        post: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}", post_id) },
+        subforum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/{}", subforum_id) },
+        forum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}", forum_id) },
+        user: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/user/{}", user_id) },
     }
 }
 
+/// Helper function to query db for subforum a post is within
 async fn get_subforum(post_id: u64, pool: &MySqlPool) -> Result<u64> {
     Ok(sqlx::query!(
         "SELECT subforum_id FROM posts WHERE post_id = ?",
@@ -68,6 +73,7 @@ async fn get_subforum(post_id: u64, pool: &MySqlPool) -> Result<u64> {
         .subforum_id)
 }
 
+/// Helper function to query db for forum a comment is within
 async fn get_forum(subforum_id: u64, pool: &MySqlPool) -> Result<u64> {
     Ok(sqlx::query!(
         " SELECT forum_id FROM subforums WHERE subforum_id = ?",
@@ -77,11 +83,10 @@ async fn get_forum(subforum_id: u64, pool: &MySqlPool) -> Result<u64> {
         .forum_id)
 }
 
+/// POSTS a comment given a post to comment on and a comment request
 pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
                             pool: &MySqlPool) -> Result<Comment> {
     let mut tx = pool.begin().await?;
-    println!("{:?}", comment_request);
-
     let comment_id = sqlx::query!(
         "INSERT INTO comments (comment, user_id, post_id) VALUES (?, UuidToBin(?), ?)",
         comment_request.comment_content,
@@ -106,6 +111,7 @@ pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
 
 }
 
+/// Get all comments within a post
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
         r#"SELECT comment, UuidFromBin(user_id) AS "user_id: String", comment_id FROM comments WHERE post_id = ?"#,
@@ -134,6 +140,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     })
 }
 
+/// Get a single comment by it's id
 pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
     let rec = sqlx::query!(
         r#"SELECT comment, UuidFromBin(user_id) AS "user_id: String", post_id FROM comments WHERE comment_id = ?"#,
@@ -152,5 +159,4 @@ pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
         links: gen_links(comment_id, &user_id, rec.post_id, subforum_id, forum_id),
         user_id
     })
-
 }
