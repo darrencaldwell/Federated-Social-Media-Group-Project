@@ -105,21 +105,14 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     let mut posts = vec![];
     let recs = sqlx::query!(
         r#"
-        SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, subforum_id FROM posts WHERE subforum_id = ?
+        SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, posts.subforum_id, forum_id FROM posts
+        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        WHERE posts.subforum_id = ?
         ORDER BY post_id
         "#,
         subforum_id
     )
     .fetch_all(pool)
-    .await?;
-
-    let forum_id = sqlx::query!(
-        r#"
-        SELECT forum_id FROM subforums WHERE subforum_id = ?
-        "#,
-        subforum_id
-    )
-    .fetch_one(pool)
     .await?;
 
     for rec in recs {
@@ -132,7 +125,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             links: generate_post_links(
                 rec.post_id,
                 rec.subforum_id,
-                forum_id.forum_id,
+                rec.forum_id.unwrap(),
                 &user_id,
             ),
             user_id,
@@ -149,18 +142,11 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
 pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
     let rec = sqlx::query!(
         r#"
-        SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, subforum_id FROM posts WHERE post_id = ?
+        SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, posts.subforum_id, forum_id FROM posts
+        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        WHERE post_id = ?
         "#,
         post_id
-    )
-    .fetch_one(pool)
-    .await?;
-
-    let forum_id = sqlx::query!(
-        r#"
-        SELECT forum_id FROM subforums WHERE subforum_id = ?
-        "#,
-        rec.subforum_id
     )
     .fetch_one(pool)
     .await?;
@@ -174,7 +160,7 @@ pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
         links: generate_post_links(
             rec.post_id,
             rec.subforum_id,
-            forum_id.forum_id,
+            rec.forum_id.unwrap(),
             &user_id,
         ),
         user_id,
