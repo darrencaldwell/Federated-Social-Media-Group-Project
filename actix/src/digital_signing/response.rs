@@ -67,16 +67,21 @@ where
 
             // create signature-input header
             // need sig1=(x, y, z); keyId=x
-            let header_string = "sig1=(*request-target, date); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=RSASSA-PSS-SHA512";
+            let header_string = "sig1=(*request-target, date, user-id); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=RSASSA-PSS-SHA512";
             res.headers_mut().insert(HeaderName::from_static("signature-input"), HeaderValue::from_static(header_string));
             let date = Date(SystemTime::now().into());
             res.headers_mut().insert(HeaderName::from_static("date"), HeaderValue::from_str(&date.to_string()).unwrap());
 
+            let request_headers = res.request().headers().clone(); // needed for borrowing shenanigans
+            let user = request_headers.get("user-id").unwrap().to_str().unwrap();
+            res.headers_mut().insert(HeaderName::from_static("user-id"), HeaderValue::from_str(user).unwrap());
+
             // sign
             // TODO: check if we want to not just create our own host header, instead of using the
             // others host
-            let string_to_sign = format!("*request-target: {}\ndate: {}", res.request().path(),
-            date.to_string());
+            let string_to_sign = format!("*request-target: {}\ndate: {}\n user-id: {}", res.request().path(),
+            date.to_string(),
+            res.request().headers().get("user-id").unwrap().to_str().unwrap());
 
             let key_pair = res.request().app_data::<Data<PKey<Private>>>().unwrap().clone();
 
