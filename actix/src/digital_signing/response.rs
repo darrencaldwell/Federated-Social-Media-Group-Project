@@ -64,6 +64,10 @@ where
 
         Box::pin(async move {
             let mut res = fut.await?;
+            println!("{:?}", res.request().path());
+            if res.request().path() == "/api/users/login" || res.request().path() == "/api/users/register" {
+                return Ok(res)
+            };
 
             // create signature-input header
             // need sig1=(x, y, z); keyId=x
