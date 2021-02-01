@@ -2,7 +2,7 @@
   "name": "cs3099",
   "version": "0.1.0",
   "private": true,
-  "homepage": "./",
+  "homepage": "https://cs3099user-b5.host.cs.st-andrews.ac.uk",
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "set PORT=21463 && react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
+    "build": "GENERATE_SOURCEMAP=true react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
