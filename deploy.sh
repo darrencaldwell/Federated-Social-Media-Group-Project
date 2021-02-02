@@ -1,6 +1,5 @@
 #!/bin/bash
 cd react-front-end
-pkill -x npm
 npm ci
 npm run build
 cd ../
