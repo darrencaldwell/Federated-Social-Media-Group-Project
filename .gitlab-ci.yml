@@ -28,6 +28,7 @@ rust-build:
       - actix/target/
   before_script:
     - apk update
+    - apk add openssl
     - apk add openssl-dev
     - apk add build-base
     - apk add pkgconfig
