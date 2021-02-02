@@ -29,6 +29,7 @@ rust-build:
   before_script:
     - apk update
     - apk add openssl
+    - apk add build-base
     - apk add mariadb-client
 
   script:
