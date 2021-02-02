@@ -8,11 +8,10 @@ stages:
 
 node-build:
   stage: build
-  image: node:current-buster
+  image: node:current-alpine3.10
   cache:
     paths:
       - $CI_PROJECT_DIR/.cache/npm
-
   before_script:
     - mkdir -p $CI_PROJECT_DIR/.cache/npm
   script:
@@ -22,15 +21,14 @@ node-build:
 
 rust-build:
   stage: build
-  image: rust:latest
+  image: rust:alpine
   cache:
     paths:
       - actix/cargo/
       - actix/target/
-      - apt/
   before_script:
-    - apt-get update -yq
-    - apt-get install -o dir::cache::archives="$APT_CACHE_DIR" -y mariadb-client
+    - apk add --no-cache mariadb-client
+
   script:
     - cd actix
     - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
@@ -38,15 +36,11 @@ rust-build:
     - cargo check
 
 deploy_staging:
-  type: deploy
+  stage: deploy
   environment:
     name: staging
-  cache:
-    paths:
-      - apt/
   before_script:
-    - apt-get update -yq
-    - apt-get install -o dir::cache::archives="$APT_CACHE_DIR" -y openssh-client
+    - apk add --no-cache openssh-client
     - eval $(ssh-agent -s)
     - chmod 600 .ssh/id_rsa
     - ssh-add .ssh/id_rsa
@@ -62,4 +56,3 @@ variables:
     MYSQL_ROOT_PASSWORD: "pass"
     MYSQL_PASSWORD: "123"
     CARGO_HOME: $CI_PROJECT_DIR/actix/cargo
-    APT_CACHE_DIR: $CI_PROJECT_DIR/apt
