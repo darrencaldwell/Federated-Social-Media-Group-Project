@@ -29,8 +29,7 @@ rust-build:
   before_script:
     - apk update
     - apk add build-base
-    - apk add musl-dev
-    - apk add libc-dev
+    - apk add pkgconfig
     - apk add mariadb-client
 
   script:
