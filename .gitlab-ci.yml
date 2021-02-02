@@ -42,7 +42,8 @@ deploy_staging:
   before_script:
     - apk update
     - apk add build-base
-    - apk add musl-dev    
+    - apk add musl-dev
+    - apk add libc-dev
     - apk add openssh-client
     - eval $(ssh-agent -s)
     - chmod 600 .ssh/id_rsa
