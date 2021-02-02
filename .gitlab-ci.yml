@@ -53,7 +53,7 @@ deploy_staging:
     - mkdir -p .ssh
     - chmod 700 .ssh
   script:
-    - ssh -o "StrictHostKeyChecking=no" cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk "cd Documents/project-code && git checkout master && git pull origin master && tmux kill-session -t 'deploy' &&tmux new-session -d -s 'deploy' './deploy.sh; exec $SHELL'"
+    - ssh -o "StrictHostKeyChecking=no" cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk "cd Documents/project-code && git checkout master && git pull origin master && tmux new-session -d -A -s deploy && tmux send-keys -t deploy './deploy.sh' C-m"
   only:
     - master
 
