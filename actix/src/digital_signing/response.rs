@@ -65,6 +65,8 @@ where
         Box::pin(async move {
             let mut res = fut.await?;
             println!("{:?}", res.request().path());
+            // local paths don't need signed, and these ones in particular won't have an associated
+            // user-id with the request, so ignore them
             if res.request().path() == "/api/users/login" || res.request().path() == "/api/users/register" {
                 return Ok(res)
             };
@@ -83,9 +85,12 @@ where
             // sign
             // TODO: check if we want to not just create our own host header, instead of using the
             // others host
-            let string_to_sign = format!("*request-target: {}\ndate: {}\n user-id: {}", res.request().path(),
+            let string_to_sign = format!("*request-target: {} {}\ndate: {}\nuser-id: {}",
+            res.request().method().as_str().to_lowercase(),
+            res.request().path(),
             date.to_string(),
             res.request().headers().get("user-id").unwrap().to_str().unwrap());
+            println!("{:?}",string_to_sign);
 
             let key_pair = res.request().app_data::<Data<PKey<Private>>>().unwrap().clone();
 
