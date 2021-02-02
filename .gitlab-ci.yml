@@ -31,7 +31,6 @@ rust-build:
     - apk add openssl-dev
     - apk add build-base
     - apk add pkgconfig
-    - apk add libssl-dev
     - apk add mariadb-client
 
   script:
