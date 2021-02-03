@@ -63,26 +63,6 @@ fn gen_links(comment_id: u64, user_id: &String, post_id: u64, subforum_id: u64, 
     }
 }
 
-/// Helper function to query db for subforum a post is within
-async fn get_subforum(post_id: u64, pool: &MySqlPool) -> Result<u64> {
-    Ok(sqlx::query!(
-        "SELECT subforum_id FROM posts WHERE post_id = ?",
-        post_id)
-        .fetch_one(pool)
-        .await?
-        .subforum_id)
-}
-
-/// Helper function to query db for forum a comment is within
-async fn get_forum(subforum_id: u64, pool: &MySqlPool) -> Result<u64> {
-    Ok(sqlx::query!(
-        " SELECT forum_id FROM subforums WHERE subforum_id = ?",
-        subforum_id)
-        .fetch_one(pool)
-        .await?
-        .forum_id)
-}
-
 /// POSTS a comment given a post to comment on and a comment request
 pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
                             pool: &MySqlPool) -> Result<Comment> {
@@ -98,14 +78,19 @@ pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
 
     tx.commit().await?;
 
-    let subforum_id = get_subforum(post_id, pool).await?;
-    let forum_id = get_forum(subforum_id, pool).await?;
+    let rec = sqlx::query!(
+        r#"SELECT posts.subforum_id, forum_id as "forum_id!"
+        FROM posts LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        WHERE post_id = ?"#,
+        post_id)
+        .fetch_one(pool)
+        .await?;
 
     Ok(Comment {
         id: comment_id,
         comment_content: comment_request.comment_content,
         post_id,
-        links: gen_links(comment_id, &comment_request.user_id, post_id, subforum_id, forum_id),
+        links: gen_links(comment_id, &comment_request.user_id, post_id, rec.subforum_id, rec.forum_id),
         user_id: comment_request.user_id,
     })
 
@@ -114,13 +99,15 @@ pub async fn insert_comment(post_id: u64, comment_request: CommentRequest,
 /// Get all comments within a post
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, UuidFromBin(user_id) AS "user_id: String", comment_id FROM comments WHERE post_id = ?"#,
+        r#"SELECT comment, UuidFromBin(comments.user_id) AS "user_id: String", comment_id,
+        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!"
+        FROM comments
+        LEFT JOIN posts on comments.post_id = posts.post_id
+        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        WHERE comments.post_id = ?"#,
         post_id)
         .fetch_all(pool)
         .await?;
-
-    let subforum_id = get_subforum(post_id, pool).await?;
-    let forum_id = get_forum(subforum_id, pool).await?;
 
     let comments: Vec<Comment> = recs.into_iter()
         .map(|rec| {
@@ -130,7 +117,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
                 comment_content: rec.comment,
                 post_id,
                 links: gen_links(rec.comment_id, &user_id, post_id,
-                                 subforum_id, forum_id),
+                                 rec.subforum_id, rec.forum_id),
                 user_id,
             }
         }).collect();
@@ -143,20 +130,23 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
 /// Get a single comment by it's id
 pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
     let rec = sqlx::query!(
-        r#"SELECT comment, UuidFromBin(user_id) AS "user_id: String", post_id FROM comments WHERE comment_id = ?"#,
+        r#"SELECT comment, UuidFromBin(comments.user_id) AS "user_id: String", comments.post_id,
+        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!"
+        FROM comments
+        LEFT JOIN posts on comments.post_id = posts.post_id
+        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        WHERE comment_id = ?"#,
         comment_id)
         .fetch_one(pool)
         .await?;
 
-    let subforum_id = get_subforum(rec.post_id, pool).await?;
-    let forum_id = get_forum(subforum_id, pool).await?;
     let user_id = rec.user_id.unwrap();
 
     Ok(Comment {
         id: comment_id,
         comment_content: rec.comment,
         post_id: rec.post_id,
-        links: gen_links(comment_id, &user_id, rec.post_id, subforum_id, forum_id),
+        links: gen_links(comment_id, &user_id, rec.post_id, rec.subforum_id, rec.forum_id),
         user_id
     })
 }
