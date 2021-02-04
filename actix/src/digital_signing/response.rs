@@ -7,11 +7,11 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::SystemTime;
 
-use openssl::sign::{Signer, Verifier};
+use openssl::sign::{Signer};
 use openssl::rsa::Padding;
 use openssl::pkey::{PKey, Private};
 use openssl::hash::MessageDigest;
-use openssl::base64::{encode_block, decode_block};
+use openssl::base64::{encode_block};
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -66,8 +66,13 @@ where
             let mut res = fut.await?;
             println!("{:?}", res.request().path());
             // local paths don't need signed, and these ones in particular won't have an associated
-            // user-id with the request, so ignore them
-            if res.request().path() == "/api/users/login" || res.request().path() == "/api/users/register" {
+            // user-id with the request, so ignore them. This includes requests for our key
+            // TODO: we may still want to sign responses for the api key, but we need to figure out
+            // what to do if they dont want to send a user id for it? we might require that they
+            // do.
+            if res.request().path() == "/api/users/login"
+                || res.request().path() == "/api/users/register"
+                || res.request().path() == "/api/key" {
                 return Ok(res)
             };
 
