@@ -1,4 +1,4 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client, web::Data};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client};
 use actix_service::{Service, Transform};
 
 use anyhow::Result;
@@ -7,19 +7,16 @@ use std::cell::RefCell;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
+use actix_web::http::Uri;
+use std::str::FromStr;
+use std::convert::TryFrom;
 
-use base64;
-use ring::{
-    rand,
-    signature::{self, KeyPair},
-};
-
-use serde::{Serialize, Deserialize};
-use openssl::sign::{Signer, Verifier};
+use serde::{Deserialize};
+use openssl::sign::{Verifier};
 use openssl::rsa::Padding;
-use openssl::pkey::{PKey, Private};
+use openssl::pkey::{PKey};
 use openssl::hash::MessageDigest;
-use openssl::base64::{encode_block, decode_block};
+use openssl::base64::{decode_block};
 
 #[derive(Debug)]
 struct SignatureInput {
@@ -117,13 +114,14 @@ where
 
                 // get header value for sig input
                 let signature_input = headers.get("Signature-Input").unwrap().to_str().unwrap();
+
                 // TODO: check for 0 splits, could be caught later potentially. - Darren
                 let iter_signature_input = signature_input.split(";");
 
                 // build struct and do soft validation on signature-input header contents
                 // TODO: can make this better by using an enum but im lazy x - Darren
-                // TODO: handle errors better, as of now unwraps simply panic and kill the worker,
-                // telling nothing to the sender. - Darren
+                // TODO: realistically only the created and expires will fail to parse, but these
+                // aren't in the protocl so we can kinda of ignore them for now - Darren
                 for entry in iter_signature_input {
                     let trim_entry = entry.trim();
                     if trim_entry.starts_with("sig1=") {
@@ -139,13 +137,11 @@ where
                         sig_input_struct.expires = trim_entry.strip_prefix("expires=").unwrap().parse::<u64>().unwrap();
                     }
                     else if trim_entry.starts_with("keyId=") {
-                        // TODO: parse this in the struct as an http::Uri for better error checking
                         sig_input_struct.key_id = trim_entry.strip_prefix("keyId=").unwrap().to_string();
                     }
                     else {
                         // invalid attribute used in request
                         let body = format!("Invalid signature-input attribute: {}", trim_entry);
-                        println!("Error: request for: {}, {}", req.path(), body);
                         return Ok(req.into_response(HttpResponse::BadRequest().body(body).into_body()))
                     }
                 }
@@ -153,16 +149,14 @@ where
 
                 // check starts and ends with parenthesis
                 if !sig_input_struct.covered_content.starts_with("(") || !sig_input_struct.covered_content.ends_with(")") {
-                    // error
+                    // if not, then error
                     let body = format!("Invalid sig1= not surrounded by parenthesis: {}", sig_input_struct.covered_content);
-                    println!("Error: request for: {}, {}", req.path(), body);
                     return Ok(req.into_response(HttpResponse::BadRequest().body(body).into_body()))
                 }
-                // remove parenthesis
                 sig_input_struct.covered_content = sig_input_struct.covered_content.strip_prefix("(").unwrap().to_string();
                 sig_input_struct.covered_content = sig_input_struct.covered_content.strip_suffix(")").unwrap().to_string();
-                // seperate by commas
                 let iter = sig_input_struct.covered_content.split(",");
+
                 // check each one against headers, dealing with speical * cases
                 // meanwhile building signature input
 
@@ -175,8 +169,8 @@ where
                 let mut signature_strings = Vec::new();
                 for field in iter {
                     let field_trim = field.trim();
-                    let req_tar_string = "*request-target";
 
+                    let req_tar_string = "*request-target";
                     if field_trim.starts_with(req_tar_string) {
                         signature_strings.push(format!("{}: {}", req_tar_string, req.path()));
                     }
@@ -186,7 +180,6 @@ where
                         // check field against headers, if exist add, else error
                         if !headers.contains_key(field_trim) {
                             let body = format!("No header exists for: {}", field_trim);
-                            println!("Error: request for: {}, {}", req.path(), body);
                             return Ok(req.into_response(HttpResponse::BadRequest().body(body).into_body()))
                         }
 
@@ -199,25 +192,25 @@ where
                     }
                 }
 
+                // used so serde can deal with the key: <key> from the api response
                 #[derive(Deserialize)]
                 struct Key {
                     key: String,
                 };
 
-                // make request for key
-                // TODO: store key in database, query that, then make request, or be a bad noodle
-                // and just always ask for it
-                //
-                // honestly this client code is horrendous and it's not even my fault
-               let client = Client::default();
-               let response = client.get(sig_input_struct.key_id)
-                  .send()     // <- Send request
-                  .await      // <- Wait for response
-                  .unwrap()
-                  .json::<Key>()
-                  .await;
+                // TODO: potentially cache key in db per domain
+                // TODO: extract domain from keyId
 
-               // TODO: check we got a valid key response
+                // makes request for key, returning an error if this fails, or key isn't a valid
+                // string
+               let client = Client::default();
+               let unparsed_key = match client.get(&sig_input_struct.key_id).send().await {
+                   Ok(mut response) => match response.json::<Key>().await {
+                       Ok(key) => key,
+                       Err(_) => return Ok(req.into_response(HttpResponse::BadRequest().body("Error parsing response body").into_body())),
+                   },
+                   Err(req_err) => return Ok(req.into_response(HttpResponse::BadRequest().body(format!("Error while making key req to keyId: {}", req_err)).into_body()))
+               };
 
                // build string to sign
                let size = signature_strings.len();
@@ -225,7 +218,6 @@ where
                let mut string_to_sign = String::with_capacity(300); // arbritary alloc, should be enough for most signature inputs without any reallocs
                for field in signature_strings {
                    if size == index {
-                       // just add
                        string_to_sign.push_str(&field);
                    }
                    else {
@@ -234,35 +226,31 @@ where
                    }
                }
 
-            //let key_pair = req.app_data::<Data<PKey<Private>>>().unwrap().clone();
-            //let public_key_pem = key_pair.public_key_to_pem().unwrap();
-
-            /*
-            let mut signer = Signer::new(MessageDigest::sha512(), &key_pair).unwrap();
-            signer.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
-            signer.update(string_to_sign.as_ref()).unwrap();
-            let signature = signer.sign_to_vec().unwrap();
-            let enc_signature = encode_block(&signature);
-            */
-
-            // TODO: key could be send over as invalid, response should tell them that
+            // have checked signature exists, value should be a valid string (hopefully)
             let enc_signature = req.headers().get("signature").unwrap().to_str().unwrap();
 
-            let public_key_parsed = PKey::public_key_from_pem(&response.unwrap().key.as_ref()).unwrap();
+            let public_key_parsed = match PKey::public_key_from_pem(&unparsed_key.key.as_ref()) {
+                Ok(key) => key,
+                Err(_) =>return Ok(req.into_response(HttpResponse::BadRequest().body("Error parsing public key, invalid format(?)").into_body())),
+            };
+
             let mut verifier = Verifier::new(MessageDigest::sha512(), &public_key_parsed).unwrap();
             verifier.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
             verifier.update(string_to_sign.as_ref()).unwrap();
 
-            let denc_signature = decode_block(&enc_signature).unwrap();
+            let denc_signature = match decode_block(&enc_signature) {
+                Ok(decoded) => decoded,
+                Err(e) =>return Ok(req.into_response(HttpResponse::BadRequest().body(format!("Error decoding signature from base64: {}", e)).into_body())),
+            };
+
             if verifier.verify(&denc_signature).unwrap() {
                 return srv.call(req).await
             } else {
-                return Ok(req.into_response(HttpResponse::BadRequest().body("Error signing signature, may not match").into_body()))
+                return Ok(req.into_response(HttpResponse::BadRequest().body("Error signing signature: may not match").into_body()))
             }
 
             }
             else {
-                // creates an error response and sends it back to the sender
                 return Ok(req.into_response(HttpResponse::Unauthorized().finish().into_body()))
             }
         })
