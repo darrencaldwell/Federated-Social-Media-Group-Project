@@ -94,6 +94,11 @@ where
 
             let headers = req.headers();
 
+            if (headers.contains_key("Signature") || headers.contains_key("Signature-Input"))
+                && headers.contains_key("Authorization") {
+                return Ok(req.into_response(HttpResponse::Unauthorized().body("Cannot have both signature and auth headers").into_body()))
+            }
+
             if let Some(token_field) = headers.get("Authorization") {
                 if let Ok(token_str) = token_field.to_str() {
                     if token_str.len() > 8 {

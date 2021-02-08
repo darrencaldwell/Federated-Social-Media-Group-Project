@@ -51,10 +51,11 @@ async fn main() -> Result<()> {
             // Data is functionally a map of Type:Value
             .data(key_pair.clone())
             .data(pool.clone())
-            // wrap is for "wrapping" middlewaare
-            .wrap(middleware::Compress::default())
+            .wrap(digital_signing::ProxyReq)
+            // auth middleware has to be at bottom,
             .wrap(digital_signing::RequestAuth)
             .wrap(digital_signing::ResponseSign)
+            .wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
             // adds routes from subdirectories
             .service(get_key)
