@@ -20,8 +20,7 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
     // need sig1=(x, y, z); keyId=x
     let header_string = "sig1=(*request-target, date, user-id); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=RSASSA-PSS-SHA512";
     res_headers.insert(HeaderName::from_static("signature-input"), HeaderValue::from_static(header_string));
-    //let date = Date(SystemTime::now().into());
-    let date = "a";
+    let date = Date(SystemTime::now().into());
     res_headers.insert(HeaderName::from_static("date"), HeaderValue::from_str(&date.to_string())?);
 
     //TODO: what if userid doesn't exist!!
