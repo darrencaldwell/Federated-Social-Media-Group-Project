@@ -1,17 +1,12 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, http::header::HeaderName, http::header::HeaderValue, web::Data, http::header::Date};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, web::Data};
 use actix_service::{Service, Transform};
+use super::util;
 
 use anyhow::Result;
 use futures::future::{ok, Future, Ready};
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use std::time::SystemTime;
-
-use openssl::sign::{Signer};
-use openssl::rsa::Padding;
 use openssl::pkey::{PKey, Private};
-use openssl::hash::MessageDigest;
-use openssl::base64::{encode_block};
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -64,7 +59,6 @@ where
 
         Box::pin(async move {
             let mut res = fut.await?;
-            println!("{:?}", res.request().path());
             // local paths don't need signed, and these ones in particular won't have an associated
             // user-id with the request, so ignore them. This includes requests for our key
             // TODO: we may still want to sign responses for the api key, but we need to figure out
@@ -76,37 +70,13 @@ where
                 return Ok(res)
             };
 
-            // create signature-input header
-            // need sig1=(x, y, z); keyId=x
-            let header_string = "sig1=(*request-target, date, user-id); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=RSASSA-PSS-SHA512";
-            res.headers_mut().insert(HeaderName::from_static("signature-input"), HeaderValue::from_static(header_string));
-            let date = Date(SystemTime::now().into());
-            res.headers_mut().insert(HeaderName::from_static("date"), HeaderValue::from_str(&date.to_string()).unwrap());
-
-            let request_headers = res.request().headers().clone(); // needed for borrowing shenanigans
-            let user = request_headers.get("user-id").unwrap().to_str().unwrap();
-            res.headers_mut().insert(HeaderName::from_static("user-id"), HeaderValue::from_str(user).unwrap());
-
-            // sign
-            // TODO: check if we want to not just create our own host header, instead of using the
-            // others host
-            let string_to_sign = format!("*request-target: {} {}\ndate: {}\nuser-id: {}",
-            res.request().method().as_str().to_lowercase(),
-            res.request().path(),
-            date.to_string(),
-            res.request().headers().get("user-id").unwrap().to_str().unwrap());
-            println!("{:?}",string_to_sign);
-
-            let key_pair = res.request().app_data::<Data<PKey<Private>>>().unwrap().clone();
-
-            let mut signer = Signer::new(MessageDigest::sha512(), &key_pair).unwrap();
-            signer.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
-            signer.update(string_to_sign.as_ref()).unwrap();
-            let signature = signer.sign_to_vec().unwrap();
-            let enc_signature = encode_block(&signature);
-
-            res.headers_mut().insert(HeaderName::from_static("signature"), HeaderValue::from_str(&enc_signature).unwrap());
-
+            let req = res.request().clone();
+            let req_headers = req.headers();
+            let req_method = req.method().as_str();
+            let req_path = req.path();
+            let key_pair = req.app_data::<Data<PKey<Private>>>().unwrap().clone();
+            // modifies the mutable res headers with the signature.
+            util::sign_signature(res.headers_mut(), &req_headers, &req_method, &req_path, &key_pair).unwrap();
             Ok(res)
         })
     }
