@@ -59,7 +59,6 @@ where
 
         Box::pin(async move {
             let mut res = fut.await?;
-            println!("{:?}", res.request().path());
             // local paths don't need signed, and these ones in particular won't have an associated
             // user-id with the request, so ignore them. This includes requests for our key
             // TODO: we may still want to sign responses for the api key, but we need to figure out
