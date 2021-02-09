@@ -3,7 +3,7 @@ import {Card} from "react-bootstrap";
 import {Container} from 'react-bootstrap';
 import '../styling/container-pages.css';
 
-// props: comment (json), createurl
+// props: comment (json), posturl
 class Comment extends Component {
     
     render() {
@@ -13,17 +13,17 @@ class Comment extends Component {
                     <Card.Body>
                         UserID:{this.props.comment.userId}-  {this.props.comment.commentContent}
                     </Card.Body>
-                    
+                    <Comments url={"/api/comments" + this.props.comment.id + "/comments"} createurl={"/api/comments" + this.props.comment.id + "/comments"}/>
+                    <a className="button create-forum-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>
+                        Create Comment
+                    </a>
                 </Card>
-                <a className="button create-forum-button" href={this.props.createurl}>
-                    Create Comment
-                </a>
             </div>
         )
     }
 }
 
-// props: url, createurl
+// props: url, posturl
 export default class Comments extends Component {
     constructor(props) {
         super(props);
@@ -69,7 +69,7 @@ export default class Comments extends Component {
                     {/*map is used to apply this html for each comment in the list */}
                     {this.state.commentList.map((comment) => (
                         // the Comment element above is used for this, which takes the comment json
-                        <Comment comment={comment} createurl={this.props.createurl}/>
+                        <Comment comment={comment} posturl={this.props.posturl}/>
                     ))}
                 </Container>
             )
