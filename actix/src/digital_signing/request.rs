@@ -116,7 +116,7 @@ where
                 match util::check_signature(headers, req.path(), &req.method().as_str().to_lowercase()).await {
                     Ok(_) => return srv.call(req).await,
                     Err(e) =>return {
-                        let error = format!("Signature verification: {}\nWith signature-input: {:?}\nWith signature {:?}",
+                        let error = format!("Signature verification: {}. With signature-input: {:?} With signature {:?}",
                                             e,
                                             req.headers().get("signature-input").unwrap(),
                                             req.headers().get("signature").unwrap());
