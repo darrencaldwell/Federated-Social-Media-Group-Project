@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Card, Container, Nav} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
-import axios from 'axios'
+// import axios from 'axios'
 
 class Account extends React.Component {
 
@@ -13,14 +13,14 @@ class Account extends React.Component {
         }
     }
 
-    componentDidMount() {
-        axios.get('local/users/{id}')
-            .then(res => {
-                console.log(res)
-            }).catch(err => {
-                alert("something went wrong")
-        })
-    }
+    // componentDidMount() {
+    //     axios.get('local/users/{id}')
+    //         .then(res => {
+    //             console.log(res)
+    //         }).catch(err => {
+    //             alert("something went wrong")
+    //     })
+    // }
 
 
     render() {
@@ -59,9 +59,6 @@ class Account extends React.Component {
                         </Card.Text>
                         <Card.Text>
                             Last name: {this.last_name}
-                        </Card.Text>
-                        <Card.Text>
-                            Username: {localStorage.getItem('username')}
                         </Card.Text>
                         <Card.Text>
                             User id: {localStorage.getItem('userid')}
