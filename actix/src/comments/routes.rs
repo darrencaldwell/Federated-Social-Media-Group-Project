@@ -15,6 +15,16 @@ async fn get_comment(
     }
 }
 
+#[get("/api/comments/{id}/comments")]
+async fn get_child_comments(
+    web::Path(id): web::Path<u64>,
+    pool: web::Data<MySqlPool>,
+    UserId(_user_id): UserId,
+) -> impl Responder {
+    comments::get_child_comments(id, &pool).await;
+    HttpResponse::Forbidden().finish()
+}
+
 #[get("/api/posts/{id}/comments")]
 async fn get_comments(
     web::Path(id): web::Path<u64>,
@@ -35,7 +45,21 @@ async fn post_comment(
     UserId(user_id): UserId
 ) -> impl Responder {
     if user_id != comment.user_id { return HttpResponse::Forbidden().finish(); }
-    match comments::insert_comment(id, comment.into_inner(), &pool).await {
+    match comments::insert_comment(id, user_id, comment.into_inner(), &pool).await {
+        Ok(comments) => HttpResponse::Ok().json(comments),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
+}
+
+#[post("/api/comments/{id}/comments")]
+async fn post_child_comment(
+    web::Path(id): web::Path<u64>,
+    pool: web::Data<MySqlPool>,
+    comment: web::Json::<comments::CommentRequest>,
+    UserId(user_id): UserId
+) -> impl Responder {
+    if user_id != comment.user_id { return HttpResponse::Forbidden().finish(); }
+    match comments::insert_child_comment(id, user_id, comment.into_inner(), &pool).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
@@ -44,5 +68,7 @@ async fn post_comment(
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(get_comment);
     cfg.service(get_comments);
+    cfg.service(get_child_comments);
     cfg.service(post_comment);
+    cfg.service(post_child_comment);
 }

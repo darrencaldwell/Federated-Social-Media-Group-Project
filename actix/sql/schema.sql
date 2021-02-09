@@ -55,11 +55,14 @@ CREATE TABLE `comments` (
   `post_id` bigint(20) unsigned NOT NULL,
   `time_submitted` time DEFAULT NULL,
   `user_id` binary(16) NOT NULL,
+  `parent_id` bigint(20) unsigned,
   PRIMARY KEY (`comment_id`),
   KEY `post_id` (`post_id`),
   KEY `comments_FK` (`user_id`),
+  KEY `parent_id` (`parent_id`),
   CONSTRAINT `comments_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  CONSTRAINT `post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`)
+  CONSTRAINT `post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`),
+  CONSTRAINT `parent_id` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`comment_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE DEFINER=`root`@`%` FUNCTION `cs3099user-b5_project`.`UuidFromBin`(_bin BINARY(16)) RETURNS binary(36)
