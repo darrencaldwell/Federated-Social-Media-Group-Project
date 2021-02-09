@@ -40,7 +40,6 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
     req_path,
     date.to_string(),
     user);
-    println!("signer\n{}", string_to_sign);
 
     let mut signer = Signer::new(MessageDigest::sha512(), &private_key)?;
     signer.set_rsa_padding(Padding::PKCS1_PSS)?;
@@ -182,7 +181,6 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
            index = index + 1;
        }
     }
-    println!("verifier\n{}", string_to_sign);
 
     // have checked signature exists, value should be a valid string (hopefully)
     let mut enc_signature = req_headers.get("signature").unwrap().to_str().unwrap();
