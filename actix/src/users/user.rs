@@ -155,20 +155,26 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
     })
 }
 
-/// Get account details within a post
-// pub async fn get_account(pool: &MySqlPool) -> Result<User> {
-//     let recs = sqlx::query!(
-//         r#"SELECT first_name, last_name, UuidFromBin(user_id) AS "user_id: String", email FROM users WHERE user_id = ?"#) //get comments
-//         .fetch_one(pool)
-//         .await?;
-//
-//     Ok( {
-//         embedded: CommentList { comment_list: comments }
-//     })
-// }
+/// Get account details
+pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser> {
+    let rec = sqlx::query!(
+        r#"SELECT username, first_name, last_name, UuidFromBin(user_id) AS "user_id: String", email FROM users WHERE user_id = ? and server = "local""#,
+        user_id) //get comments
+        .fetch_one(pool)
+        .await?;
+
+    Ok(LocalUser{
+        links: gen_links(&user_id),
+        local_username: rec.username,
+        local_user_id: user_id,
+        first_name: rec.first_name.unwrap(),
+        last_name: rec.last_name.unwrap(),
+        email: rec.email.unwrap()
+    })
+}
 
 /// Registers a [user] into the database and returns a [user] object
-pub async fn register(username: String, password: String, first_name: String, last_name: String, email: String, pool: &MySqlPool) -> Result<User> {
+pub async fn register(username: String, password: String, first_name: String, last_name: String, email: String, pool: &MySqlPool) -> Result<LocalUser> {
     let tx = pool.begin().await?;
     let password_hash: String = hash(password, 10)?;
 
@@ -190,22 +196,22 @@ pub async fn register(username: String, password: String, first_name: String, la
 
     tx.commit().await?;
 
-    let new_user = User {
-        username,
-        links: gen_links(&user_id),
-        user_id,
-    };
-
-    // let local_user = LocalUser {
-    //     local_username: username.clone(),
-    //     local_user_id: user_id.clone(),
-    //     first_name,
-    //     last_name,
-    //     email,
+    // let new_user = User {
+    //     username,
     //     links: gen_links(&user_id),
+    //     user_id,
     // };
 
-    Ok(new_user)
+    let local_user = LocalUser {
+        links: gen_links(&user_id),
+        local_username: username,
+        local_user_id: user_id,
+        first_name,
+        last_name,
+        email,
+    };
+
+    Ok(local_user)
 }
 
 

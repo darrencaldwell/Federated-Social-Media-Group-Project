@@ -65,22 +65,22 @@ async fn get_users(
     }
 }
 
-// #[get("/local/users/{id}")]
-// async fn get_account(
-//     web::Path(id): web::Path<u64>,
-//     pool: web::Data<MySqlPool>,
-//     UserId(_user_id): UserId,
-// ) -> impl Responder {
-//     match user::get_account(&pool).await {
-//         Ok(account) => HttpResponse::Ok().json(account),
-//         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
-//     }
-// }
+#[get("/local/users/{id}")]
+async fn get_account(
+    web::Path(id): web::Path<String>,
+    pool: web::Data<MySqlPool>,
+    UserId(_user_id): UserId,
+) -> impl Responder {
+    match user::get_account(id, &pool).await {
+        Ok(account) => HttpResponse::Ok().json(account),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
+}
 
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
     cfg.service(get_users);
     cfg.service(get_user);
-    // cfg.service(get_account);
+    cfg.service(get_account);
 }

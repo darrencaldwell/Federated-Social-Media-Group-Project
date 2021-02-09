@@ -2,6 +2,8 @@ import React from "react";
 import {Button, Card, Container, Nav} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
+import axios from 'axios'
+
 class Account extends React.Component {
 
     constructor() {
@@ -9,6 +11,15 @@ class Account extends React.Component {
         this.state = {
             uploadedPicture: false
         }
+    }
+
+    componentDidMount() {
+        axios.get('local/users/{id}')
+            .then(res => {
+                console.log(res)
+            }).catch(err => {
+                alert("something went wrong")
+        })
     }
 
 
@@ -40,6 +51,15 @@ class Account extends React.Component {
                 </Nav>
                 <Card>
                     <Card.Body>
+                        <Card.Text>
+                            Username: {localStorage.getItem('username')}
+                        </Card.Text>
+                        <Card.Text>
+                            First name: {this.first_name}
+                        </Card.Text>
+                        <Card.Text>
+                            Last name: {this.last_name}
+                        </Card.Text>
                         <Card.Text>
                             Username: {localStorage.getItem('username')}
                         </Card.Text>
