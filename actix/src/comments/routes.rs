@@ -21,8 +21,10 @@ async fn get_child_comments(
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    comments::get_child_comments(id, &pool).await;
-    HttpResponse::Forbidden().finish()
+    match comments::get_child_comments(id, &pool).await {
+        Ok(comments) => HttpResponse::Ok().json(comments),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }
 
 #[get("/api/posts/{id}/comments")]

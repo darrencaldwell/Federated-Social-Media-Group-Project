@@ -5,7 +5,7 @@ import '../styling/container-pages.css';
 
 // props: comment (json), posturl
 class Comment extends Component {
-    
+
     render() {
         return (
             <div>
@@ -13,7 +13,7 @@ class Comment extends Component {
                     <Card.Body>
                         UserID:{this.props.comment.userId}-  {this.props.comment.commentContent}
                     </Card.Body>
-                    <Comments url={"/api/comments" + this.props.comment.id + "/comments"} createurl={"/api/comments" + this.props.comment.id + "/comments"}/>
+                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} createurl={"/api/comments/" + this.props.comment.id + "/comments"}/>
                     <a className="button create-forum-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>
                         Create Comment
                     </a>
@@ -37,7 +37,7 @@ export default class Comments extends Component {
         try {
             // the url needs the post id from the props
             let url = this.props.url;
-            
+
             let res = await fetch(url
                 , {
                     method: 'get', // we're making a GET request

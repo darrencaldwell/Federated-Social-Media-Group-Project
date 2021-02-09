@@ -52,7 +52,6 @@ async fn main() -> Result<()> {
             .data(key_pair.clone())
             .data(pool.clone())
             // wrap is for "wrapping" middlewaare
-<<<<<<< HEAD
             .wrap(middleware::Compress::default())
             .wrap(digital_signing::RequestAuth)
             .wrap(digital_signing::ResponseSign)
