@@ -47,8 +47,9 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
     signer.update(string_to_sign.as_ref())?;
     let signature = signer.sign_to_vec()?;
     let enc_signature = encode_block(&signature);
+    let final_signature = format!("sig1=:{}:", enc_signature);
 
-    res_headers.insert(HeaderName::from_static("signature"), HeaderValue::from_str(&enc_signature)?);
+    res_headers.insert(HeaderName::from_static("signature"), HeaderValue::from_str(&final_signature)?);
     Ok(())
 }
 
@@ -184,7 +185,14 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     println!("verifier\n{}", string_to_sign);
 
     // have checked signature exists, value should be a valid string (hopefully)
-    let enc_signature = req_headers.get("signature").unwrap().to_str().unwrap();
+    let mut enc_signature = req_headers.get("signature").unwrap().to_str().unwrap();
+    // format: sig1=:<enc_signature>:
+    if !enc_signature.starts_with("sig1=:") ||
+       !enc_signature.ends_with(":") {
+        return Err(anyhow!("Error: invalid signature format, must be 'sig1=:<enc_signature>:'"))
+    }
+    enc_signature = enc_signature.strip_prefix("sig1=:").unwrap()
+        .strip_suffix(":").unwrap();
 
     let public_key_parsed = match PKey::public_key_from_pem(&unparsed_key.key.as_ref()) {
         Ok(key) => key,
