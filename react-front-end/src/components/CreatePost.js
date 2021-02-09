@@ -18,7 +18,7 @@ class Make extends React.Component {
             titleText: defaultTitle, // the title starts as the default
             defaultBody: defaultBody, // the default body needs to be preserved
             bodyText: defaultBody, // the body starts as the default
-            url: '/api/subforums/' + this.props.subforumID + '/posts'
+            url: '/api/subforums/' + this.props.match.params.subforumID + '/posts'
         };
     }
 
@@ -61,9 +61,11 @@ class Make extends React.Component {
     }
 
     render() {
+        const backURL = "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
+
         return (
             <Container>
-                <BackButton/>
+                <BackButton url={backURL}/>
                 <Form className="createPost">
                     <Form.Label>Create Post</Form.Label>
                     <FormGroup controlId="create-title">

@@ -23,7 +23,7 @@ class PostList extends Component {
             // while fetching the list of posts, show a loading graphic
             this.setState({loading: true, listingPosts: false, listingPost: false});
             // the url needs the subforum id from the props
-            let url = '/api/subforums/' + this.props.subforumID + '/posts';
+            let url = '/api/subforums/' + this.props.match.params.subforumID + '/posts';
             let res = await fetch(url
                 , {
                     method: 'get',
@@ -63,10 +63,10 @@ class PostList extends Component {
                         {/*map is used to apply this html for each post in the list */}
                         {this.state.postList.map((post) => (
                             // the PostPreview element is used for this, which takes the post id and the post json
-                            <PostPreview key={post.id} post={post} forumID={this.props.forumID} subforumID={this.props.subforumID}/>
+                            <PostPreview key={post.id} post={post} forumID={this.props.match.params.forumID} subforumID={this.props.match.params.subforumID}/>
                         ))}
                     </Container>
-                    <a className="button" href={'/' + this.props.forumID + '/' + this.props.subforumID + '/new'}>
+                    <a className="button" href={'/' + this.props.match.params.forumID + '/' + this.props.match.params.subforumID + '/new'}>
                         New Post
                     </a>
                 </div>)

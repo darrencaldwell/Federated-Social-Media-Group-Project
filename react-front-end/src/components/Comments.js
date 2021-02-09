@@ -1,22 +1,29 @@
 import React, { Component } from 'react'
 import {Card} from "react-bootstrap";
 import {Container} from 'react-bootstrap';
+import '../styling/container-pages.css';
 
-// props: comment (json)
+// props: comment (json), createurl
 class Comment extends Component {
     
     render() {
         return (
-            <Card>
-                <Card.Body>
-                    UserID:{this.props.comment.userId}-  {this.props.comment.commentContent}
-                </Card.Body>
-            </Card>
+            <div>
+                <Card>
+                    <Card.Body>
+                        UserID:{this.props.comment.userId}-  {this.props.comment.commentContent}
+                    </Card.Body>
+                    
+                </Card>
+                <a className="button create-forum-button" href={this.props.createurl}>
+                    Create Comment
+                </a>
+            </div>
         )
     }
 }
 
-// props: postID
+// props: url, createurl
 export default class Comments extends Component {
     constructor(props) {
         super(props);
@@ -29,7 +36,7 @@ export default class Comments extends Component {
     componentDidMount = async () => {
         try {
             // the url needs the post id from the props
-            let url = '/api/posts/' + this.props.postID + '/comments';
+            let url = this.props.url;
             
             let res = await fetch(url
                 , {
@@ -62,7 +69,7 @@ export default class Comments extends Component {
                     {/*map is used to apply this html for each comment in the list */}
                     {this.state.commentList.map((comment) => (
                         // the Comment element above is used for this, which takes the comment json
-                        <Comment comment={comment}/>
+                        <Comment comment={comment} createurl={this.props.createurl}/>
                     ))}
                 </Container>
             )
