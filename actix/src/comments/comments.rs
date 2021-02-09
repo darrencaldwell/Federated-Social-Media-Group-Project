@@ -162,7 +162,7 @@ pub async fn insert_child_comment(parent_id: u64,
 
 }
 
-/// Get all comments within a post
+/// Get all top level comments within a post
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
         r#"SELECT comment, UuidFromBin(comments.user_id) AS "user_id!: String", comment_id,
@@ -171,7 +171,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.post_id = ?"#,
+        WHERE comments.post_id = ? AND parent_id IS NULL"#,
         post_id)
         .fetch_all(pool)
         .await?;
@@ -195,7 +195,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
             _self: Link {
                 href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}/comments", post_id)
             }
-        } 
+        }
     })
 }
 
