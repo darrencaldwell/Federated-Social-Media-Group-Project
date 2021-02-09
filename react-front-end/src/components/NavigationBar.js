@@ -51,9 +51,9 @@ class NavigationBar extends React.Component {
         if (this.props.isLoggedIn) {
             buttons = (
                 <Nav className="mr-auto" onClick={this.setNavClose}>
-                    <Nav.Link as={Link} to='/'>Home</Nav.Link>
+                    {/*<Nav.Link as={Link} to='/'>Home</Nav.Link>   redundant*/}
                     <Nav.Link as={Link} to='/account'>My account</Nav.Link>
-                    <Nav.Link as={Link} to='/forums'>View Forums    </Nav.Link>
+                    {/*<Nav.Link as={Link} to='/forums'>View Forums    </Nav.Link>   redundant*/}
                     <Nav.Link as={Link} to='/' onClick={() => localStorage.clear()}>Logout</Nav.Link>
                 </Nav>
             )
