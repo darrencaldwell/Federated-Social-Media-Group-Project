@@ -13,6 +13,21 @@ pub struct User {
     pub links: UserLinks,
 }
 
+/// Represents a local user separate from API user
+#[derive(Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalUser {
+    #[serde(rename = "username")]
+    pub local_username: String,
+    #[serde(rename = "user_id")]
+    pub local_user_id: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    #[serde(rename = "_links")]
+    pub links: UserLinks,
+}
+
 /// The links sent with a [User] object
 #[derive(Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -69,6 +84,7 @@ pub struct UserRegisterRequest {
     pub password: String,
     pub username: String,
 }
+
 /// Represents the response from the server upon logging in
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -115,7 +131,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
         .fetch_all(pool)
         .await?;
 
-    println!("{:?}",result);
+    println!("{:?}", result);
     let users: Vec<User> = result
         .into_iter()
         .map(|rec| {
@@ -139,34 +155,59 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
     })
 }
 
+/// Get account details within a post
+// pub async fn get_account(pool: &MySqlPool) -> Result<User> {
+//     let recs = sqlx::query!(
+//         r#"SELECT first_name, last_name, UuidFromBin(user_id) AS "user_id: String", email FROM users WHERE user_id = ?"#) //get comments
+//         .fetch_one(pool)
+//         .await?;
+//
+//     Ok( {
+//         embedded: CommentList { comment_list: comments }
+//     })
+// }
+
 /// Registers a [user] into the database and returns a [user] object
-pub async fn register(username: String, password: String, pool: &MySqlPool) -> Result<User> {
+pub async fn register(username: String, password: String, first_name: String, last_name: String, email: String, pool: &MySqlPool) -> Result<User> {
     let tx = pool.begin().await?;
     let password_hash: String = hash(password, 10)?;
 
     let user_id: String = sqlx::query!(
-        r#"insert into users (username, password_hash, user_id, server) values(?, ?, UuidToBin(UUID()), ?) RETURNING UuidFromBin(user_id) AS user_id"#,
+        r#"insert into users (username, password_hash, user_id, server, first_name, last_name, email) values(?, ?, UuidToBin(UUID()), ?, ?, ?, ?) RETURNING UuidFromBin(user_id) AS user_id"#,
         username,
         password_hash,
-        "local"
+        "local",
+        first_name,
+        last_name,
+        email
     )
-    .fetch_one(pool)
-    .await?
-    // Due to either mariaDB or sqlx, it seems to think the return result is a binary and not a
-    // string, since we know it will be a valid string we can use this get_unchecked to get the
-    // UUID string.
-    .get_unchecked(0);
+        .fetch_one(pool)
+        .await?
+        // Due to either mariaDB or sqlx, it seems to think the return result is a binary and not a
+        // string, since we know it will be a valid string we can use this get_unchecked to get the
+        // UUID string.
+        .get_unchecked(0);
 
     tx.commit().await?;
 
     let new_user = User {
         username,
         links: gen_links(&user_id),
-        user_id: user_id
+        user_id,
     };
+
+    // let local_user = LocalUser {
+    //     local_username: username.clone(),
+    //     local_user_id: user_id.clone(),
+    //     first_name,
+    //     last_name,
+    //     email,
+    //     links: gen_links(&user_id),
+    // };
 
     Ok(new_user)
 }
+
 
 /// Used for verifying a login attempt, checks that the credentials match
 pub async fn verify(
@@ -178,29 +219,29 @@ pub async fn verify(
         r#"SELECT password_hash, UuidFromBin(user_id) AS "user_id: String" FROM users WHERE username = ?"#,
         username
     )
-    // Uniqueness guaranteed by database
-    .fetch_one(pool)
-    .await;
+        // Uniqueness guaranteed by database
+        .fetch_one(pool)
+        .await;
 
     let rec_result = match rec {
         Ok(rec) => rec,
         Err(e) => {
-            println!("{:?}",e);
-            return Err(LoginError::InvalidHash)
-        },
+            println!("{:?}", e);
+            return Err(LoginError::InvalidHash);
+        }
     };
 
     let password_hash = match rec_result.password_hash {
         Some(password_hash) => password_hash,
         None => {
             println!("Trying to login foreign user.");
-            return Err(LoginError::InvalidHash)
-        },
+            return Err(LoginError::InvalidHash);
+        }
     };
 
     match bcrypt::verify(password, &password_hash) {
         Ok(boolean) => if !boolean { // if password hash doesn't match
-            return Err(LoginError::InvalidHash)
+            return Err(LoginError::InvalidHash);
         },
         Err(_) => return Err(LoginError::InvalidHash),
     };
