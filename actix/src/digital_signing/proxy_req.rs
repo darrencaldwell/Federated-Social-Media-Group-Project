@@ -109,12 +109,13 @@ where
             let mut response = client_req.send_stream(payload).await.unwrap();
 
             // verify signature of response
+            /*
             let signature_verf = util::check_signature(response.headers(), &http_req.path(), &http_req.method().as_str().to_lowercase()).await;
             if signature_verf.is_err() {
                 let e = signature_verf.unwrap_err();
                 return Ok(ServiceResponse::new(http_req, HttpResponse::BadRequest().body(format!("Signature verification: {}", e)).into_body()));
             };
-
+            */
             // uses up the future to get the body so we can make a new response
             let body = response.body().await.unwrap();
 

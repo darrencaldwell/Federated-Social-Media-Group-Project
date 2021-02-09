@@ -23,8 +23,13 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
     let date = Date(SystemTime::now().into());
     res_headers.insert(HeaderName::from_static("date"), HeaderValue::from_str(&date.to_string())?);
 
-    //TODO: what if userid doesn't exist!!
-    let user = req_headers.get("user-id").unwrap().to_str()?;
+    // Only case where we sign a signature with no id is when sending an error resposne
+    let user;
+    if req_headers.contains_key("user-id") {
+        user = req_headers.get("user-id").unwrap().to_str()?;
+    } else {
+        user = "-1";
+    }
     res_headers.insert(HeaderName::from_static("user-id"), HeaderValue::from_str(user)?);
 
     // sign
