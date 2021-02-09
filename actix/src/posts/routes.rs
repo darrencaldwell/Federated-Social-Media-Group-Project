@@ -31,13 +31,13 @@ async fn get_posts(
     }
 }
 
-#[get("/api/forums/{forum_id}/subforums/{subforum_id}/posts/{post_id}")]
+#[get("/api/posts/{id}")]
 async fn get_post(
-    web::Path(post_id): web::Path<u64>,
+    web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    let result = posts::get_one(post_id, pool.get_ref()).await;
+    let result = posts::get_one(id, pool.get_ref()).await;
     match result {
         Ok(post) => HttpResponse::Ok().json(post),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),

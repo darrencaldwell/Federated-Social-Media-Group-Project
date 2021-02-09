@@ -158,7 +158,7 @@ pub async fn post_subforum(forum_id: u64, subforum_request: PostSubforumRequest,
 
 pub async fn get_subforums(forum_id: u64, pool: &MySqlPool) -> Result<Subforums> {
     let results = sqlx::query!(
-        "SELECT subforum_id, subforum_name FROM subforums")
+        "SELECT subforum_id, subforum_name FROM subforums WHERE forum_id = ?", forum_id)
         .fetch_all(pool)
         .await?;
 
