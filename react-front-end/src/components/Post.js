@@ -61,7 +61,7 @@ export class Post extends Component {
                     </Card>
                 </div>
 
-                <a className="button create-forum-button" href={"/api/posts/" + this.state.post.id + "/new"}>
+                <a className="button create-forum-button" href={"/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}>
                     Create Comment
                 </a>
 
@@ -70,7 +70,8 @@ export class Post extends Component {
                 {/*<Dropdown className="mt-3">*/}
                 {/*<Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>*/}
                 {/*<Dropdown.Menu>*/}
-                <Comments url={'/api/posts/' + this.props.match.params.postID + '/comments'} createurl={"/api/posts/" + this.state.post.postId + "/comments"}/>
+                <Comments url={'/api/posts/' + this.props.match.params.postID + '/comments'} 
+                        posturl={"/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID}/>
                 {/*</Dropdown.Menu>*/}
                 {/*</Dropdown>*/}
 
