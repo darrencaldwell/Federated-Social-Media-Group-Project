@@ -7,4 +7,4 @@ cd actix
 sh sshTunnel.sh
 nolimit cargo build --release
 pkill -x actix
-cargo run --release
+cargo run --release >> log.log 2>&1
