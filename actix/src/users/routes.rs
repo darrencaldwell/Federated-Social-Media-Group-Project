@@ -7,7 +7,7 @@ use crate::id_extractor::UserId;
 #[post("/api/users/register")]
 async fn register(post: web::Json<user::UserRegisterRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     let post = post.into_inner();
-    let user = user::register(post.username, post.password, &pool).await;
+    let user = user::register(post.username, post.password, post.first_name, post.last_name, post.email, &pool).await;
 
     match user {
         Ok(user) => HttpResponse::Ok().json(user),
@@ -65,9 +65,22 @@ async fn get_users(
     }
 }
 
+#[get("/local/users/{id}")]
+async fn get_account(
+    web::Path(id): web::Path<String>,
+    pool: web::Data<MySqlPool>,
+    UserId(_user_id): UserId,
+) -> impl Responder {
+    match user::get_account(id, &pool).await {
+        Ok(account) => HttpResponse::Ok().json(account),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
+}
+
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
     cfg.service(get_users);
     cfg.service(get_user);
+    cfg.service(get_account);
 }

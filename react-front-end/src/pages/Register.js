@@ -18,10 +18,10 @@ class Register extends React.Component {
     handleSubmit = e => {
         e.preventDefault()
         const data = {
-            firstName: this.firstName,
-            lastName: this.lastName,
-            email: this.email,
             username: this.username,
+            firstName: this.first_name,
+            lastName: this.last_name,
+            email: this.email,
             password: this.password,
             confirmPassword: this.confirmPassword,
         }
@@ -60,13 +60,13 @@ class Register extends React.Component {
                     <FormGroup controlId="fname">
                         <Form.Label>First Name</Form.Label>
                         <Form.Control type="text" placeholder="First Name"
-                                      onChange={e => this.firstName = e.target.value}/>
+                                      onChange={e => this.first_name = e.target.value}/>
                     </FormGroup>
 
                     <FormGroup controlId="lname">
                         <label>Last Name</label>
                         <Form.Control type="text" placeholder="Last Name"
-                                      onChange={e => this.lastName = e.target.value}/>
+                                      onChange={e => this.last_name = e.target.value}/>
                     </FormGroup>
 
                     <FormGroup controlId="email">
