@@ -4,7 +4,7 @@ use serde::{Deserialize};
 use anyhow::{Result, anyhow};
 use std::time::SystemTime;
 use openssl::sign::{Signer, Verifier};
-use openssl::rsa::Padding;
+use openssl::rsa::{Rsa, Padding};
 use openssl::pkey::{PKey, Private};
 use openssl::hash::MessageDigest;
 use openssl::base64::{encode_block, decode_block};
@@ -23,8 +23,13 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
     let date = Date(SystemTime::now().into());
     res_headers.insert(HeaderName::from_static("date"), HeaderValue::from_str(&date.to_string())?);
 
-    //TODO: what if userid doesn't exist!!
-    let user = req_headers.get("user-id").unwrap().to_str()?;
+    // Only case where we sign a signature with no id is when sending an error resposne
+    let user;
+    if req_headers.contains_key("user-id") {
+        user = req_headers.get("user-id").unwrap().to_str()?;
+    } else {
+        user = "-1";
+    }
     res_headers.insert(HeaderName::from_static("user-id"), HeaderValue::from_str(user)?);
 
     // sign
@@ -35,15 +40,15 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
     req_path,
     date.to_string(),
     user);
-    println!("signer\n{}", string_to_sign);
 
     let mut signer = Signer::new(MessageDigest::sha512(), &private_key)?;
     signer.set_rsa_padding(Padding::PKCS1_PSS)?;
     signer.update(string_to_sign.as_ref())?;
     let signature = signer.sign_to_vec()?;
     let enc_signature = encode_block(&signature);
+    let final_signature = format!("sig1=:{}:", enc_signature);
 
-    res_headers.insert(HeaderName::from_static("signature"), HeaderValue::from_str(&enc_signature)?);
+    res_headers.insert(HeaderName::from_static("signature"), HeaderValue::from_str(&final_signature)?);
     Ok(())
 }
 
@@ -176,13 +181,18 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
            index = index + 1;
        }
     }
-    println!("verifier\n{}", string_to_sign);
-
     // have checked signature exists, value should be a valid string (hopefully)
-    let enc_signature = req_headers.get("signature").unwrap().to_str().unwrap();
+    let mut enc_signature = req_headers.get("signature").unwrap().to_str().unwrap();
+    // format: sig1=:<enc_signature>:
+    if !enc_signature.starts_with("sig1=:") ||
+       !enc_signature.ends_with(":") {
+        return Err(anyhow!("Error: invalid signature format, must be 'sig1=:<enc_signature>:'"))
+    }
+    enc_signature = enc_signature.strip_prefix("sig1=:").unwrap()
+        .strip_suffix(":").unwrap();
 
-    let public_key_parsed = match PKey::public_key_from_pem(&unparsed_key.key.as_ref()) {
-        Ok(key) => key,
+    let public_key_parsed = match Rsa::public_key_from_pem_pkcs1(&unparsed_key.key.as_ref()) {
+        Ok(key) => PKey::from_rsa(key).unwrap(),
         Err(e) => return Err(anyhow!("Error: parsing public key: {}", e)),
     };
 

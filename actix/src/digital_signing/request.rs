@@ -18,6 +18,9 @@ use openssl::rsa::Padding;
 use openssl::pkey::{PKey};
 use openssl::hash::MessageDigest;
 use openssl::base64::{decode_block};
+use log::info;
+
+use super::util;
 
 use super::util;
 
@@ -94,6 +97,13 @@ where
 
             let headers = req.headers();
 
+            if (headers.contains_key("Signature") || headers.contains_key("Signature-Input"))
+                && headers.contains_key("Authorization") {
+                let error = "Cannot have both signature and auth headers";
+                info!("Req Rejected: {}",error);
+                return Ok(req.into_response(HttpResponse::Unauthorized().body(error).into_body()))
+            }
+
             if let Some(token_field) = headers.get("Authorization") {
                 if let Ok(token_str) = token_field.to_str() {
                     if token_str.len() > 8 {
@@ -107,10 +117,19 @@ where
             } else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
                 match util::check_signature(headers, req.path(), &req.method().as_str().to_lowercase()).await {
                     Ok(_) => return srv.call(req).await,
-                    Err(e) =>return Ok(req.into_response(HttpResponse::BadRequest().body(format!("Signature verification: {}", e)).into_body())),
+                    Err(e) =>return {
+                        let error = format!("Signature verification: {}. With signature-input: {:?} With signature {:?}",
+                                            e,
+                                            req.headers().get("signature-input").unwrap(),
+                                            req.headers().get("signature").unwrap());
+                        info!("Req Rejected: {}", error);
+                        Ok(req.into_response(HttpResponse::BadRequest().body(error).into_body()))
+                    }
                 };
             } else {
-                return Ok(req.into_response(HttpResponse::Unauthorized().body("No valid authentication method").into_body()))
+                let error = "No valid authentication method";
+                info!("Req Rejected: {}", error);
+                return Ok(req.into_response(HttpResponse::Unauthorized().body(error).into_body()))
             }
         })
     }

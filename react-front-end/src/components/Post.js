@@ -48,7 +48,7 @@ export class Post extends Component {
         const backURL = "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
 
         return (
-            <Container>
+            <Container className="post-container">
                 <BackButton url={backURL}/>
                 <div className="mt-3">
                     <Card border="dark">

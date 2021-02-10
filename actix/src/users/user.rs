@@ -199,12 +199,6 @@ pub async fn register(username: String, password: String, first_name: String, la
 
     tx.commit().await?;
 
-    // let new_user = User {
-    //     username,
-    //     links: gen_links(&user_id),
-    //     user_id,
-    // };
-
     let local_user = LocalUser {
         links: gen_links(&user_id),
         local_username: username,

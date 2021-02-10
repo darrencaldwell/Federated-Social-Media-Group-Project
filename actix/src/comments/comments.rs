@@ -208,7 +208,7 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.comment_id = ?"#,
+        WHERE comments.parent_id = ?"#,
         comment_id)
         .fetch_all(pool)
         .await?;
@@ -226,10 +226,16 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
             }
         }).collect();
 
+    let post_id = if comments.len() == 0 {
+        sqlx::query!("SELECT post_id FROM comments WHERE comment_id = ?", comment_id).fetch_one(pool).await?.post_id
+    } else {
+        comments[0].post_id
+    };
+
     Ok(Comments {
         links: SelfLink {
             _self: Link {
-                href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}/comments", comments[0].post_id)
+                href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}/comments", post_id)
             }
         },
         embedded: CommentList { comment_list: comments },
