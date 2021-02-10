@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Card, Container, Nav} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
-// import axios from 'axios'
+import axios from 'axios'
 
 class Account extends React.Component {
 
@@ -10,44 +10,21 @@ class Account extends React.Component {
         super(props);
         this.state = {
             uploadedPicture: false,
-            detail: {}
+            userInfo: {}
         }
     }
 
-    // componentDidMount() {
-    //     axios.get('local/users/{id}')
-    //         .then(res => {
-    //             console.log(res)
-    //         }).catch(err => {
-    //             alert("something went wrong")
-    //     })
-    // }
-
-    componentDidMount = async () => {
-        try {
-            // this is the url to fetch users
-            const user_id = localStorage.getItem('userId')
-            let url = '/local/users/' + user_id;
-            console.log(url)
-            let res = await fetch(url,
-                {
-                    method: 'get',  // we're making a GET request
-                    withCredentials: true,  // we want to use authorisation
-                    credentials: 'include',
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token'),
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                }
-            );
-
-            let result = await res.json(); // we know the result will be json
-            this.setState({details: result} ); // and we store that json in the state
-            this.setState(({}))
-        } catch (e) {
-        }
+    componentDidMount() {
+        axios.get('local/users/' + localStorage.getItem('userId'))
+            .then(res => {
+                this.setState({
+                    userInfo: res.data
+                })
+            }).catch(err => {
+                alert("something went wrong")
+        })
     }
+
 
     render() {
         return (
@@ -81,16 +58,16 @@ class Account extends React.Component {
                             Username: {localStorage.getItem('username')}
                         </Card.Text>
                         <Card.Text>
-                            First name: {this.first_name}
+                            First name: {this.state.userInfo.firstName}
                         </Card.Text>
                         <Card.Text>
-                            Last name: {this.last_name}
+                            Last name: {this.state.userInfo.lastName}
                         </Card.Text>
                         <Card.Text>
                             User id: {localStorage.getItem('userId')}
                         </Card.Text>
                         <Card.Text>
-                            Email: {localStorage.getItem('email')}
+                            Email: {this.state.userInfo.email}
                         </Card.Text>
                         <Card.Text>
                             Joined:
