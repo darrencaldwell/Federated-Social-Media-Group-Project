@@ -4,7 +4,7 @@ use serde::{Deserialize};
 use anyhow::{Result, anyhow};
 use std::time::SystemTime;
 use openssl::sign::{Signer, Verifier};
-use openssl::rsa::Padding;
+use openssl::rsa::{Rsa, Padding};
 use openssl::pkey::{PKey, Private};
 use openssl::hash::MessageDigest;
 use openssl::base64::{encode_block, decode_block};
@@ -192,8 +192,8 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     enc_signature = enc_signature.strip_prefix("sig1=:").unwrap()
         .strip_suffix(":").unwrap();
 
-    let public_key_parsed = match PKey::public_key_from_pem(&unparsed_key.key.as_ref()) {
-        Ok(key) => key,
+    let public_key_parsed = match Rsa::public_key_from_pem_pkcs1(&unparsed_key.key.as_ref()) {
+        Ok(key) => PKey::from_rsa(key).unwrap(),
         Err(e) => return Err(anyhow!("Error: parsing public key: {}", e)),
     };
 
