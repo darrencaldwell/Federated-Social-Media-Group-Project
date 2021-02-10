@@ -226,10 +226,16 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
             }
         }).collect();
 
+    let post_id = if comments.len() == 0 {
+        sqlx::query!("SELECT post_id FROM comments WHERE comment_id = ?", comment_id).fetch_one(pool).await?.post_id
+    } else {
+        comments[0].post_id
+    };
+
     Ok(Comments {
         links: SelfLink {
             _self: Link {
-                href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}/comments", comments[0].post_id)
+                href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}/comments", post_id)
             }
         },
         embedded: CommentList { comment_list: comments },
