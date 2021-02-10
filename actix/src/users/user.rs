@@ -160,7 +160,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
 /// Get account details
 pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser> {
     let rec = sqlx::query!(
-        r#"SELECT username, first_name, last_name, UuidFromBin(user_id) AS "user_id: String", email FROM users WHERE user_id = ? and server = "local""#,
+        r#"SELECT username, first_name, last_name, UuidFromBin(user_id) AS "user_id: String", email FROM users WHERE user_id = (UuidToBin(?)) and server = "local""#,
         user_id) //get comments
         .fetch_one(pool)
         .await?;
