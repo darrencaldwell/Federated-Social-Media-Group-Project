@@ -208,7 +208,7 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.comment_id = ?"#,
+        WHERE comments.parent_id = ?"#,
         comment_id)
         .fetch_all(pool)
         .await?;
