@@ -1,0 +1,24 @@
+.displayPic {
+    width: 30%;
+    text-align: center;
+    font-style: italic;
+    font-size: smaller;
+    text-indent: 0;
+    /*border: thin silver solid;*/
+    margin: 0.5em;
+    padding: 0.5em;
+}
+
+.uploadPicButton {
+    width: 30%;
+    text-align: center;
+    margin: 0.5em;
+    padding: 0.5em;
+}
+
+.bio {
+    width: 30%;
+    text-align: center;
+    margin: 0.5em;
+    padding: 0.5em;
+}

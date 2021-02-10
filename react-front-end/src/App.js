@@ -73,8 +73,9 @@ class App extends React.Component {
                             <Route exact path="/login" component={() => <Login login={this.login}/>}/> {/*login page*/}
                             <Route exact path="/register" component={Register}/> {/*registration page*/}
 
-                            {/*these should all contain some sort of identifier for the instance, but that is not implemented yet*/}
-                            <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
+                        {/*these should all contain some sort of identifier for the instance, but that is not implemented yet*/}
+                        <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
+                        {/*<Route exact path="/account" component={() => <Account user={this.user_id}}/>}/>*/}
 
                             <Route exact path="/forums" component={() => <Home user={this.state.user}/>}/> {/*shows the list of forums (for our server)*/}
                             <Route exact path="/new" component={CreateForum}/> {/*page to create a new forum*/}
