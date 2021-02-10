@@ -20,7 +20,7 @@ CREATE TABLE `forums` (
   `forum_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `forum_name` varchar(100) COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`forum_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
 -- `cs3099user-b5_project`.users definition
@@ -29,7 +29,7 @@ CREATE TABLE `users` (
   `username` varchar(30) COLLATE utf8_bin NOT NULL,
   `password_hash` varchar(60) COLLATE utf8_bin DEFAULT NULL,
   `user_id` binary(16) NOT NULL,
-  `server` varchar(100) COLLATE utf8_bin DEFAULT NULL,
+  `server` varchar(100) COLLATE utf8_bin NOT NULL,
   `description` text COLLATE utf8_bin NOT NULL DEFAULT '',
   `email` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `first_name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE `subforums` (
   PRIMARY KEY (`subforum_id`),
   KEY `subforums_FK` (`forum_id`),
   CONSTRAINT `subforums_FK` FOREIGN KEY (`forum_id`) REFERENCES `forums` (`forum_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
 -- `cs3099user-b5_project`.posts definition
@@ -64,7 +64,7 @@ CREATE TABLE `posts` (
   KEY `posts_FK` (`user_id`),
   CONSTRAINT `posts_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `subforum_id` FOREIGN KEY (`subforum_id`) REFERENCES `subforums` (`subforum_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8 COLLATE=utf8_croatian_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8 COLLATE=utf8_croatian_ci;
 
 
 -- `cs3099user-b5_project`.comments definition
@@ -83,7 +83,7 @@ CREATE TABLE `comments` (
   CONSTRAINT `comments_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `parent_id` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`comment_id`),
   CONSTRAINT `post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE DEFINER=`root`@`%` FUNCTION `cs3099user-b5_project`.`UuidFromBin`(_bin BINARY(16)) RETURNS binary(36)
     DETERMINISTIC
