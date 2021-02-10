@@ -181,7 +181,6 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
            index = index + 1;
        }
     }
-
     // have checked signature exists, value should be a valid string (hopefully)
     let mut enc_signature = req_headers.get("signature").unwrap().to_str().unwrap();
     // format: sig1=:<enc_signature>:

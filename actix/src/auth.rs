@@ -22,12 +22,12 @@ impl Claim {
 
 pub fn encode_jwt(user_id: String, username: String) -> Result<String> {
     let claim = Claim::new(user_id, username);
-    let key = EncodingKey::from_secret("change_me".as_ref());
+    let key = EncodingKey::from_secret("change_me".as_bytes());
     Ok(encode(&Header::default(), &claim, &key)?)
 }
 
 pub fn decode_jwt(token: &str) -> Result<String> {
-    let key = DecodingKey::from_secret("change_me".as_ref());
+    let key = DecodingKey::from_secret("change_me".as_bytes());
     let user_id = decode::<Claim>(token, &key, &Validation::default())
                     .map(|data| data.claims.user_id)?;
     Ok(user_id)

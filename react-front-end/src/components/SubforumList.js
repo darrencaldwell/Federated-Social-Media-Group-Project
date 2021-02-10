@@ -17,7 +17,9 @@ export default class SubforumList extends Component {
     // When the component loads, fetch the list of subforums
     componentDidMount = async () => {
         try {
-            let url = "/api/forums/" + this.props.forumID + "/subforums";
+            // get the list of subforums
+
+            let url = "/api/forums/" + this.props.match.params.forumID + "/subforums";
 
             let res = await fetch(url,
                 {
@@ -36,8 +38,10 @@ export default class SubforumList extends Component {
             let result = await res.json(); // we know the result will be json
             this.setState({subforumList: result._embedded.subforumList} ); // and we store that json in the state
 
+            
+            // get the forum name
 
-            let url2 = "/api/forums/" + this.props.forumID;
+            let url2 = "/api/forums/" + this.props.match.params.forumID;
 
             let res2 = await fetch(url2,
                 {
@@ -64,7 +68,7 @@ export default class SubforumList extends Component {
         //var name = this.state.forumName;
         return (
             <div className="subforum-container">
-                <a className="button forum-info forum-info-container" href={'/' + this.props.forumID} body={this.state.forumName}>
+                <a className="button forum-info forum-info-container" href={'/' + this.props.match.params.forumID} body={this.state.forumName}>
                     forum name would go here but I can't get it to work
                 </a>
                 <Container className="subforumlist">
@@ -73,14 +77,14 @@ export default class SubforumList extends Component {
                         <Card className="subforum" >  {/*each forum is displayed as a card with className forum */}
                             <Card.Body>
                                 {/*The card consists of the name of the forum, which links to the forum itself */}
-                                <Card.Link href={'/' + this.props.forumID + '/' + subforum.id}>
+                                <Card.Link href={'/' + this.props.match.params.forumID + '/' + subforum.id}>
                                     {subforum.subforumName}
                                 </Card.Link>
                             </Card.Body>
                         </Card>
                     ))}
                 </Container>
-                <a className="button" href={"/" + this.props.forumID + "/new"}>
+                <a className="button" href={"/" + this.props.match.params.forumID + "/new"}>
                     New Subforum
                 </a>
             </div>)

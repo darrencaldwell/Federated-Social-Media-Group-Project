@@ -21,7 +21,7 @@ export class Post extends Component {
     componentDidMount = async () => {
         try {
             // the url needs the post id from the props
-            let url = '/api/posts/' + this.props.postID;
+            let url = '/api/posts/' + this.props.match.params.postID;
             let res = await fetch(url
                 , {
                     method: 'get', // we're making a GET request
@@ -44,8 +44,8 @@ export class Post extends Component {
     }
 
     render() {
-        const url = "/api/posts/" + this.state.post.postId + "/comments";
-        const backURL = "/" + this.props.forumID + "/" + this.props.subforumID;
+        
+        const backURL = "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
 
         return (
             <Container>
@@ -61,12 +61,17 @@ export class Post extends Component {
                     </Card>
                 </div>
 
-                <CreateComment url={url}/>
+                <a className="button create-forum-button" href={"/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}>
+                    Create Comment
+                </a>
+
+                {/*<CreateComment url={url}/>*/}
 
                 {/*<Dropdown className="mt-3">*/}
                 {/*<Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>*/}
                 {/*<Dropdown.Menu>*/}
-                <Comments postID={this.props.postID}/>
+                <Comments url={'/api/posts/' + this.props.match.params.postID + '/comments'} 
+                        posturl={"/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID}/>
                 {/*</Dropdown.Menu>*/}
                 {/*</Dropdown>*/}
 

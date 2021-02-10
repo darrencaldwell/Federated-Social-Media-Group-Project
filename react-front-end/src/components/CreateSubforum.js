@@ -13,7 +13,7 @@ class Make extends React.Component {
 
         // JS seems to be weird with concat on undefined variables, this seemed to fix the undef issues
         var url = ""
-        url = '/api/forums/' + this.props.forumID + '/subforums'
+        url = '/api/forums/' + this.props.match.params.forumID + '/subforums'
         this.state = {
             buttonText: 'Create Subforum',
             defaultTitle: defaultTitle, // the default title needs to be preserved
@@ -38,7 +38,7 @@ class Make extends React.Component {
                 },
                 body: JSON.stringify({
                     "subforumName": this.state.titleText,
-                    "forumId": this.props.forumId
+                    "forumId": this.props.match.params.forumID
                 })
             }).then(responseJson => {
                 console.log(responseJson);
@@ -58,7 +58,7 @@ class Make extends React.Component {
     render() {
         return (
             <Container>
-                <BackButton url={"/" + this.props.forumID}/>
+                <BackButton url={"/" + this.props.match.params.forumID}/>
                 <Form className="createForum">
                     <FormGroup controlId="create-title">
                         {/*These are the input forms for title and body, with placeholder text. They call the above change methods when you type in them.*/}
