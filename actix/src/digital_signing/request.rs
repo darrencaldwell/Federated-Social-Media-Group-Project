@@ -22,8 +22,6 @@ use log::info;
 
 use super::util;
 
-use super::util;
-
 #[derive(Debug)]
 struct SignatureInput {
     alg: String,

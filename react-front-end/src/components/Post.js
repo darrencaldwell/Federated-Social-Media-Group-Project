@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
 import Comments from './Comments';
 // import CreatePost from './CreatePost.js';
-import CreateComment from './CreateComment';
 import BackButton from './BackButton';
 // import '../styling/Post.css';
 import {Card, Container} from "react-bootstrap";
@@ -44,7 +43,7 @@ export class Post extends Component {
     }
 
     render() {
-        
+
         const backURL = "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
 
         return (
@@ -70,7 +69,7 @@ export class Post extends Component {
                 {/*<Dropdown className="mt-3">*/}
                 {/*<Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>*/}
                 {/*<Dropdown.Menu>*/}
-                <Comments url={'/api/posts/' + this.props.match.params.postID + '/comments'} 
+                <Comments url={'/api/posts/' + this.props.match.params.postID + '/comments'}
                         posturl={"/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID}/>
                 {/*</Dropdown.Menu>*/}
                 {/*</Dropdown>*/}
