@@ -6,10 +6,11 @@ import DisplayPicture from "../components/account/DisplayPicture";
 
 class Account extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
-            uploadedPicture: false
+            uploadedPicture: false,
+            detail: {}
         }
     }
 
@@ -22,6 +23,31 @@ class Account extends React.Component {
     //     })
     // }
 
+    componentDidMount = async () => {
+        try {
+            // this is the url to fetch users
+            const user_id = localStorage.getItem('userId')
+            let url = '/local/users/' + user_id;
+            console.log(url)
+            let res = await fetch(url,
+                {
+                    method: 'get',  // we're making a GET request
+                    withCredentials: true,  // we want to use authorisation
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token'),
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            let result = await res.json(); // we know the result will be json
+            this.setState({details: result} ); // and we store that json in the state
+            this.setState(({}))
+        } catch (e) {
+        }
+    }
 
     render() {
         return (
@@ -61,7 +87,7 @@ class Account extends React.Component {
                             Last name: {this.last_name}
                         </Card.Text>
                         <Card.Text>
-                            User id: {localStorage.getItem('userid')}
+                            User id: {localStorage.getItem('userId')}
                         </Card.Text>
                         <Card.Text>
                             Email: {localStorage.getItem('email')}
