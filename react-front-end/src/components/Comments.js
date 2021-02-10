@@ -5,18 +5,20 @@ import '../styling/container-pages.css';
 
 // props: comment (json), posturl
 class Comment extends Component {
-
+    
     render() {
         return (
             <div>
                 <Card>
-                    <Card.Body>
-                        UserID:{this.props.comment.userId}-  {this.props.comment.commentContent}
-                    </Card.Body>
-                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} createurl={"/api/comments/" + this.props.comment.id + "/comments"}/>
-                    <a className="button create-forum-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>
-                        Create Comment
-                    </a>
+                    <div className="comment-columns">
+                        <Card.Body>
+                            {this.props.comment.username}-  {this.props.comment.commentContent}
+                        </Card.Body>
+                        <a className="button create-comment-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>
+                            Create Comment
+                        </a>
+                    </div>
+                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} posturl={this.props.posturl}/>
                 </Card>
             </div>
         )
@@ -28,16 +30,16 @@ export default class Comments extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            commentList: {} // the list of comments will be stored here
+            commentList: [] // the list of comments will be stored here
         }
     }
 
     // Runs when the component is loaded, fetching the list of comments into state
     componentDidMount = async () => {
         try {
-            // the url needs the post id from the props
+            // the url to make the request to is given by the parent
             let url = this.props.url;
-
+            
             let res = await fetch(url
                 , {
                     method: 'get', // we're making a GET request
