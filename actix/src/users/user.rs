@@ -9,6 +9,7 @@ use sqlx::{Row, FromRow, MySqlPool};
 pub struct User {
     pub username: String,
     pub user_id: String,
+    pub description: String,
     #[serde(rename = "_links")]
     pub links: UserLinks,
 }
@@ -97,21 +98,21 @@ fn gen_links(user_id: &String) -> UserLinks {
 
 /// Given a user_id and db pool queries for that user and returns it
 pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
-    let username = sqlx::query!("SELECT username FROM users WHERE user_id = (UuidToBin(?))", &user_id)
+    let result = sqlx::query!("SELECT username, description FROM users WHERE user_id = (UuidToBin(?))", &user_id)
         .fetch_one(pool)
-        .await?
-        .username;
+        .await?;
 
     Ok(User {
-        username,
+        username: result.username,
         links: gen_links(&user_id),
         user_id,
+        description: result.description,
     })
 }
 
 /// Returns a list of ALL users within our database, should probably not be used.
 pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
-    let result = sqlx::query!(r#"SELECT UuidFromBin(user_id) AS "user_id: String", username FROM users"#)
+    let result = sqlx::query!(r#"SELECT UuidFromBin(user_id) AS "user_id: String", username, description FROM users"#)
         .fetch_all(pool)
         .await?;
 
@@ -122,6 +123,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
             let user_id = rec.user_id.unwrap();
             User {
                 username: rec.username,
+                description: rec.description,
                 links: gen_links(&user_id),
                 user_id,
             }
@@ -143,12 +145,14 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
 pub async fn register(username: String, password: String, pool: &MySqlPool) -> Result<User> {
     let tx = pool.begin().await?;
     let password_hash: String = hash(password, 10)?;
+    let default_desc = String::from("");
 
     let user_id: String = sqlx::query!(
-        r#"insert into users (username, password_hash, user_id, server) values(?, ?, UuidToBin(UUID()), ?) RETURNING UuidFromBin(user_id) AS user_id"#,
+        r#"insert into users (username, password_hash, user_id, server, description) values(?, ?, UuidToBin(UUID()), ?, ?) RETURNING UuidFromBin(user_id) AS user_id"#,
         username,
         password_hash,
-        "local"
+        "local",
+        default_desc
     )
     .fetch_one(pool)
     .await?
@@ -161,6 +165,7 @@ pub async fn register(username: String, password: String, pool: &MySqlPool) -> R
 
     let new_user = User {
         username,
+        description: default_desc,
         links: gen_links(&user_id),
         user_id: user_id
     };
