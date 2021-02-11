@@ -58,6 +58,7 @@ where
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
+    #[allow(clippy::type_complexity)]
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
 
     fn poll_ready(&mut self, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
@@ -91,11 +92,11 @@ where
                         }
                     }
                 }
-                return srv.call(req).await
+                srv.call(req).await
             } else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
                 match util::check_signature(headers, req.path(), &req.method().as_str().to_lowercase()).await {
-                    Ok(_) => return srv.call(req).await,
-                    Err(e) =>return {
+                    Ok(_) => srv.call(req).await,
+                    Err(e) => {
                         let error = format!("Signature verification: {}\nWith signature-input: {:?}\nWith signature {:?}",
                                             e,
                                             req.headers().get("signature-input").unwrap(),
@@ -103,11 +104,11 @@ where
                         info!("Req Rejected: {}", error);
                         Ok(req.into_response(HttpResponse::BadRequest().body(error).into_body()))
                     }
-                };
+                }
             } else {
                 let error = "No valid authentication method";
                 info!("Req Rejected: {}", error);
-                return Ok(req.into_response(HttpResponse::Unauthorized().body(error).into_body()))
+                Ok(req.into_response(HttpResponse::Unauthorized().body(error).into_body()))
             }
         })
     }

@@ -105,7 +105,7 @@ pub struct Link {
 fn gen_forum_links(forum_id: u64) -> ForumLinks {
     ForumLinks {
         _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}", forum_id) },
-        forums: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums") },
+        forums: Link { href: "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums".to_string() },
         subforums: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums", forum_id) },
     }
 }
@@ -150,7 +150,7 @@ pub async fn post_subforum(forum_id: u64, subforum_request: PostSubforumRequest,
 
     Ok(Subforum {
         subforum_name: subforum_request.subforum_name,
-        forum_id: forum_id,
+        forum_id,
         id: subforum_id,
         links: gen_sub_links(subforum_id, forum_id),
     })
@@ -232,6 +232,6 @@ pub async fn get_forums(pool: &MySqlPool) -> Result<Forums> {
 
         Ok(Forums {
             _embedded: ForumList { forum_list: forums },
-            _links: ForumsLinks { _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums") } },
+            _links: ForumsLinks { _self: Link { href: "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums".to_string() } },
         })
 }

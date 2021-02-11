@@ -101,13 +101,13 @@ pub enum LoginError {
 }
 
 /// Generates links to point to user and users endpoint
-fn gen_links(user_id: &String) -> UserLinks {
+fn gen_links(user_id: &str) -> UserLinks {
     UserLinks {
         _self: Link {
             href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/{}", user_id),
         },
         users: Link {
-            href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users"),
+            href: "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users".to_string(),
         },
     }
 }
@@ -151,7 +151,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
         embedded: UsersList { user_list: users },
         links: UsersLinks {
             _self: Link {
-                href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users"),
+                href: "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users".to_string(),
             },
         },
     })
@@ -213,8 +213,8 @@ pub async fn register(username: String, password: String, first_name: String, la
 
 /// Used for verifying a login attempt, checks that the credentials match
 pub async fn verify(
-    username: &String,
-    password: &String,
+    username: &str,
+    password: &str,
     pool: &MySqlPool,
 ) -> Result<String, LoginError> {
     let rec = sqlx::query!(
