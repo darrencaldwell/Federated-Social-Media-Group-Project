@@ -1,9 +1,9 @@
 #!/bin/bash
-cd react-front-end
+cd frontend
 npm ci
 npm run build
 cd ../
-cd actix
+cd backend
 sh sshTunnel.sh
 nolimit cargo build --release
 pkill -x actix
