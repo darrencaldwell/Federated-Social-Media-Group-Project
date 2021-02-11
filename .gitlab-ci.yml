@@ -12,7 +12,7 @@ node-build:
   before_script:
     - mkdir -p $CI_PROJECT_DIR/.cache/npm
   script:
-    - cd react-front-end
+    - cd frontend
     - npm ci --cache $CI_PROJECT_DIR/.cache/npm --prefer-offline
     - npm run build
 
@@ -23,8 +23,8 @@ rust-build:
   image: rust:alpine
   cache:
     paths:
-      - actix/cargo/
-      - actix/target/
+      - backend/cargo/
+      - backend/target/
   before_script:
     - apk update
     - apk add openssl-dev
@@ -33,7 +33,7 @@ rust-build:
     - apk add mariadb-client
 
   script:
-    - cd actix
+    - cd backend
     - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
     - mysql --user=root --password=pass -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
     - cargo check
