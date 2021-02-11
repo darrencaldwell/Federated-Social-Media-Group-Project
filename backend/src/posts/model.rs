@@ -184,8 +184,7 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
 /// Given parameters, generate the links to meet the protocl specification return JSON
 fn generate_post_links(id: u64, subforum_id: u64, forum_id: u64, user_id: &str) -> PostLinks {
     let self_link = format!(
-        "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums/{}/posts/{}",
-        forum_id, subforum_id, id
+        "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}", id
     );
 
     let subforum_link = format!(

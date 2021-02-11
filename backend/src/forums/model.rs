@@ -132,7 +132,7 @@ fn gen_sub_links(subforum_id: u64, forum_id: u64) -> SubforumLinks {
     SubforumLinks {
         _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/{}", subforum_id) },
         forum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}", forum_id) },
-        posts: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums", forum_id) },
+        posts: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/{}/posts", forum_id) },
     }
 }
 

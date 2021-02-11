@@ -83,7 +83,7 @@ fn gen_links(comment_id: u64, parent_comment_id: u64, user_id: &str, post_id: u6
         parent_comment: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}", parent_comment_id) },
         subforum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/{}", subforum_id) },
         forum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}", forum_id) },
-        user: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/user/{}", user_id) },
+        user: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/{}", user_id) },
         child_comments: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}/comments", comment_id) },
     }
 }
