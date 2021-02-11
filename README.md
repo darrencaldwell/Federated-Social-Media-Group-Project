@@ -4,8 +4,7 @@ Federated Social Media
 By Darren Caldwell, Raiyan Chowdhury, Dean Kuyser, Donald Enwan, Euan Lacy
 
 API Reference:
-https://gist.github.com/11wykessam/f88fdac4a40faeca11922835c25d4c32
-
+https://github.com/FindlaySloan/3099_Protocol_Group_B (im sorry)
 Confuence Blog: Basic Setup
 https://cs3099b5.atlassian.net/wiki/spaces/CS3099/blog/2021/01/19/182288385/Local+Dev+Setup
 
