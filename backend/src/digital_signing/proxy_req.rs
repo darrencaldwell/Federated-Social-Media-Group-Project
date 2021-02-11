@@ -1,7 +1,4 @@
 use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client, web::Data};
-use actix_web::HttpMessage;
-use actix_web::dev::ResponseBody;
-use actix_web::http::{HeaderName, HeaderValue};
 use actix_service::{Service, Transform};
 
 use anyhow::Result;
@@ -10,28 +7,9 @@ use std::cell::RefCell;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
-use actix_web::http::Uri;
-use std::str::FromStr;
-use std::convert::TryFrom;
-
-use serde::{Deserialize};
-use openssl::sign::{Verifier};
-use openssl::rsa::Padding;
-use openssl::hash::MessageDigest;
-use openssl::base64::{decode_block};
 use openssl::pkey::{PKey, Private};
 
 use super::util;
-
-// This is ALL boilerplate for a middleware,
-// TODO: Move to another file when its done
-// https://github.com/casbin-rs/actix-casbin-auth/blob/master/src/middleware.rs
-// a link to a helpful implementation of a middleware thats kinda auth
-
-pub struct Keys {
-    pub private: Vec<u8>,
-    pub public: Vec<u8>,
-}
 
 pub struct ProxyReq;
 
@@ -76,7 +54,7 @@ where
         self.service.poll_ready(cx)
     }
 
-    fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
+    fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let mut srv = self.service.clone();
 
         Box::pin(async move {

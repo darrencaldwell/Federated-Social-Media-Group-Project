@@ -1,6 +1,6 @@
 use actix_web::http::header::{HeaderName, HeaderMap, HeaderValue, Date};
-use actix_web::{client::Client};
-use serde::{Deserialize};
+use actix_web::client::Client;
+use serde::Deserialize;
 use anyhow::{Result, anyhow};
 use std::time::SystemTime;
 use openssl::sign::{Signer, Verifier};
@@ -8,7 +8,6 @@ use openssl::rsa::{Rsa, Padding};
 use openssl::pkey::{PKey, Private};
 use openssl::hash::MessageDigest;
 use openssl::base64::{encode_block, decode_block};
-use log::info;
 
 /// Signs
 pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,

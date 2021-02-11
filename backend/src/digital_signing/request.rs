@@ -1,4 +1,4 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse};
 use actix_web::http::{HeaderName, HeaderValue};
 use actix_service::{Service, Transform};
 
@@ -8,16 +8,6 @@ use std::cell::RefCell;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
-use actix_web::http::Uri;
-use std::str::FromStr;
-use std::convert::TryFrom;
-
-use serde::{Deserialize};
-use openssl::sign::{Verifier};
-use openssl::rsa::Padding;
-use openssl::pkey::{PKey};
-use openssl::hash::MessageDigest;
-use openssl::base64::{decode_block};
 use log::info;
 
 use super::util;
@@ -29,16 +19,6 @@ struct SignatureInput {
     expires: u64,
     key_id: String,
     covered_content: String,
-}
-
-// This is ALL boilerplate for a middleware,
-// TODO: Move to another file when its done
-// https://github.com/casbin-rs/actix-casbin-auth/blob/master/src/middleware.rs
-// a link to a helpful implementation of a middleware thats kinda auth
-
-pub struct Keys {
-    pub private: Vec<u8>,
-    pub public: Vec<u8>,
 }
 
 pub struct RequestAuth;
