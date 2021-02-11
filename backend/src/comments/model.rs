@@ -109,9 +109,9 @@ pub async fn insert_comment(post_id: u64,
         id: comment_id,
         comment_content: comment_request.comment_content,
         username: rec.username,
-        post_id: post_id,
+        post_id,
         links: gen_links(comment_id, comment_id, &user_id, post_id, rec.subforum_id, rec.forum_id),
-        user_id: user_id,
+        user_id,
     })
 
 }
@@ -155,9 +155,9 @@ pub async fn insert_child_comment(parent_id: u64,
         id: comment_id,
         comment_content: comment_request.comment_content,
         username: rec.username,
-        post_id: post_id,
+        post_id,
         links: gen_links(comment_id, parent_id, &user_id, post_id, rec.subforum_id, rec.forum_id),
-        user_id: user_id,
+        user_id,
     })
 
 }
@@ -182,7 +182,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
-                post_id: post_id,
+                post_id,
                 links: gen_links(rec.comment_id, rec.comment_id, &rec.user_id, post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
@@ -226,7 +226,7 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
             }
         }).collect();
 
-    let post_id = if comments.len() == 0 {
+    let post_id = if comments.is_empty() {
         sqlx::query!("SELECT post_id FROM comments WHERE comment_id = ?", comment_id).fetch_one(pool).await?.post_id
     } else {
         comments[0].post_id

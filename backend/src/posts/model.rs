@@ -93,8 +93,8 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool) -> Re
         post_title: post.post_title,
         post_contents: post.post_contents,
         user_id: post.user_id.clone(),
-        post_id: post_id,
-        subforum_id: subforum_id,
+        post_id,
+        subforum_id,
         links: generate_post_links(post_id, subforum_id, forum_id.forum_id, &post.user_id),
     };
     Ok(new_post)
@@ -169,7 +169,7 @@ pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
 }
 
 /// Given parameters, generate the links to meet the protocl specification return JSON
-fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: &String) -> PostLinks {
+fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: &str) -> PostLinks {
     let self_link = format!(
         "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums/{}/posts/{}",
         forum_id, subforum_id, post_id

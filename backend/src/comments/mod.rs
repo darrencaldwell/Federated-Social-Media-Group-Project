@@ -1,5 +1,5 @@
-mod comments;
+mod model;
 mod routes;
 
-pub use comments::*;
+pub use model::*;
 pub use routes::init;

@@ -1,5 +1,5 @@
-mod posts;
+mod model;
 mod routes;
 
-pub use posts::*;
+pub use model::*;
 pub use routes::init;

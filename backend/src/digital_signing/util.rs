@@ -75,7 +75,7 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     let signature_input = req_headers.get("Signature-Input").unwrap().to_str().unwrap();
 
     // TODO: check for 0 splits, could be caught later potentially. - Darren
-    let iter_signature_input = signature_input.split(";");
+    let iter_signature_input = signature_input.split(';');
 
     // build struct and do soft validation on signature-input header contents
     // TODO: can make this better by using an enum but im lazy x - Darren
@@ -106,13 +106,13 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     // check covered_content / sig1= is valid with headers
 
     // check starts and ends with parenthesis
-    if !sig_input_struct.covered_content.starts_with("(") || !sig_input_struct.covered_content.ends_with(")") {
+    if !sig_input_struct.covered_content.starts_with('(') || !sig_input_struct.covered_content.ends_with(')') {
         // if not, then error
         return Err(anyhow!("Error: Invalid sig1=, not surrounded by parenthesis: {}", sig_input_struct.covered_content));
     }
     sig_input_struct.covered_content = sig_input_struct.covered_content.strip_prefix("(").unwrap().to_string();
     sig_input_struct.covered_content = sig_input_struct.covered_content.strip_suffix(")").unwrap().to_string();
-    let iter = sig_input_struct.covered_content.split(",");
+    let iter = sig_input_struct.covered_content.split(',');
 
     // check each one against headers, dealing with speical * cases
     // meanwhile building signature input
@@ -178,14 +178,14 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
        }
        else {
            string_to_sign.push_str(&format!("{}\n", field));
-           index = index + 1;
+           index += 1;
        }
     }
     // have checked signature exists, value should be a valid string (hopefully)
     let mut enc_signature = req_headers.get("signature").unwrap().to_str().unwrap();
     // format: sig1=:<enc_signature>:
     if !enc_signature.starts_with("sig1=:") ||
-       !enc_signature.ends_with(":") {
+       !enc_signature.ends_with(':') {
         return Err(anyhow!("Error: invalid signature format, must be 'sig1=:<enc_signature>:'"))
     }
     enc_signature = enc_signature.strip_prefix("sig1=:").unwrap()

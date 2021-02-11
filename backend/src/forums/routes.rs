@@ -1,4 +1,4 @@
-use super::forums;
+use super::model;
 use actix_web::{web, get, post, HttpResponse, Responder};
 use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
@@ -9,7 +9,7 @@ async fn get_forum(
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    match forums::get_forum(id, &pool).await {
+    match model::get_forum(id, &pool).await {
         Ok(forum) => HttpResponse::Ok().json(forum),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
@@ -17,11 +17,11 @@ async fn get_forum(
 
 #[post("/api/forums")]
 async fn post_forum(
-    forum_request: web::Json<forums::PostForumRequest>,
+    forum_request: web::Json<model::PostForumRequest>,
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    match forums::post_forum(forum_request.into_inner(), &pool).await {
+    match model::post_forum(forum_request.into_inner(), &pool).await {
         Ok(forum) => HttpResponse::Ok().json(forum),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
@@ -33,7 +33,7 @@ async fn get_subforum(
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    match forums::get_subforum(id, &pool).await {
+    match model::get_subforum(id, &pool).await {
         Ok(subforum) => HttpResponse::Ok().json(subforum),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
@@ -42,11 +42,11 @@ async fn get_subforum(
 #[post("/api/forums/{id}/subforums")]
 async fn post_subforum(
     web::Path(id): web::Path<u64>,
-    subforum_request: web::Json<forums::PostSubforumRequest>,
+    subforum_request: web::Json<model::PostSubforumRequest>,
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    match forums::post_subforum(id, subforum_request.into_inner(), &pool).await {
+    match model::post_subforum(id, subforum_request.into_inner(), &pool).await {
         Ok(subforum) => HttpResponse::Ok().json(subforum),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
@@ -57,7 +57,7 @@ async fn get_forums(
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    match forums::get_forums(&pool).await {
+    match model::get_forums(&pool).await {
         Ok(forums) => HttpResponse::Ok().json(forums),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
@@ -69,7 +69,7 @@ async fn get_subforums(
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
 ) -> impl Responder {
-    match forums::get_subforums(id, &pool).await {
+    match model::get_subforums(id, &pool).await {
         Ok(subforums) => HttpResponse::Ok().json(subforums),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
