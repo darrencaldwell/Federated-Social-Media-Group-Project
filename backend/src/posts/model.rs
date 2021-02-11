@@ -1,6 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, MySqlPool};
+use serde::ser::{Serializer, SerializeStruct};
 
 /// Represents a request to POST a post
 #[derive(Serialize, Deserialize)]
@@ -12,15 +13,27 @@ pub struct PostRequest {
 }
 
 /// Represents the database record for a given post
-#[derive(Serialize, FromRow)]
-#[serde(rename_all = "camelCase")]
+impl Serialize for Post {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+            S: Serializer {
+        let mut state = serializer.serialize_struct("Post", 6)?;
+        state.serialize_field("postTitle", &self.post_title)?;
+        state.serialize_field("postContents", &self.post_contents)?;
+        state.serialize_field("userId", &self.user_id.to_string())?;
+        state.serialize_field("id", &self.id.to_string())?;
+        state.serialize_field("subforumId", &self.subforum_id.to_string())?;
+        state.serialize_field("_links", &self.links)?;
+        state.end()
+    }
+}
+#[derive(FromRow)]
 pub struct Post {
     pub post_title: String,
     pub post_contents: String,
     pub user_id: String,
-    pub post_id: u64,
+    pub id: u64,
     pub subforum_id: u64,
-    #[serde(rename = "_links")]
     pub links: PostLinks,
 }
 
@@ -62,7 +75,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool) -> Re
     // pool is used for a transaction, ie a rollbackable operation
     let mut tx = pool.begin().await?;
 
-    let post_id = sqlx::query!(
+    let id = sqlx::query!(
         r#"
         insert into posts (post_title, user_id, post_contents, subforum_id)
         values( ?, UuidToBin(?), ?, ? )
@@ -93,9 +106,9 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool) -> Re
         post_title: post.post_title,
         post_contents: post.post_contents,
         user_id: post.user_id.clone(),
-        post_id,
+        id,
         subforum_id,
-        links: generate_post_links(post_id, subforum_id, forum_id.forum_id, &post.user_id),
+        links: generate_post_links(id, subforum_id, forum_id.forum_id, &post.user_id),
     };
     Ok(new_post)
 }
@@ -118,7 +131,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     for rec in recs {
         let user_id = rec.user_id.unwrap();
         posts.push(Post {
-            post_id: rec.post_id,
+            id: rec.post_id,
             post_title: rec.post_title,
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
@@ -139,21 +152,21 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
 }
 
 ///  Get a single post by its id
-pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
+pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
     let rec = sqlx::query!(
         r#"
         SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, posts.subforum_id, forum_id FROM posts
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
         WHERE post_id = ?
         "#,
-        post_id
+        id
     )
     .fetch_one(pool)
     .await?;
 
     let user_id = rec.user_id.unwrap();
     let post = Post {
-        post_id: rec.post_id,
+        id: rec.post_id,
         post_title: rec.post_title,
         post_contents: rec.post_contents,
         subforum_id: rec.subforum_id,
@@ -169,10 +182,10 @@ pub async fn get_one(post_id: u64, pool: &MySqlPool) -> Result<Post> {
 }
 
 /// Given parameters, generate the links to meet the protocl specification return JSON
-fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: &str) -> PostLinks {
+fn generate_post_links(id: u64, subforum_id: u64, forum_id: u64, user_id: &str) -> PostLinks {
     let self_link = format!(
         "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}/subforums/{}/posts/{}",
-        forum_id, subforum_id, post_id
+        forum_id, subforum_id, id
     );
 
     let subforum_link = format!(
@@ -192,7 +205,7 @@ fn generate_post_links(post_id: u64, subforum_id: u64, forum_id: u64, user_id: &
 
     let comments_link = format!(
         "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}/comments",
-        post_id
+        id
     );
 
     PostLinks {

@@ -1,8 +1,9 @@
 use sqlx::MySqlPool;
 use anyhow::Result;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use serde::ser::{Serializer, SerializeStruct};
 
-/// Represents a request o post a comment on a post
+/// Represents a request to post a comment on a post
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -35,16 +36,27 @@ pub struct Links {
     pub child_comments: Link,
 }
 
+impl Serialize for Comment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+            S: Serializer {
+        let mut state = serializer.serialize_struct("Comment", 6)?;
+        state.serialize_field("id", &self.id.to_string())?;
+        state.serialize_field("commentContent", &self.comment_content)?;
+        state.serialize_field("userId", &self.user_id)?;
+        state.serialize_field("username", &self.username)?;
+        state.serialize_field("postId", &self.post_id.to_string())?;
+        state.serialize_field("_links", &self.links)?;
+        state.end()
+    }
+}
 /// Represents an entire comment in the database
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Comment {
     pub id: u64,
     pub comment_content: String,
     pub user_id: String,
     pub username: String,
     pub post_id: u64,
-    #[serde(rename = "_links")]
     pub links: Links,
 }
 

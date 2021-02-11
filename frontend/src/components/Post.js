@@ -54,7 +54,7 @@ export class Post extends Component {
                         <Card.Body>
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
                             <Card.Subtitle className="text-muted">
-                                Post made by user Id: {this.state.post.postId}</Card.Subtitle>
+                                Post made by user Id: {this.state.post.id}</Card.Subtitle>
                             <Card.Text>{this.state.post.postContents}</Card.Text>
                         </Card.Body>
                     </Card>

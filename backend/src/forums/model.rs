@@ -1,14 +1,23 @@
 use sqlx::MySqlPool;
 use anyhow::Result;
 use serde::{Serialize, Deserialize};
+use serde::ser::{Serializer, SerializeStruct};
 
 /// Represents a forum
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
+impl Serialize for Forum {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+            S: Serializer {
+        let mut state = serializer.serialize_struct("Forum", 3)?;
+        state.serialize_field("id", &self.id.to_string())?;
+        state.serialize_field("forumName", &self.forum_name)?;
+        state.serialize_field("_links", &self.links)?;
+        state.end()
+    }
+}
 pub struct Forum {
     pub id: u64,
     pub forum_name: String,
-    #[serde(rename = "_links")]
     pub links: ForumLinks,
 }
 
@@ -26,14 +35,23 @@ pub struct Forums {
     _links: ForumsLinks,
 }
 
+impl Serialize for Subforum {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+            S: Serializer {
+        let mut state = serializer.serialize_struct("Subforum", 4)?;
+        state.serialize_field("id", &self.id.to_string())?;
+        state.serialize_field("subforumName", &self.subforum_name)?;
+        state.serialize_field("forumId", &self.forum_id.to_string())?;
+        state.serialize_field("_links", &self.links)?;
+        state.end()
+    }
+}
 /// Represents a single subforum within the database
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Subforum {
     id: u64,
     subforum_name: String,
     forum_id: u64,
-    #[serde(rename = "_links")]
     links: SubforumLinks,
 }
 
