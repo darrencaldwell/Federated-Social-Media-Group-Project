@@ -7,6 +7,7 @@ node-build:
   stage: build
   image: node:current-alpine3.10
   cache:
+    key: cs3099user-b5
     paths:
       - $CI_PROJECT_DIR/.cache/npm
   before_script:
@@ -22,6 +23,7 @@ rust-build:
   stage: build
   image: rust:alpine
   cache:
+    key: cs3099user-b5
     paths:
       - backend/cargo/
       - backend/target/
