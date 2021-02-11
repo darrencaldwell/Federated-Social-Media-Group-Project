@@ -3,6 +3,6 @@ mod response;
 mod proxy_req;
 mod util;
 
-pub use request::{RequestAuth, Keys};
+pub use request::RequestAuth;
 pub use response::ResponseSign;
 pub use proxy_req::ProxyReq;

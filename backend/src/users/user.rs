@@ -179,7 +179,6 @@ pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser>
 pub async fn register(username: String, password: String, first_name: String, last_name: String, email: String, pool: &MySqlPool) -> Result<LocalUser> {
     let tx = pool.begin().await?;
     let password_hash: String = hash(password, 10)?;
-    let default_desc = String::from("");
 
     let user_id: String = sqlx::query!(
         r#"insert into users (username, password_hash, user_id, server, first_name, last_name, email) values(?, ?, UuidToBin(UUID()), ?, ?, ?, ?) RETURNING UuidFromBin(user_id) AS user_id"#,
