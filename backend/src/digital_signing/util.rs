@@ -8,6 +8,7 @@ use openssl::rsa::{Rsa, Padding};
 use openssl::pkey::{PKey, Private};
 use openssl::hash::MessageDigest;
 use openssl::base64::{encode_block, decode_block};
+use log::info;
 
 /// Signs
 pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
