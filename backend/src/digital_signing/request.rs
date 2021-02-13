@@ -101,7 +101,7 @@ where
                                             e,
                                             req.headers().get("signature-input").unwrap(),
                                             req.headers().get("signature").unwrap());
-                        info!("Req Rejected: {}", error);
+                        info!("Request Rejected: {}", error);
                         Ok(req.into_response(HttpResponse::BadRequest().body(error).into_body()))
                     }
                 }

@@ -8,6 +8,7 @@ use openssl::rsa::{Rsa, Padding};
 use openssl::pkey::{PKey, Private};
 use openssl::hash::MessageDigest;
 use openssl::base64::{encode_block, decode_block};
+use log::info;
 
 /// Signs
 pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
@@ -206,6 +207,7 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     };
 
     if verifier.verify(&denc_signature).unwrap() {
+        info!("Successful Request from: {}", &sig_input_struct.key_id);
         return Ok(())
     } else {
         return Err(anyhow!("Error: verifying signature, may not match, signed with this string: \n{}", string_to_sign))
