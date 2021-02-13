@@ -1,7 +1,39 @@
 use super::model;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, patch, delete, web, HttpResponse, Responder};
 use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
+use super::super::request_errors::RequestError;
+
+#[patch("/api/posts/{id}")]
+async fn patch_post(
+        web::Path(id): web::Path<u64>,
+        pool: web::Data<MySqlPool>,
+        post: web::Json<model::PostPatchRequest>,
+    ) -> impl Responder {
+    // TODO: validate permission to modify post
+    match model::patch(id, post.into_inner(), pool.get_ref()).await {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => match e {
+            RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+            RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+        }
+    }
+}
+
+#[delete("/api/posts/{id}")]
+async fn delete_post(
+        web::Path(id): web::Path<u64>,
+        pool: web::Data<MySqlPool>,
+    ) -> impl Responder {
+    // TODO: validate permission to delete post
+    match model::delete(id, pool.get_ref()).await {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => match e {
+            RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+            RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+        }
+    }
+}
 
 #[post("/api/subforums/{id}/posts")]
 async fn post_post(
@@ -45,6 +77,8 @@ async fn get_post(
 }
 
 pub fn init(cfg: &mut web::ServiceConfig) {
+    cfg.service(patch_post);
+    cfg.service(delete_post);
     cfg.service(post_post);
     cfg.service(get_posts);
     cfg.service(get_post);
