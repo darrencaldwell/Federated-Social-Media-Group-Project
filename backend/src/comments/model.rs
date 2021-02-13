@@ -1,7 +1,8 @@
-use sqlx::MySqlPool;
+use sqlx::{MySqlPool, Done};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde::ser::{Serializer, SerializeStruct};
+use super::super::request_errors::RequestError;
 
 /// Represents a request to post a comment on a post
 #[derive(Deserialize)]
@@ -11,6 +12,12 @@ pub struct CommentRequest {
     pub comment_content: String,
     pub user_id: String,
     pub username: String,
+}
+/// Represents a request to modify a comment
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CommentPatchRequest {
+    pub comment_content: String,
 }
 
 #[derive(Serialize)]
@@ -172,6 +179,49 @@ pub async fn insert_child_comment(parent_id: u64,
         user_id,
     })
 
+}
+
+/// Modifies an existing comment
+pub async fn patch(comment_id: u64, comment: CommentPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
+
+    let number_modified = sqlx::query!(
+        r#"
+        UPDATE comments
+        SET comment = ?, modified_time = current_timestamp()
+        WHERE comment_id = ?
+        "#,
+        comment.comment_content,
+        comment_id
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    if number_modified != 1 {
+        Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
+    } else {
+        Ok(())
+    }
+}
+
+/// Deletes an existing comment
+pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestError> {
+
+    let number_modified = sqlx::query!(
+        r#"
+        DELETE FROM comments WHERE comment_id = ?
+        "#,
+        comment_id
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    if number_modified != 1 {
+        Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
+    } else {
+        Ok(())
+    }
 }
 
 /// Get all top level comments within a post

@@ -1,7 +1,8 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, MySqlPool};
+use sqlx::{FromRow, MySqlPool, Done};
 use serde::ser::{Serializer, SerializeStruct};
+use super::super::request_errors::RequestError;
 
 /// Represents a request to POST a post
 #[derive(Serialize, Deserialize)]
@@ -10,6 +11,14 @@ pub struct PostRequest {
     pub post_title: String,
     pub post_contents: String,
     pub user_id: String,
+}
+
+/// Represents a request to modify a post
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PostPatchRequest {
+    pub post_title: String,
+    pub post_contents: String,
 }
 
 /// Represents the database record for a given post
@@ -68,6 +77,50 @@ pub struct PostLinks {
 #[serde(rename_all = "camelCase")]
 pub struct Link {
     pub href: String,
+}
+
+/// Modifies an existing post
+pub async fn patch(post_id: u64, post: PostPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
+
+    let number_modified = sqlx::query!(
+        r#"
+        UPDATE posts
+        SET post_title = ?, post_contents = ?, modified_time = current_timestamp()
+        WHERE post_id = ?
+        "#,
+        post.post_title,
+        post.post_contents,
+        post_id
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    if number_modified != 1 {
+        Err(RequestError::NotFound(format!("post_id: {} not found", post_id)))
+    } else {
+        Ok(())
+    }
+}
+
+/// Deletes an existing post
+pub async fn delete(post_id: u64, pool: &MySqlPool) -> Result<(), RequestError> {
+
+    let number_modified = sqlx::query!(
+        r#"
+        DELETE FROM posts WHERE post_id = ?
+        "#,
+        post_id
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    if number_modified != 1 {
+        Err(RequestError::NotFound(format!("post_id: {} not found", post_id)))
+    } else {
+        Ok(())
+    }
 }
 
 /// Creates / Inserts a post into the database

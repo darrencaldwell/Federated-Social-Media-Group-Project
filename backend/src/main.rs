@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer, middleware};
+use actix_web::{App, HttpServer, middleware, web::PathConfig, error};
 
 use anyhow::Result;
 use dotenv::dotenv;
@@ -13,6 +13,7 @@ mod comments;
 mod forums;
 mod digital_signing;
 mod id_extractor;
+mod request_errors;
 
 use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
@@ -51,6 +52,15 @@ async fn main() -> Result<()> {
             // Data is functionally a map of Type:Value
             .data(key_pair.clone())
             .data(pool.clone())
+            // configures the error that is returned when an unparsable var is used in the path,
+            // eg an id that is not a u64
+            .app_data(PathConfig::default().error_handler(|err, _req| {
+                error::InternalError::from_response(
+                        err,
+                        HttpResponse::BadRequest().body("Unparsable id in path, only number id's are supported."),
+                    )
+                    .into()
+            }))
             .wrap(digital_signing::ProxyReq)
             // auth middleware has to be at bottom,
             .wrap(digital_signing::RequestAuth)
