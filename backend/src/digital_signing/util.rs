@@ -206,6 +206,7 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     };
 
     if verifier.verify(&denc_signature).unwrap() {
+        info!("Successful Request from: {}", &sig_input_struct.key_id);
         return Ok(())
     } else {
         return Err(anyhow!("Error: verifying signature, may not match, signed with this string: \n{}", string_to_sign))
