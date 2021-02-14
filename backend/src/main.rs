@@ -11,7 +11,7 @@ mod users;
 mod auth;
 mod comments;
 mod forums;
-mod digital_signing;
+mod middlewares;
 mod id_extractor;
 mod request_errors;
 mod implementations;
@@ -62,10 +62,10 @@ async fn main() -> Result<()> {
                     )
                     .into()
             }))
-            .wrap(digital_signing::ProxyReq)
+            .wrap(middlewares::ProxyReq)
             // auth middleware has to be at bottom,
-            .wrap(digital_signing::RequestAuth)
-            .wrap(digital_signing::ResponseSign)
+            .wrap(middlewares::RequestAuth)
+            .wrap(middlewares::ResponseSign)
             .wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
             // adds routes from subdirectories
