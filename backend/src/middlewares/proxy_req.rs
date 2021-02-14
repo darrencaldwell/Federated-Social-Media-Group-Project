@@ -1,5 +1,6 @@
 use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client, web::Data};
 use actix_service::{Service, Transform};
+use sqlx::MySqlPool;
 
 use anyhow::Result;
 use futures::future::{ok, Future, Ready};
@@ -10,6 +11,7 @@ use std::task::{Context, Poll};
 use openssl::pkey::{PKey, Private};
 
 use super::util;
+use super::super::implementations::get_one;
 
 pub struct ProxyReq;
 
@@ -66,14 +68,24 @@ where
             }
 
             // make request!
+            // get URL from querying database
+            let pool = req.app_data::<Data<MySqlPool>>().unwrap().clone();
+            // TODO: handle where id isn't a number
+            let id = req.headers().get("redirect").unwrap().to_str().unwrap().parse::<u64>().unwrap();
+
+            // TODO: handle impl not existing
+            let implementation = get_one(id, &pool).await.unwrap();
+
             // same path, same headers, sign it, send it off
 
+            // TODO, make client in main?
             let client = Client::default();
-            let dest_url = req.headers().get("redirect").unwrap().to_str().unwrap();
+            let dest_url = implementation.url;
             let dest_url_complete = format!("{}{}", dest_url, req.path());
             println!("{}",dest_url_complete);
             // make request from initial req, copies method and headers
             let mut client_req = client.request_from(dest_url_complete, req.head()); // redirect should have url to redirect to "https://yeet.com"
+            client_req.headers_mut().remove("Authorization"); // to not confuse other implementations, Authorization is only used locally.
 
             // add signature to request
             let req_headers = req.headers();

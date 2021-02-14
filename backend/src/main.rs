@@ -11,9 +11,10 @@ mod users;
 mod auth;
 mod comments;
 mod forums;
-mod digital_signing;
+mod middlewares;
 mod id_extractor;
 mod request_errors;
+mod implementations;
 
 use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
@@ -61,10 +62,11 @@ async fn main() -> Result<()> {
                     )
                     .into()
             }))
-            .wrap(digital_signing::ProxyReq)
+            .wrap(middlewares::ProxyReq)
+            .wrap(middlewares::ProtectLocal)
             // auth middleware has to be at bottom,
-            .wrap(digital_signing::RequestAuth)
-            .wrap(digital_signing::ResponseSign)
+            .wrap(middlewares::ResponseSign)
+            .wrap(middlewares::RequestAuth)
             .wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
             // adds routes from subdirectories
@@ -73,6 +75,7 @@ async fn main() -> Result<()> {
             .configure(users::init)
             .configure(comments::init)
             .configure(forums::init)
+            .configure(implementations::init)
     })
     .workers(2)
     .bind("127.0.0.1:21450")?
