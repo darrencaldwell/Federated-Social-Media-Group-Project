@@ -14,6 +14,7 @@ mod forums;
 mod digital_signing;
 mod id_extractor;
 mod request_errors;
+mod implementations;
 
 use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
@@ -73,6 +74,7 @@ async fn main() -> Result<()> {
             .configure(users::init)
             .configure(comments::init)
             .configure(forums::init)
+            .configure(implementations::init)
     })
     .workers(2)
     .bind("127.0.0.1:21450")?
