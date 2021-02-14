@@ -63,9 +63,10 @@ async fn main() -> Result<()> {
                     .into()
             }))
             .wrap(middlewares::ProxyReq)
+            .wrap(middlewares::ProtectLocal)
             // auth middleware has to be at bottom,
-            .wrap(middlewares::RequestAuth)
             .wrap(middlewares::ResponseSign)
+            .wrap(middlewares::RequestAuth)
             .wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
             // adds routes from subdirectories
