@@ -33,12 +33,13 @@ rust-build:
     - apk add build-base
     - apk add pkgconfig
     - apk add mariadb-client
+    - rustup component add clippy
 
   script:
     - cd backend
     - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
     - mysql --user=root --password=pass -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
-    - cargo check
+    - cargo clippy --all-targets --all-features -- -D warnings
 
 deploy_staging:
   stage: deploy
