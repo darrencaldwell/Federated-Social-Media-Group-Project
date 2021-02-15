@@ -99,3 +99,26 @@ CREATE TABLE `comments` (
   CONSTRAINT `comments_FK_1` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `comments_FK_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+CREATE DEFINER=`root`@`%` FUNCTION `cs3099user-b5_project`.`UuidFromBin`(_bin BINARY(16)) RETURNS binary(36)
+    DETERMINISTIC
+    SQL SECURITY INVOKER
+RETURN
+        LCASE(CONCAT_WS('-',
+            HEX(SUBSTR(_bin,  5, 4)),
+            HEX(SUBSTR(_bin,  3, 2)),
+            HEX(SUBSTR(_bin,  1, 2)),
+            HEX(SUBSTR(_bin,  9, 2)),
+            HEX(SUBSTR(_bin, 11))
+                 ));
+
+CREATE DEFINER=`cs3099user-b5`@`%` FUNCTION `cs3099user-b5_project`.`UuidToBin`(_uuid BINARY(36)) RETURNS binary(16)
+    DETERMINISTIC
+    SQL SECURITY INVOKER
+RETURN
+        UNHEX(CONCAT(
+            SUBSTR(_uuid, 15, 4),
+            SUBSTR(_uuid, 10, 4),
+            SUBSTR(_uuid,  1, 8),
+            SUBSTR(_uuid, 20, 4),
+            SUBSTR(_uuid, 25) ));
