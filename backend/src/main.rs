@@ -80,6 +80,7 @@ async fn main() -> Result<()> {
             .configure(implementations::init)
     })
     .bind("127.0.0.1:21450")?
+    .workers(4)
     .run()
     .await?;
 
