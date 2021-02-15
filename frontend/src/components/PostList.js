@@ -63,7 +63,6 @@ class PostList extends Component {
                         {/*map is used to apply this html for each post in the list */}
                         {this.state.postList.map((post) => (
                             // the PostPreview element is used for this, which takes the post id and the post json
-                            console.log(post),
                             <PostPreview key={post.id} post={post} forumID={this.props.match.params.forumID} subforumID={this.props.match.params.subforumID}/>
                         ))}
                     </Container>

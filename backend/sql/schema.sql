@@ -23,6 +23,16 @@ CREATE TABLE `forums` (
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
+-- `cs3099user-b5_project`.implementations definition
+
+CREATE TABLE `implementations` (
+  `implementation_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `implementation_url` varchar(500) NOT NULL,
+  `implementation_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`implementation_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
+
+
 -- `cs3099user-b5_project`.users definition
 
 CREATE TABLE `users` (
@@ -34,6 +44,7 @@ CREATE TABLE `users` (
   `email` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `first_name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `last_name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `date_joined` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -47,7 +58,7 @@ CREATE TABLE `subforums` (
   `forum_id` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`subforum_id`),
   KEY `subforums_FK` (`forum_id`),
-  CONSTRAINT `subforums_FK` FOREIGN KEY (`forum_id`) REFERENCES `forums` (`forum_id`)
+  CONSTRAINT `subforums_FK` FOREIGN KEY (`forum_id`) REFERENCES `forums` (`forum_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
@@ -59,12 +70,14 @@ CREATE TABLE `posts` (
   `post_contents` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `subforum_id` bigint(20) unsigned NOT NULL,
   `user_id` binary(16) NOT NULL,
+  `created_time` datetime DEFAULT current_timestamp(),
+  `modified_time` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`post_id`),
   KEY `subforum_id` (`subforum_id`),
   KEY `posts_FK` (`user_id`),
-  CONSTRAINT `posts_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  CONSTRAINT `subforum_id` FOREIGN KEY (`subforum_id`) REFERENCES `subforums` (`subforum_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8 COLLATE=utf8_croatian_ci;
+  CONSTRAINT `posts_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `posts_FK_1` FOREIGN KEY (`subforum_id`) REFERENCES `subforums` (`subforum_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8 COLLATE=utf8_croatian_ci;
 
 
 -- `cs3099user-b5_project`.comments definition
@@ -76,34 +89,13 @@ CREATE TABLE `comments` (
   `time_submitted` time DEFAULT NULL,
   `user_id` binary(16) NOT NULL,
   `parent_id` bigint(20) unsigned DEFAULT NULL,
+  `created_time` datetime DEFAULT current_timestamp(),
+  `modified_time` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`comment_id`),
   KEY `post_id` (`post_id`),
   KEY `comments_FK` (`user_id`),
   KEY `parent_id` (`parent_id`),
-  CONSTRAINT `comments_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  CONSTRAINT `parent_id` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`comment_id`),
-  CONSTRAINT `post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
-CREATE DEFINER=`root`@`%` FUNCTION `cs3099user-b5_project`.`UuidFromBin`(_bin BINARY(16)) RETURNS binary(36)
-    DETERMINISTIC
-    SQL SECURITY INVOKER
-RETURN
-        LCASE(CONCAT_WS('-',
-            HEX(SUBSTR(_bin,  5, 4)),
-            HEX(SUBSTR(_bin,  3, 2)),
-            HEX(SUBSTR(_bin,  1, 2)),
-            HEX(SUBSTR(_bin,  9, 2)),
-            HEX(SUBSTR(_bin, 11))
-                 ));
-
-CREATE DEFINER=`root`@`%` FUNCTION `cs3099user-b5_project`.`UuidToBin`(_uuid BINARY(36)) RETURNS binary(16)
-    DETERMINISTIC
-    SQL SECURITY INVOKER
-RETURN
-        UNHEX(CONCAT(
-            SUBSTR(_uuid, 15, 4),
-            SUBSTR(_uuid, 10, 4),
-            SUBSTR(_uuid,  1, 8),
-            SUBSTR(_uuid, 20, 4),
-            SUBSTR(_uuid, 25) ));
+  CONSTRAINT `comments_FK` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_FK_1` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_FK_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
