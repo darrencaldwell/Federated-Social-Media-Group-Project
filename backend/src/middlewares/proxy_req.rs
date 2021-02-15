@@ -78,8 +78,7 @@ where
 
             // same path, same headers, sign it, send it off
 
-            // TODO, make client in main?
-            let client = Client::default();
+            let client = req.app_data::<Data<Client>>().unwrap();
             let dest_url = implementation.url;
             let dest_url_complete = format!("{}{}", dest_url, req.path());
             println!("{}",dest_url_complete);

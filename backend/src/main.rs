@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer, middleware, web::PathConfig, error};
+use actix_web::{App, HttpServer, middleware, web::PathConfig, error, client::Client};
 
 use anyhow::Result;
 use dotenv::dotenv;
@@ -53,6 +53,8 @@ async fn main() -> Result<()> {
             // Data is functionally a map of Type:Value
             .data(key_pair.clone())
             .data(pool.clone())
+            // construct a client for each worker
+            .data(Client::default())
             // configures the error that is returned when an unparsable var is used in the path,
             // eg an id that is not a u64
             .app_data(PathConfig::default().error_handler(|err, _req| {
@@ -77,7 +79,6 @@ async fn main() -> Result<()> {
             .configure(forums::init)
             .configure(implementations::init)
     })
-    .workers(2)
     .bind("127.0.0.1:21450")?
     .run()
     .await?;
