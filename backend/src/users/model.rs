@@ -181,10 +181,10 @@ pub async fn register(username: String, password: String, first_name: String, la
     let password_hash: String = hash(password, 10)?;
 
     let user_id: String = sqlx::query!(
-        r#"insert into users (username, password_hash, user_id, server, first_name, last_name, email) values(?, ?, UuidToBin(UUID()), ?, ?, ?, ?) RETURNING UuidFromBin(user_id) AS user_id"#,
+        r#"insert into users (username, password_hash, user_id, implementation_id, first_name, last_name, email) values(?, ?, UuidToBin(UUID()), ?, ?, ?, ?) RETURNING UuidFromBin(user_id) AS user_id"#,
         username,
         password_hash,
-        "local",
+        1,
         first_name,
         last_name,
         email

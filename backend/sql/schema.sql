@@ -33,23 +33,6 @@ CREATE TABLE `implementations` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
 
 
--- `cs3099user-b5_project`.users definition
-
-CREATE TABLE `users` (
-  `username` varchar(30) COLLATE utf8_bin NOT NULL,
-  `password_hash` varchar(60) COLLATE utf8_bin DEFAULT NULL,
-  `user_id` binary(16) NOT NULL,
-  `server` varchar(100) COLLATE utf8_bin NOT NULL,
-  `description` text COLLATE utf8_bin NOT NULL DEFAULT '',
-  `email` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `first_name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `last_name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `date_joined` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
-
 -- `cs3099user-b5_project`.subforums definition
 
 CREATE TABLE `subforums` (
@@ -60,6 +43,25 @@ CREATE TABLE `subforums` (
   KEY `subforums_FK` (`forum_id`),
   CONSTRAINT `subforums_FK` FOREIGN KEY (`forum_id`) REFERENCES `forums` (`forum_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+-- `cs3099user-b5_project`.users definition
+
+CREATE TABLE `users` (
+  `username` varchar(30) COLLATE utf8_bin NOT NULL,
+  `password_hash` varchar(60) COLLATE utf8_bin DEFAULT NULL,
+  `user_id` binary(16) NOT NULL,
+  `description` text COLLATE utf8_bin NOT NULL DEFAULT '',
+  `email` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `first_name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `last_name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `date_joined` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `implementation_id` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  KEY `users_FK` (`implementation_id`),
+  CONSTRAINT `users_FK` FOREIGN KEY (`implementation_id`) REFERENCES `implementations` (`implementation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
 -- `cs3099user-b5_project`.posts definition
