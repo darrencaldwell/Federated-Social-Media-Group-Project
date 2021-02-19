@@ -1,4 +1,4 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client, web::Data};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, client::Client, web::Data, http::HeaderName};
 use actix_service::{Service, Transform};
 use sqlx::MySqlPool;
 
@@ -88,8 +88,16 @@ where
             let dest_url_complete = format!("{}{}", dest_url, req.path());
             println!("{}",dest_url_complete);
             // make request from initial req, copies method and headers
-            let mut client_req = client.request_from(dest_url_complete, req.head()); // redirect should have url to redirect to "https://yeet.com"
-            client_req.headers_mut().remove("Authorization"); // to not confuse other implementations, Authorization is only used locally.
+            let mut client_req = client.request(req.method().clone(), dest_url_complete); // redirect should have url to redirect to "https://yeet.com"
+            // add headers from front-end for content-type if exist
+            if req.headers().contains_key("content-type") {
+                client_req.headers_mut().append(HeaderName::from_static("content-type"), 
+                                                req.headers().get("content-type").unwrap().clone());
+            }
+            if req.headers().contains_key("content-length") {
+                client_req.headers_mut().append(HeaderName::from_static("content-length"), 
+                                                req.headers().get("content-length").unwrap().clone());
+            }
 
             // add signature to request
             let req_headers = req.headers();

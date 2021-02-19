@@ -32,7 +32,6 @@ class PostList extends Component {
                     credentials: 'include',
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
-                        'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'redirect': this.props.match.params.impID
                     }
