@@ -3,7 +3,7 @@ import {Button, Container, Form, FormGroup} from 'react-bootstrap'
 import BackButton from "./BackButton";
 import '../styling/create-post.css'
 
-//props: match.params.postID, match.params.commentID
+//props: match.params.impID, match.params.postID, match.params.commentID
 class Make extends React.Component {
     constructor(props) {
         super(props);
@@ -32,7 +32,8 @@ class Make extends React.Component {
                 credentials: 'include',
                 headers: {
                     'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'redirect': this.props.match.params.impID
                 },
                 body: JSON.stringify(
                     {
@@ -55,7 +56,7 @@ class Make extends React.Component {
     }
 
     render() {
-        const backURL = "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID;
+        const backURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID;
 
         return (
             <Container>

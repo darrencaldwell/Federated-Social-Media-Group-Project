@@ -3,7 +3,7 @@ import {Card} from "react-bootstrap";
 import {Container} from 'react-bootstrap';
 import '../styling/container-pages.css';
 
-// props: comment (json), posturl
+// props: comment (json), posturl, impID, level
 class Comment extends Component {
 
     render() {
@@ -18,18 +18,22 @@ class Comment extends Component {
                             Create Comment
                         </a>
                     </div>
-                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} posturl={this.props.posturl}/>
+                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
                 </Card>
             </div>
         )
     }
 }
 
-// props: url, posturl
+// props: url, posturl, impID, level, commentID
 export default class Comments extends Component {
     constructor(props) {
         super(props);
+        const root = (typeof this.props.level == 'undefined'); // it's a root comment if the comment ID is undefined
+        const level = root ? (0)
+                         : (this.props.level);
         this.state = {
+            level: level,
             commentList: [] // the list of comments will be stored here
         }
     }
@@ -48,7 +52,8 @@ export default class Comments extends Component {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'redirect': this.props.impID
                     }
                 }
             );
@@ -62,7 +67,20 @@ export default class Comments extends Component {
     }
 
     render() {
-        if (this.state.commentList.length > 0) {
+        if (this.state.expanded) {  // provide a link to return to the post
+            return (
+                <Container>
+                    <a className="button" href={this.props.posturl}>Return</a>
+                    <Comments url={this.props.url} impID={this.props.impID} expanded={false} posturl={this.props.posturl}/>
+                </Container>
+            )
+        } else if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
+            return (
+                <Container>
+                    <a className="button" href={this.props.posturl + "/" + this.props.commentID}>Expand</a>
+                </Container>
+            )
+        } else if (this.state.commentList.length > 0) {
 
             // if there are comments, display them
             return(
@@ -70,7 +88,7 @@ export default class Comments extends Component {
                     {/*map is used to apply this html for each comment in the list */}
                     {this.state.commentList.map((comment) => (
                         // the Comment element above is used for this, which takes the comment json
-                        <Comment comment={comment} posturl={this.props.posturl}/>
+                        <Comment comment={comment} impID={this.props.impID} level={this.state.level} posturl={this.props.posturl}/>
                     ))}
                 </Container>
             )

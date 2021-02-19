@@ -3,6 +3,7 @@ import {Button, Container, Form, FormGroup} from 'react-bootstrap'
 import BackButton from './BackButton';
 import '../styling/create-post.css'
 
+// props: match.params.impID
 class Make extends React.Component {
     constructor(props) {
         super(props);
@@ -29,7 +30,8 @@ class Make extends React.Component {
                 credentials: 'include',
                 headers: {
                     'Authorization': "Bearer " + localStorage.getItem('token'), // need to get the auth token from localStorage
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'redirect': this.props.match.params.impID
                 },
                 body: JSON.stringify({
                     "forumName": this.state.titleText
@@ -52,7 +54,7 @@ class Make extends React.Component {
     render() {
         return (
             <Container>
-                <BackButton url={"/forums"}/>
+                <BackButton url={"/" + this.props.match.params.impID + "/forums"}/>
                 <Form className="createForum">
                     <FormGroup controlId="create-title">
                         {/*These are the input forms for title and body, with placeholder text. They call the above change methods when you type in them.*/}

@@ -6,12 +6,14 @@ import BackButton from './BackButton';
 // import '../styling/Post.css';
 import {Card, Container} from "react-bootstrap";
 
-// props: postID, subforumID, forumID
+// props: match.params.impID, match.params.postID, match.params.subforumID, match.params.forumID, match.params.commentID
 export class Post extends Component {
 
     constructor(props) {
         super(props);
+        const expanded = (typeof this.props.match.params.commentID != 'undefined'); // it's an expanded comment if the url has the comment id
         this.state = {
+            expanded: expanded,
             post: {} // the post is stored here once loaded
         }
     }
@@ -30,7 +32,8 @@ export class Post extends Component {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'redirect': this.props.match.params.impID
                     }
                 }
             );
@@ -44,7 +47,9 @@ export class Post extends Component {
 
     render() {
 
-        const backURL = "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
+        const backURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
+        const url = this.state.expanded ? ('/api/comments/' + this.props.match.params.commentID + '/comments')
+                                        : ('/api/posts/' + this.props.match.params.postID + '/comments/');
 
         return (
             <Container className="post-container">
@@ -60,7 +65,7 @@ export class Post extends Component {
                     </Card>
                 </div>
 
-                <a className="button create-forum-button" href={"/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}>
+                <a className="button create-forum-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}>
                     Create Comment
                 </a>
 
@@ -69,8 +74,8 @@ export class Post extends Component {
                 {/*<Dropdown className="mt-3">*/}
                 {/*<Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>*/}
                 {/*<Dropdown.Menu>*/}
-                <Comments url={'/api/posts/' + this.props.match.params.postID + '/comments'}
-                        posturl={"/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID}/>
+                <Comments url={url} impID={this.props.match.params.impID} expanded={this.state.expanded}
+                        posturl={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID}/>
                 {/*</Dropdown.Menu>*/}
                 {/*</Dropdown>*/}
 
