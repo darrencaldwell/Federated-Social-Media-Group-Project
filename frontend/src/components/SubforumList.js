@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import {Card, Container} from "react-bootstrap";
+import {Card, Container, Button} from "react-bootstrap";
 import '../styling/container-pages.css';
 
-// props: forumID
+// props: match.params.impID, match.params.forumID
 export default class SubforumList extends Component {
 
     constructor(props) {
@@ -30,7 +30,8 @@ export default class SubforumList extends Component {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'redirect': this.props.match.params.impID
                     }
                 }
             );
@@ -52,7 +53,8 @@ export default class SubforumList extends Component {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'redirect': this.props.match.params.impID
                     }
                 }
             );
@@ -68,23 +70,23 @@ export default class SubforumList extends Component {
         //var name = this.state.forumName;
         return (
             <div className="subforum-container">
-                <a className="button forum-info forum-info-container" href={'/' + this.props.match.params.forumID} body={this.state.forumName}>
-                    forum name would go here but I can't get it to work
-                </a>
+                <Button className="button forum-info forum-info-container" href={'/' + this.props.match.params.forumID} body={this.state.forumName}>
+                    forum name, if it ever works
+                </Button>
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}
                     {this.state.subforumList.map((subforum) => (
                         <Card className="subforum" >  {/*each forum is displayed as a card with className forum */}
                             <Card.Body>
                                 {/*The card consists of the name of the forum, which links to the forum itself */}
-                                <Card.Link href={'/' + this.props.match.params.forumID + '/' + subforum.id}>
+                                <Card.Link href={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + subforum.id}>
                                     {subforum.subforumName}
                                 </Card.Link>
                             </Card.Body>
                         </Card>
                     ))}
                 </Container>
-                <a className="button" href={"/" + this.props.match.params.forumID + "/new"}>
+                <a className="button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/new"}>
                     New Subforum
                 </a>
             </div>)

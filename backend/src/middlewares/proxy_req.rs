@@ -72,6 +72,11 @@ where
             let pool = req.app_data::<Data<MySqlPool>>().unwrap().clone();
             // TODO: handle where id isn't a number
             let id = req.headers().get("redirect").unwrap().to_str().unwrap().parse::<u64>().unwrap();
+            // TODO: first value in db should be local, so don't go for it, maybe we need a less
+            // magic number approach?
+            if id == 1 {
+                return srv.call(req).await
+            }
 
             // TODO: handle impl not existing
             let implementation = get_one(id, &pool).await.unwrap();

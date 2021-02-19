@@ -71,5 +71,6 @@ pub fn init(cfg: &mut web::ServiceConfig) {
    cfg.service(delete_implementation);
    cfg.service(post_implementation);
    cfg.service(get_implementations);
+   cfg.service(get_one_implementation);
 
 }

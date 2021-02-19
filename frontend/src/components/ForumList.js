@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Card, Container} from "react-bootstrap";
 import '../styling/container-pages.css';
 
-// no props
+// props: match.params.impID
 export default class ForumList extends Component {
 
     constructor(props) {
@@ -27,15 +27,23 @@ export default class ForumList extends Component {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'redirect': this.props.match.params.impID
                     }
                 }
             );
 
-            let result = await res.json(); // we know the result will be json
-            this.setState({forumList: result._embedded.forumList} ); // and we store that json in the state
+            if (res.ok) {
+                let result = await res.json(); // we know the result will be json
+                this.setState({forumList: result._embedded.forumList} ); // and we store that json in the state
+            } else {
+                alert("Error: " + res.statusText);
+            }
 
         } catch (e) {
+            console.log("Error", e.stack);
+            console.log("Error", e.name);
+            console.log("Error", e.message);
         }
     }
 
@@ -50,7 +58,7 @@ export default class ForumList extends Component {
                     <Card className="forum" >  {/*each forum is displayed as a card with className forum */}
                         <Card.Body>
                             {/*The card consists of the name of the forum, which links to the forum itself */}
-                            <Card.Link href={'/' + forum.id}>
+                            <Card.Link href={'/' + this.props.match.params.impID + '/' + forum.id}>
                                 {forum.forumName}
                             </Card.Link> 
                         </Card.Body>                    
@@ -58,7 +66,7 @@ export default class ForumList extends Component {
                     ))}
                 </Container>
                 
-                <a className="button" href="/new">
+                <a className="button" href={"/" + this.props.match.params.impID + "/new"}>
                     New Forum
                 </a>
 
