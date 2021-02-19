@@ -3,7 +3,7 @@ use actix_web::client::Client;
 use serde::Deserialize;
 use anyhow::{Result, anyhow};
 use std::time::SystemTime;
-use openssl::sign::{Signer, Verifier};
+use openssl::sign::{RsaPssSaltlen, Signer, Verifier};
 use openssl::rsa::{Rsa, Padding};
 use openssl::pkey::{PKey, Private};
 use openssl::hash::MessageDigest;
@@ -44,6 +44,8 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
 
     let mut signer = Signer::new(MessageDigest::sha512(), &private_key)?;
     signer.set_rsa_padding(Padding::PKCS1_PSS)?;
+    signer.set_rsa_mgf1_md(MessageDigest::sha512())?;
+    signer.set_rsa_pss_saltlen(RsaPssSaltlen::custom(20))?;
     signer.update(string_to_sign.as_ref())?;
     let signature = signer.sign_to_vec()?;
     let enc_signature = encode_block(&signature);
@@ -199,6 +201,8 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
 
     let mut verifier = Verifier::new(MessageDigest::sha512(), &public_key_parsed).unwrap();
     verifier.set_rsa_padding(Padding::PKCS1_PSS).unwrap();
+    verifier.set_rsa_mgf1_md(MessageDigest::sha512())?;
+    verifier.set_rsa_pss_saltlen(RsaPssSaltlen::custom(20))?;
     verifier.update(string_to_sign.as_ref()).unwrap();
 
     let denc_signature = match decode_block(&enc_signature) {
