@@ -51,13 +51,8 @@ export default class SubforumList extends Component {
                     credentials: 'include',
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
-<<<<<<< HEAD
-                        'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'redirect': this.props.match.params.impID
-=======
-                        'Accept': 'application/json'
->>>>>>> 52bbc215 (fix: use a new set of headers when making reqs to other impl, removed invalid content-type from get requests in front-end)
                     }
                 }
             );

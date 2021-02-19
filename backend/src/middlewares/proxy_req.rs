@@ -9,6 +9,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
 use openssl::pkey::{PKey, Private};
+use log::info;
 
 use super::util;
 use super::super::implementations::get_one;
@@ -86,9 +87,8 @@ where
             let client = req.app_data::<Data<Client>>().unwrap();
             let dest_url = implementation.url;
             let dest_url_complete = format!("{}{}", dest_url, req.path());
-            println!("{}",dest_url_complete);
             // make request from initial req, copies method and headers
-            let mut client_req = client.request(req.method().clone(), dest_url_complete); // redirect should have url to redirect to "https://yeet.com"
+            let mut client_req = client.request(req.method().clone(), &dest_url_complete); // redirect should have url to redirect to "https://yeet.com"
             // add headers from front-end for content-type if exist
             if req.headers().contains_key("content-type") {
                 client_req.headers_mut().append(HeaderName::from_static("content-type"), 
@@ -105,6 +105,7 @@ where
             let req_path = req.path();
             let key_pair = req.app_data::<Data<PKey<Private>>>().unwrap().clone();
             util::sign_signature(client_req.headers_mut(), &req_headers, &req_method, &req_path, &key_pair).unwrap();
+            info!("Making request to {} With headers: {:#?}",dest_url_complete, client_req.headers());
 
             // split request to get payload (body)
             let (http_req, payload) = req.into_parts();
