@@ -99,14 +99,16 @@ fn gen_links(comment_id: u64, parent_comment_id: u64, user_id: &str, post_id: u6
 pub async fn insert_comment(post_id: u64,
                             user_id: String,
                             comment_request: CommentRequest,
-                            pool: &MySqlPool
+                            pool: &MySqlPool,
+                            implementation_id: u64
 ) -> Result<Comment> {
     let mut tx = pool.begin().await?;
     let comment_id = sqlx::query!(
-        "INSERT INTO comments (comment, user_id, post_id) VALUES (?, ?, ?)",
+        "INSERT INTO comments (comment, user_id, post_id, implementation_id) VALUES (?, ?, ?, ?)",
         comment_request.comment_content,
         comment_request.user_id,
-        post_id)
+        post_id,
+        implementation_id)
         .execute(&mut tx)
         .await?
         .last_insert_id();
@@ -139,7 +141,8 @@ pub async fn insert_comment(post_id: u64,
 pub async fn insert_child_comment(parent_id: u64,
                             user_id: String,
                             comment_request: CommentRequest,
-                            pool: &MySqlPool
+                            pool: &MySqlPool,
+                            implementation_id: u64
 ) -> Result<Comment> {
     let post_id = sqlx::query!("SELECT post_id FROM comments where comment_id = ?", parent_id)
         .fetch_one(pool)
@@ -148,11 +151,12 @@ pub async fn insert_child_comment(parent_id: u64,
 
     let mut tx = pool.begin().await?;
     let comment_id = sqlx::query!(
-        "INSERT INTO comments (comment, user_id, post_id, parent_id) VALUES (?, ?, ?, ?)",
+        "INSERT INTO comments (comment, user_id, post_id, parent_id, implementation_id) VALUES (?, ?, ?, ?, ?)",
         comment_request.comment_content,
         comment_request.user_id,
         post_id,
-        parent_id)
+        parent_id,
+        implementation_id)
         .execute(&mut tx)
         .await?
         .last_insert_id();
