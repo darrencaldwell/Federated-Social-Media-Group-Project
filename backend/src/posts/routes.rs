@@ -2,6 +2,7 @@ use super::model;
 use actix_web::{get, post, patch, delete, web, HttpResponse, Responder};
 use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
+use crate::implementation_id_extractor::ImplementationId;
 use super::super::request_errors::RequestError;
 
 #[patch("/api/posts/{id}")]
@@ -41,9 +42,10 @@ async fn post_post(
     pool: web::Data<MySqlPool>,
     post: web::Json<model::PostRequest>,
     UserId(user_id): UserId,
+    ImplementationId(implementation_id): ImplementationId,
 ) -> impl Responder {
     if user_id != post.user_id { return HttpResponse::Forbidden().finish(); }
-    let result = model::create(id, post.into_inner(), pool.get_ref()).await;
+    let result = model::create(id, post.into_inner(), pool.get_ref(), implementation_id).await;
     match result {
         Ok(post) => HttpResponse::Ok().json(post),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),

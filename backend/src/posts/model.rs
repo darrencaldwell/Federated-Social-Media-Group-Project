@@ -124,19 +124,20 @@ pub async fn delete(post_id: u64, pool: &MySqlPool) -> Result<(), RequestError> 
 }
 
 /// Creates / Inserts a post into the database
-pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool) -> Result<Post> {
+pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, implementation_id: u64) -> Result<Post> {
     // pool is used for a transaction, ie a rollbackable operation
     let mut tx = pool.begin().await?;
 
     let id = sqlx::query!(
         r#"
-        insert into posts (post_title, user_id, post_contents, subforum_id)
-        values( ?, UuidToBin(?), ?, ? )
+        insert into posts (post_title, user_id, post_contents, subforum_id, implementation_id)
+        values( ?, UuidToBin(?), ?, ?, ?)
         "#,
         post.post_title,
         post.user_id,
         post.post_contents,
-        subforum_id
+        subforum_id,
+        implementation_id
     )
     .execute(&mut tx)
     .await?

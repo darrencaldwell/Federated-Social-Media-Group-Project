@@ -13,6 +13,7 @@ mod comments;
 mod forums;
 mod middlewares;
 mod id_extractor;
+mod implementation_id_extractor;
 mod request_errors;
 mod implementations;
 

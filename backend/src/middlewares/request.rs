@@ -1,6 +1,7 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpResponse, web::Data};
 use actix_web::http::{HeaderName, HeaderValue};
 use actix_service::{Service, Transform};
+use sqlx::MySqlPool;
 
 use anyhow::Result;
 use futures::future::{ok, Future, Ready};
@@ -88,6 +89,9 @@ where
                     if token_str.len() > 8 {
                         if let Ok(user_id) = crate::auth::decode_jwt(&token_str[7..]) {
                             req.headers_mut().insert(HeaderName::from_static("user-id"), HeaderValue::from_str(&user_id).unwrap());
+                            // local impl is always first id
+                            req.headers_mut().append(HeaderName::from_static("implementation-id"),
+                                HeaderValue::from_str("1").unwrap());
                             return srv.call(req).await
                         }
                     }
@@ -95,7 +99,25 @@ where
                 srv.call(req).await
             } else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {
                 match util::check_signature(headers, req.path(), &req.method().as_str().to_lowercase()).await {
-                    Ok(_) => srv.call(req).await,
+                    Ok(remote_url) => { 
+
+                        let pool: &MySqlPool = &req.app_data::<Data<MySqlPool>>().unwrap().clone();
+                        let impl_id = sqlx::query!(
+                            r#"
+                            SELECT implementation_id FROM implementations
+                            WHERE implementation_url = ?
+                            "#,
+                            remote_url
+                        )
+                        .fetch_one(pool)
+                        .await.unwrap()
+                        .implementation_id;
+                        // TODO: Make this less dirty?
+                        req.headers_mut().append(HeaderName::from_static("implementation-id"),
+                            HeaderValue::from_str(impl_id.to_string().as_str()).unwrap());
+
+                        srv.call(req).await
+                    },
                     Err(e) => {
                         let error = format!("Signature verification: {}\nWith signature-input: {:?}\nWith signature {:?}",
                                             e,
