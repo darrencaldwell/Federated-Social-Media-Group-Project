@@ -131,7 +131,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
     let id = sqlx::query!(
         r#"
         insert into posts (post_title, user_id, post_contents, subforum_id, implementation_id)
-        values( ?, UuidToBin(?), ?, ?, ?)
+        values( ?, ?, ?, ?, ?)
         "#,
         post.post_title,
         post.user_id,
@@ -172,7 +172,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     let mut posts = vec![];
     let recs = sqlx::query!(
         r#"
-        SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, posts.subforum_id, forum_id FROM posts
+        SELECT post_id, post_title, user_id, post_contents, posts.subforum_id, forum_id FROM posts
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
         WHERE posts.subforum_id = ?
         ORDER BY post_id
@@ -183,7 +183,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     .await?;
 
     for rec in recs {
-        let user_id = rec.user_id.unwrap();
+        let user_id = rec.user_id;
         posts.push(Post {
             id: rec.post_id,
             post_title: rec.post_title,
@@ -195,7 +195,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
                 rec.forum_id.unwrap(),
                 &user_id,
             ),
-            user_id,
+            user_id: user_id.to_string(),
         });
     }
     let post_list = PostList { post_list: posts };

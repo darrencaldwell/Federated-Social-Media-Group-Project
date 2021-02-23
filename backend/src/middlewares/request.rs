@@ -101,6 +101,7 @@ where
                 match util::check_signature(headers, req.path(), &req.method().as_str().to_lowercase()).await {
                     Ok(remote_url) => { 
 
+                        // get implementation_id by url
                         let pool: &MySqlPool = &req.app_data::<Data<MySqlPool>>().unwrap().clone();
                         let impl_id = sqlx::query!(
                             r#"
@@ -115,6 +116,17 @@ where
                         // TODO: Make this less dirty?
                         req.headers_mut().append(HeaderName::from_static("implementation-id"),
                             HeaderValue::from_str(impl_id.to_string().as_str()).unwrap());
+
+                        // add remote user to our db if not already in its
+                        sqlx::query!(
+                            r#"
+                            INSERT IGNORE INTO users (user_id, implementation_id) 
+                            values (?, ?)
+                            "#,
+                            req.headers().get("user-id").unwrap().to_str().unwrap(),
+                            impl_id
+                            ).execute(pool)
+                            .await.unwrap();
 
                         srv.call(req).await
                     },

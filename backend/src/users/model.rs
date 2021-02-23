@@ -114,12 +114,12 @@ fn gen_links(user_id: &str) -> UserLinks {
 
 /// Given a user_id and db pool queries for that user and returns it
 pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
-    let result = sqlx::query!("SELECT username, description FROM users WHERE user_id = (UuidToBin(?))", &user_id)
+    let result = sqlx::query!("SELECT username, description FROM users WHERE user_id = (?)", &user_id)
         .fetch_one(pool)
         .await?;
 
     Ok(User {
-        username: result.username,
+        username: result.username.unwrap(),
         links: gen_links(&user_id),
         user_id,
         description: result.description,
@@ -128,7 +128,7 @@ pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
 
 /// Returns a list of ALL users within our database, should probably not be used.
 pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
-    let result = sqlx::query!(r#"SELECT UuidFromBin(user_id) AS "user_id: String", username, description FROM users"#)
+    let result = sqlx::query!(r#"SELECT user_id, username, description FROM users"#)
         .fetch_all(pool)
         .await?;
 
@@ -136,12 +136,12 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
     let users: Vec<User> = result
         .into_iter()
         .map(|rec| {
-            let user_id = rec.user_id.unwrap();
+            let user_id = rec.user_id;
             User {
-                username: rec.username,
+                username: rec.username.unwrap(),
                 description: rec.description,
                 links: gen_links(&user_id),
-                user_id,
+                user_id: user_id.to_string(),
             }
         })
         .collect();
@@ -160,14 +160,14 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
 /// Get account details
 pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser> {
     let rec = sqlx::query!(
-        r#"SELECT username, first_name, last_name, UuidFromBin(user_id) AS "user_id: String", email FROM users WHERE user_id = (UuidToBin(?)) and implementation_id = 1"#,
+        r#"SELECT username, first_name, last_name, user_id, email FROM users WHERE user_id = (?) and implementation_id = 1"#,
         user_id) //get comments
         .fetch_one(pool)
         .await?;
 
     Ok(LocalUser{
         links: gen_links(&user_id),
-        local_username: rec.username,
+        local_username: rec.username.unwrap(),
         local_user_id: user_id,
         first_name: rec.first_name.unwrap(),
         last_name: rec.last_name.unwrap(),
@@ -181,7 +181,7 @@ pub async fn register(username: String, password: String, first_name: String, la
     let password_hash: String = hash(password, 10)?;
 
     let user_id: String = sqlx::query!(
-        r#"insert into users (username, password_hash, user_id, implementation_id, first_name, last_name, email) values(?, ?, UuidToBin(UUID()), ?, ?, ?, ?) RETURNING UuidFromBin(user_id) AS user_id"#,
+        r#"insert into users (username, password_hash, user_id, implementation_id, first_name, last_name, email) values(?, ?, UUID(), ?, ?, ?, ?) RETURNING user_id"#,
         username,
         password_hash,
         1,
@@ -218,7 +218,7 @@ pub async fn verify(
     pool: &MySqlPool,
 ) -> Result<String, LoginError> {
     let rec = sqlx::query!(
-        r#"SELECT password_hash, UuidFromBin(user_id) AS "user_id: String" FROM users WHERE username = ?"#,
+        r#"SELECT password_hash, user_id FROM users WHERE username = ?"#,
         username
     )
         // Uniqueness guaranteed by database
@@ -248,5 +248,5 @@ pub async fn verify(
         Err(_) => return Err(LoginError::InvalidHash),
     };
 
-    Ok(rec_result.user_id.unwrap())
+    Ok(rec_result.user_id)
 }

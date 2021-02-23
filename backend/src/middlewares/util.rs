@@ -212,10 +212,9 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
 
     if verifier.verify(&denc_signature).unwrap() {
         info!("Successful Request from: {}", &sig_input_struct.key_id);
-
         // get implementation id by querying database
         let full_url = sig_input_struct.key_id.clone();
-        let parsed_url = full_url.strip_suffix(req_path).unwrap();
+        let parsed_url = full_url.split("/api/").collect::<Vec<_>>()[0];
         return Ok(parsed_url.to_string())
     } else {
         return Err(anyhow!("Error: verifying signature, may not match, signed with this string: \n{}", string_to_sign))
