@@ -218,7 +218,7 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
     .fetch_one(pool)
     .await?;
 
-    let user_id = rec.user_id.unwrap();
+    let user_id = rec.user_id;
     let post = Post {
         id: rec.post_id,
         post_title: rec.post_title,
@@ -230,7 +230,7 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
             rec.forum_id.unwrap(),
             &user_id,
         ),
-        user_id,
+        user_id: user_id.to_string(),
     };
     Ok(post)
 }
