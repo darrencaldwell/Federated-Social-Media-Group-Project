@@ -209,7 +209,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
 pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
     let rec = sqlx::query!(
         r#"
-        SELECT post_id, post_title, UuidFromBin(user_id) AS "user_id: String", post_contents, posts.subforum_id, forum_id FROM posts
+        SELECT post_id, post_title, user_id, post_contents, posts.subforum_id, forum_id FROM posts
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
         WHERE post_id = ?
         "#,
