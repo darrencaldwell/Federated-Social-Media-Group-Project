@@ -64,7 +64,7 @@ struct SignatureInput {
     covered_content: String,
 }
 
-pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method: &str) -> Result<()> {
+pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method: &str) -> Result<String> {
 
     let mut sig_input_struct = SignatureInput {
         alg: String::from(""),
@@ -212,7 +212,10 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
 
     if verifier.verify(&denc_signature).unwrap() {
         info!("Successful Request from: {}", &sig_input_struct.key_id);
-        return Ok(())
+        // get implementation id by querying database
+        let full_url = sig_input_struct.key_id.clone();
+        let parsed_url = full_url.split("/api/").collect::<Vec<_>>()[0];
+        return Ok(parsed_url.to_string())
     } else {
         return Err(anyhow!("Error: verifying signature, may not match, signed with this string: \n{}", string_to_sign))
     }

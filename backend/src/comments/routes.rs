@@ -2,6 +2,7 @@ use super::model;
 use actix_web::{web, get, post, patch, delete, HttpResponse, Responder};
 use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
+use crate::implementation_id_extractor::ImplementationId;
 use super::super::request_errors::RequestError;
 
 #[patch("/api/comments/{id}")]
@@ -76,10 +77,11 @@ async fn post_comment(
     web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
     comment: web::Json::<model::CommentRequest>,
-    UserId(user_id): UserId
+    UserId(user_id): UserId,
+    ImplementationId(implementation_id): ImplementationId,
 ) -> impl Responder {
     if user_id != comment.user_id { return HttpResponse::Forbidden().finish(); }
-    match model::insert_comment(id, user_id, comment.into_inner(), &pool).await {
+    match model::insert_comment(id, user_id, comment.into_inner(), &pool, implementation_id).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
@@ -90,10 +92,11 @@ async fn post_child_comment(
     web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
     comment: web::Json::<model::CommentRequest>,
-    UserId(user_id): UserId
+    UserId(user_id): UserId,
+    ImplementationId(implementation_id): ImplementationId,
 ) -> impl Responder {
     if user_id != comment.user_id { return HttpResponse::Forbidden().finish(); }
-    match model::insert_child_comment(id, user_id, comment.into_inner(), &pool).await {
+    match model::insert_child_comment(id, user_id, comment.into_inner(), &pool, implementation_id).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }

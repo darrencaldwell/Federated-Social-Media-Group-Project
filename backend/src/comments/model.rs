@@ -99,14 +99,16 @@ fn gen_links(comment_id: u64, parent_comment_id: u64, user_id: &str, post_id: u6
 pub async fn insert_comment(post_id: u64,
                             user_id: String,
                             comment_request: CommentRequest,
-                            pool: &MySqlPool
+                            pool: &MySqlPool,
+                            implementation_id: u64
 ) -> Result<Comment> {
     let mut tx = pool.begin().await?;
     let comment_id = sqlx::query!(
-        "INSERT INTO comments (comment, user_id, post_id) VALUES (?, UuidToBin(?), ?)",
+        "INSERT INTO comments (comment, user_id, post_id, implementation_id) VALUES (?, ?, ?, ?)",
         comment_request.comment_content,
         comment_request.user_id,
-        post_id)
+        post_id,
+        implementation_id)
         .execute(&mut tx)
         .await?
         .last_insert_id();
@@ -139,7 +141,8 @@ pub async fn insert_comment(post_id: u64,
 pub async fn insert_child_comment(parent_id: u64,
                             user_id: String,
                             comment_request: CommentRequest,
-                            pool: &MySqlPool
+                            pool: &MySqlPool,
+                            implementation_id: u64
 ) -> Result<Comment> {
     let post_id = sqlx::query!("SELECT post_id FROM comments where comment_id = ?", parent_id)
         .fetch_one(pool)
@@ -148,11 +151,12 @@ pub async fn insert_child_comment(parent_id: u64,
 
     let mut tx = pool.begin().await?;
     let comment_id = sqlx::query!(
-        "INSERT INTO comments (comment, user_id, post_id, parent_id) VALUES (?, UuidToBin(?), ?, ?)",
+        "INSERT INTO comments (comment, user_id, post_id, parent_id, implementation_id) VALUES (?, ?, ?, ?, ?)",
         comment_request.comment_content,
         comment_request.user_id,
         post_id,
-        parent_id)
+        parent_id,
+        implementation_id)
         .execute(&mut tx)
         .await?
         .last_insert_id();
@@ -227,7 +231,7 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
 /// Get all top level comments within a post
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, UuidFromBin(comments.user_id) AS "user_id!: String", comment_id,
+        r#"SELECT comment, comments.user_id, comment_id,
         posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
         FROM comments
         LEFT JOIN users on comments.user_id = users.user_id
@@ -264,7 +268,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
 /// Get all top level child comments of a comment
 pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, UuidFromBin(comments.user_id) AS "user_id!: String", comment_id, comments.post_id,
+        r#"SELECT comment, comments.user_id, comment_id, comments.post_id,
         posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
         FROM comments
         LEFT JOIN users on comments.user_id = users.user_id
@@ -308,7 +312,7 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
 /// Get a single comment by it's id
 pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
     let rec = sqlx::query!(
-        r#"SELECT comment, UuidFromBin(comments.user_id) AS "user_id!: String", comments.post_id,
+        r#"SELECT comment, comments.user_id, comments.post_id,
         posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
         FROM comments
         LEFT JOIN users on comments.user_id = users.user_id
