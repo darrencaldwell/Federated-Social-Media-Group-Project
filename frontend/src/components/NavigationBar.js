@@ -56,7 +56,7 @@ class NavigationBar extends React.Component {
                     {/*<Nav.Link as={Link} to='/communities'>My Communities</Nav.Link>*/}
                     <Nav.Link as={Link} to='/account'>My account</Nav.Link>
                     {/*<Nav.Link as={Link} to='/forums'>View Forums    </Nav.Link>   redundant*/}
-                    <Nav.Link as={Link} to='/' onClick={() => localStorage.clear()}>Logout</Nav.Link>
+                    <Nav.Link as={Link} to='/' onClick={() => this.props.logout()}>Logout</Nav.Link>
                 </Nav>
             )
 
