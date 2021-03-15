@@ -14,12 +14,14 @@ export class Post extends Component {
         const expanded = (typeof this.props.match.params.commentID != 'undefined'); // it's an expanded comment if the url has the comment id
         this.state = {
             expanded: expanded,
-            post: {} // the post is stored here once loaded
+            post: {}, // the post is stored here once loaded
+            post_author: {}
         }
     }
 
     // Runs when the component is loaded, fetching the post into state
     componentDidMount = async () => {
+        // get post
         try {
             // the url needs the post id from the props
             let url = '/api/posts/' + this.props.match.params.postID;
@@ -40,7 +42,27 @@ export class Post extends Component {
             let result = await res.json(); // we know the result will be json
             this.setState({post: result }); // we store the json for the post in the state
 
+            // the url needs the post id from the props
+            url = '/api/users/' + this.state.post.userId;
+            res = await fetch(url
+                , {
+                    method: 'get', // we're making a GET request
+
+                    withCredentials: true, // we're using authorisation with a token in local storage
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token'),
+                        'Accept': 'application/json',
+                        'redirect': this.props.match.params.impID
+                    }
+                }
+            );
+
+            result = await res.json(); // we know the result will be json
+            this.setState({post_author: result }); // we store the json for the post in the state
+
         } catch (e) {
+            console.log(e)
         }
     }
 
@@ -58,7 +80,8 @@ export class Post extends Component {
                         <Card.Body>
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
                             <Card.Subtitle className="text-muted">
-                                Post made by user Id: {this.state.post.id}</Card.Subtitle>
+                                Post made by: {this.state.post_author.username}
+                            </Card.Subtitle>
                             <Card.Text>{this.state.post.postContents}</Card.Text>
                         </Card.Body>
                     </Card>

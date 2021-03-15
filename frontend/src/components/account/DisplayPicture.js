@@ -1,50 +1,26 @@
 import React from 'react'
-import {Container, Image} from "react-bootstrap";
-import dp from '../../images/display-pic.png'
+import Avatar from 'react-avatar';
+import Uploady from "@rpldy/uploady";
+import UploadButton from "@rpldy/upload-button";
+import {Container} from "react-bootstrap";
 import '../../styling/display-pic.css'
 
 class DisplayPicture extends React.Component {
-    // constructor() {
-    //     super();
-    //     this.state = {
-    //         uploadedPicture: false
-    //     }
-    // }
-
-    /**
-     * Doesn't do anything as of yet
-     * Nee
-     * @param e
-     */
-    handleImageUpload = e => {
-        const [file] = e.target.files
-
-        if (file) {
-            console.log(file)
-        }
-    }
-
     render() {
-        if (this.props.uploadedPicture) {
-            return (
-                <Container className="displayPic">
-                    <p1>Picture Yay</p1>
-
+        return (
+            <Container className="displayPic">
+                <Avatar round={true} src={"/api/users/" + localStorage.getItem("userId") + "/profilepicture"} name={localStorage.getItem("username")}/>
+                <Container>
+                    <Uploady
+                    destination={{ 
+                        url: "/local/users/" + localStorage.getItem("userId") + "/profilepicture",
+                        headers: {"Authorization": localStorage.getItem("token")}
+                    }}>
+                        <UploadButton/>
+                    </Uploady>
                 </Container>
-            )
-        } else {
-            return (
-                <Container className="displayPic">
-                    <Image src={dp}/>
-                    <Container>
-                        <input className="uploadPicButton"
-                               type="file"
-                               accept="image/*" onChange={this.handleImageUpload}
-                        />
-                    </Container>
-                </Container>
-            )
-        }
+            </Container>
+        )
     }
 }
 

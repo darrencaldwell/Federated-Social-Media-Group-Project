@@ -9,6 +9,7 @@ export default class SubforumList extends Component {
         super(props)
         this.state = {
             subforumList: [], // the list of subforums will be stored here, once loaded
+            forum: {},
             forumName: {},
             forumLink: {}
         }
@@ -58,7 +59,7 @@ export default class SubforumList extends Component {
             );
 
             let result2 = await res2.json(); // we know the result will be json
-            this.setState({forumName: result2.forumName }); // and we store that json in the state
+            this.setState({forum: result2 }); // and we store that json in the state
         } catch (e) {
         }
     }
@@ -68,8 +69,8 @@ export default class SubforumList extends Component {
         //var name = this.state.forumName;
         return (
             <div className="subforum-container">
-                <Button className="button forum-info forum-info-container" href={'/' + this.props.match.params.forumID} body={this.state.forumName}>
-                    forum name, if it ever works
+                <Button className="button forum-info forum-info-container" href={'/' + this.props.match.params.forumID}>
+                {this.state.forum.forumName} 
                 </Button>
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}

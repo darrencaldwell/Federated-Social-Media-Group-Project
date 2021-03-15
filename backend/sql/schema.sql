@@ -11,7 +11,7 @@ CREATE TABLE `casbin_rules` (
   `v5` varchar(128) CHARACTER SET utf8 NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_key_sqlx_adapter` (`ptype`,`v0`,`v1`,`v2`,`v3`,`v4`,`v5`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 -- `cs3099user-b5_project`.forums definition
@@ -20,7 +20,7 @@ CREATE TABLE `forums` (
   `forum_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `forum_name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`forum_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 -- `cs3099user-b5_project`.implementations definition
@@ -42,7 +42,7 @@ CREATE TABLE `subforums` (
   PRIMARY KEY (`subforum_id`),
   KEY `subforums_FK` (`forum_id`),
   CONSTRAINT `subforums_FK` FOREIGN KEY (`forum_id`) REFERENCES `forums` (`forum_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 -- `cs3099user-b5_project`.users definition
@@ -57,6 +57,7 @@ CREATE TABLE `users` (
   `last_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `date_joined` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `implementation_id` bigint(20) unsigned NOT NULL,
+  `profile_picture` longblob DEFAULT NULL,
   PRIMARY KEY (`user_id`,`implementation_id`),
   KEY `users_FK` (`implementation_id`),
   CONSTRAINT `users_FK` FOREIGN KEY (`implementation_id`) REFERENCES `implementations` (`implementation_id`)
@@ -79,7 +80,7 @@ CREATE TABLE `posts` (
   KEY `posts_FK_1` (`user_id`,`implementation_id`),
   CONSTRAINT `posts_FK` FOREIGN KEY (`subforum_id`) REFERENCES `subforums` (`subforum_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `posts_FK_1` FOREIGN KEY (`user_id`, `implementation_id`) REFERENCES `users` (`user_id`, `implementation_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8mb4;
 
 
 -- `cs3099user-b5_project`.comments definition
@@ -102,27 +103,4 @@ CREATE TABLE `comments` (
   CONSTRAINT `comments_FK` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `comments_FK_1` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `comments_FK_2` FOREIGN KEY (`user_id`, `implementation_id`) REFERENCES `users` (`user_id`, `implementation_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE DEFINER=`root`@`%` FUNCTION `cs3099user-b5_project`.`UuidFromBin`(_bin BINARY(16)) RETURNS binary(36)
-    DETERMINISTIC
-    SQL SECURITY INVOKER
-RETURN
-        LCASE(CONCAT_WS('-',
-            HEX(SUBSTR(_bin,  5, 4)),
-            HEX(SUBSTR(_bin,  3, 2)),
-            HEX(SUBSTR(_bin,  1, 2)),
-            HEX(SUBSTR(_bin,  9, 2)),
-            HEX(SUBSTR(_bin, 11))
-                 ));
-
-CREATE DEFINER=`cs3099user-b5`@`%` FUNCTION `cs3099user-b5_project`.`UuidToBin`(_uuid BINARY(36)) RETURNS binary(16)
-    DETERMINISTIC
-    SQL SECURITY INVOKER
-RETURN
-        UNHEX(CONCAT(
-            SUBSTR(_uuid, 15, 4),
-            SUBSTR(_uuid, 10, 4),
-            SUBSTR(_uuid,  1, 8),
-            SUBSTR(_uuid, 20, 4),
-            SUBSTR(_uuid, 25) ));
+) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
