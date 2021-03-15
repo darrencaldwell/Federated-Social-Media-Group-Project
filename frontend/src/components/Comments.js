@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import {Card} from "react-bootstrap";
 import {Container} from 'react-bootstrap';
 import '../styling/container-pages.css';
+import Avatar from 'react-avatar';
 
 // props: comment (json), posturl, impID, level
 class Comment extends Component {
@@ -12,7 +13,8 @@ class Comment extends Component {
                 <Card>
                     <div className="comment-columns">
                         <Card.Body>
-                            {this.props.comment.username}-  {this.props.comment.commentContent}
+                        <Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
+            {" | "} {this.props.comment.username}:  {this.props.comment.commentContent}
                         </Card.Body>
                         <a className="button create-comment-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>
                             Create Comment

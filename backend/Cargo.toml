@@ -28,3 +28,4 @@ openssl= {version = "0.10"}
 base64 = "0.13"
 log = "0.4"
 thiserror= "1.0"
+actix-multipart = "*"

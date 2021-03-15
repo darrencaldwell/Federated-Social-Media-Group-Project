@@ -74,6 +74,10 @@ where
             if req.path() == "/api/key" {
                 return srv.call(req).await
             }
+            // profile pictures are public
+            if req.path().starts_with("/api/users") && req.path().ends_with("profilepicture") {
+                return srv.call(req).await
+            }
 
             let headers = req.headers();
 

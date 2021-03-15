@@ -1,8 +1,58 @@
 use super::model;
 use crate::auth;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder, Error, http::StatusCode, dev::HttpResponseBuilder};
 use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
+use actix_multipart as mp;
+use futures_util::stream::StreamExt;
+
+#[post("/local/users/{id}/profilepicture")]
+async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>, web::Path(id): web::Path<String>) -> Result<HttpResponse, Error> {
+    // iterate over multipart stream
+    while let Some(item) = payload.next().await {
+        let mut field = item?;
+
+        if !field.content_type().to_string().starts_with("image/") {
+            return Ok(HttpResponse::BadRequest()
+                .body("Profile picutre must be image format."))
+        }
+
+        let mut vec: Vec<u8> = Vec::new();
+        // Field in turn is stream of *Bytes* object
+        while let Some(chunk) = field.next().await {
+            vec.append(&mut chunk?.as_ref().to_vec());
+        }
+        // add to database
+        sqlx::query!(
+            r#"
+            UPDATE users 
+            SET profile_picture = ?
+            WHERE user_id = ?
+            "#,
+            vec,
+            id
+        )
+        .execute(pool.as_ref())
+        .await.unwrap();
+        }
+    Ok(HttpResponse::Ok().into())
+}
+#[get("/api/users/{id}/profilepicture")]
+async fn get_profile_picture(pool: web::Data<MySqlPool>, web::Path(id): web::Path<String>) -> Result<HttpResponse, Error> {
+    let img = sqlx::query!(
+        r#"
+        SELECT profile_picture as pp
+        FROM users
+        WHERE user_id = ?
+        "#,
+        id
+    )
+    .fetch_one(pool.as_ref())
+    .await.unwrap() // TODO: MATCH THIS PROPERLY
+    .pp.unwrap();
+    let res = HttpResponseBuilder::new(StatusCode::OK).content_type("image").body(img);
+    Ok(res)
+}
 
 #[post("/api/users/register")]
 async fn register(post: web::Json<model::UserRegisterRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
@@ -83,4 +133,6 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(get_users);
     cfg.service(get_user);
     cfg.service(get_account);
+    cfg.service(profile_picture);
+    cfg.service(get_profile_picture);
 }
