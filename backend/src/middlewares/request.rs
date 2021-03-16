@@ -107,7 +107,7 @@ where
 
                         // get implementation_id by url
                         let pool: &MySqlPool = &req.app_data::<Data<MySqlPool>>().unwrap().clone();
-                        let impl_id = sqlx::query!(
+                        let res = sqlx::query!(
                             r#"
                             SELECT implementation_id FROM implementations
                             WHERE implementation_url = ?
@@ -115,8 +115,12 @@ where
                             remote_url
                         )
                         .fetch_one(pool)
-                        .await.unwrap()
-                        .implementation_id;
+                        .await;
+                        if res.is_err() {
+                            return Ok(req.into_response(HttpResponse::Unauthorized().body("Err: Ask Site Admin to authorize implementation.").into_body()))
+                        } 
+                        let impl_id = res.unwrap().implementation_id;
+                            
                         // TODO: Make this less dirty?
                         req.headers_mut().append(HeaderName::from_static("implementation-id"),
                             HeaderValue::from_str(impl_id.to_string().as_str()).unwrap());
