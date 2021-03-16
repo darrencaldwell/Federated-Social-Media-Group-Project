@@ -14,10 +14,10 @@ class Comment extends Component {
                     <div className="comment-columns">
                         <Card.Body>
                         <Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
-            {" | "} {this.props.comment.username}:  {this.props.comment.commentContent}
+            {"  "} {this.props.comment.username} | {this.props.comment.commentContent}
                         </Card.Body>
                         <a className="button create-comment-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>
-                            Create Comment
+                            Reply to {this.props.comment.username}
                         </a>
                     </div>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
