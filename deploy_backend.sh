@@ -1,8 +1,4 @@
 #!/bin/bash
-cd frontend
-npm ci
-npm run build
-cd ../
 cd backend
 sh sshTunnel.sh
 nolimit cargo build --release

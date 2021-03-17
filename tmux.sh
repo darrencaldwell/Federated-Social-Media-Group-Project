@@ -7,4 +7,5 @@ if [ $? = 0 ]; then
 	tmux kill-session -t $session
 fi
 
-tmux new-session -d -s 'deploy' './deploy.sh; exec $SHELL'
+./deploy_frontend.sh &
+tmux new-session -d -s 'deploy' './deploy_backend.sh; exec $SHELL'
