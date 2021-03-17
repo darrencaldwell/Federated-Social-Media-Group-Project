@@ -3,7 +3,7 @@ use actix_web::{App, HttpServer, middleware, web::PathConfig, error, client::Cli
 use anyhow::Result;
 use dotenv::dotenv;
 use env_logger::Env;
-use sqlx::{Connection, MySqlConnection, MySqlPool};
+use sqlx::MySqlPool;
 use std::env;
 
 mod posts;
