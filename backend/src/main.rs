@@ -3,7 +3,7 @@ use actix_web::{App, HttpServer, middleware, web::PathConfig, error, client::Cli
 use anyhow::Result;
 use dotenv::dotenv;
 use env_logger::Env;
-use sqlx::MySqlPool;
+use sqlx::{Connection, MySqlConnection, MySqlPool};
 use std::env;
 
 mod posts;
@@ -39,6 +39,7 @@ async fn get_key(key_pair: web::Data<PKey<Private>>) -> impl Responder {
 async fn main() -> Result<()> {
     // update env with .env file.
     dotenv().unwrap();
+    std::env::set_var("RUST_LOG", "debug,sqlx=error");
     // initiates logger for actix middleware
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     // pool used for database connections, gets databse url from env file
