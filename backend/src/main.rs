@@ -39,7 +39,7 @@ async fn get_key(key_pair: web::Data<PKey<Private>>) -> impl Responder {
 async fn main() -> Result<()> {
     // update env with .env file.
     dotenv().unwrap();
-    std::env::set_var("RUST_LOG", "debug,sqlx=error");
+    std::env::set_var("RUST_LOG", "info,sqlx=error");
     // initiates logger for actix middleware
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     // pool used for database connections, gets databse url from env file
