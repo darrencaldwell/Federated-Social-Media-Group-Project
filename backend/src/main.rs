@@ -16,6 +16,7 @@ mod id_extractor;
 mod implementation_id_extractor;
 mod request_errors;
 mod implementations;
+mod voting;
 
 use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
@@ -80,6 +81,7 @@ async fn main() -> Result<()> {
             .configure(comments::init)
             .configure(forums::init)
             .configure(implementations::init)
+            .configure(voting::init)
     })
     .bind("127.0.0.1:21450")?
     .workers(4)

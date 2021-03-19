@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Card} from "react-bootstrap";
+import Voting from './Voting';
 // import '../styling/individualPost.css';
 
 // props: post, impID, forumID, subforumID
@@ -8,6 +9,7 @@ export class PostPreview extends Component {
         return (
             <Card className="mt-3" >
                 <Card.Body>
+                    <Voting></Voting>
                     <Card.Title>{this.props.post.postTitle}</Card.Title>    {/*Use the title from the prop as the title text */}
                     <Card.Text>{this.props.post.postContent}</Card.Text>     {/*Use the body from the prop as the body */}
                     {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}

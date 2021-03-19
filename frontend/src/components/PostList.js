@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import PostPreview from './PostPreview';
+import Voting from './Voting';
 import {Alert, Container, Spinner} from "react-bootstrap";
 import '../styling/container-pages.css';
 
@@ -37,8 +38,10 @@ class PostList extends Component {
                     }
                 }
             );
-            let result = await res.json();
-            this.setState({postList: result._embedded.postList, loading: false, listingPosts: true});
+            let result_posts = await res.json();
+            console.log(result_posts)
+
+            this.setState({postList: result_posts._embedded.postList, loading: false, listingPosts: true});
         } catch (e) {
             this.setState({loading: false});
         }
