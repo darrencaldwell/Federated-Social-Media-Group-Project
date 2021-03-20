@@ -9,7 +9,13 @@ export class PostPreview extends Component {
         return (
             <Card className="mt-3" >
                 <Card.Body>
-                    <Voting></Voting>
+                    <Voting upvotes={this.props.post.upvotes} 
+                    downvotes={this.props.post.downvotes} 
+                    _userVotes={this.props.post._userVotes}
+                    type="posts"
+                    postID={this.props.post.id}
+                    impID={this.props.impID}
+                    ></Voting>
                     <Card.Title>{this.props.post.postTitle}</Card.Title>    {/*Use the title from the prop as the title text */}
                     <Card.Text>{this.props.post.postContent}</Card.Text>     {/*Use the body from the prop as the body */}
                     {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}

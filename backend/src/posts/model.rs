@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, MySqlPool, Done};
 use serde::ser::{Serializer, SerializeStruct};
 use super::super::request_errors::RequestError;
-use bigdecimal::{BigDecimal, ToPrimitive};
+use bigdecimal::ToPrimitive;
 
 
 /// Represents a request to POST a post
@@ -47,8 +47,8 @@ impl Serialize for Post {
         state.serialize_field("userId", &self.user_id.to_string())?;
         state.serialize_field("id", &self.id.to_string())?;
         state.serialize_field("subforumId", &self.subforum_id.to_string())?;
-        state.serialize_field("totalVotes", &self.total_votes.to_string())?;
-        state.serialize_field("upvotes", &self.upvotes.to_string())?;
+        state.serialize_field("downvotes", &self.downvotes)?;
+        state.serialize_field("upvotes", &self.upvotes)?;
         state.serialize_field("_userVotes", &self.user_votes)?;
         state.serialize_field("_links", &self.links)?;
         state.end()
@@ -61,7 +61,7 @@ pub struct Post {
     pub user_id: String,
     pub id: u64,
     pub subforum_id: u64,
-    pub total_votes: u64,
+    pub downvotes: u64,
     pub upvotes: u64,
     pub user_votes: UserVotes,
     pub links: PostLinks,
@@ -183,7 +183,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
         user_id: post.user_id.clone(),
         id,
         subforum_id,
-        total_votes: 0,
+        downvotes: 0,
         upvotes: 0,
         user_votes: UserVotes { posts_votes: Vec::with_capacity(0) },
         links: generate_post_links(id, subforum_id, forum_id.forum_id, &post.user_id),
@@ -199,11 +199,11 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
         SELECT
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!",
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
-            count(p.post_id) AS "total_votes!: u64",
-            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS upvotes
+            sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!"
         FROM posts p
         INNER JOIN subforums s on p.subforum_id = s.subforum_id
-        INNER JOIN posts_votes pv ON
+        LEFT JOIN posts_votes pv ON
             p.post_id = pv.post_id
         WHERE p.subforum_id = ?
         GROUP BY p.post_id
@@ -216,43 +216,46 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     for rec in recs {
         // because the supergroup decided this was better, we need to know all the users for each
         // post!
-        let votes = sqlx::query!(
-            r#"
-            SELECT 
-                pv.user_id,
-                i.implementation_url,
-                pv.is_upvote
-            FROM posts_votes pv
-            INNER JOIN implementations i ON
-                pv.implementation_id = i.implementation_id
-            WHERE pv.post_id = ?
-            "#,
-            rec.post_id
-            )
-            .fetch_all(pool)
-            .await?;
-
         let mut user_votes_vec = Vec::new();
-        for rec in votes {
-            // construct url: <url>/api/users/{id}
-            let url = format!("{}/api/users/{}", rec.implementation_url, rec.user_id);
-            let mut is_upvote = false;
-            if rec.is_upvote > 0 {is_upvote = true;}
-            user_votes_vec.push(UserVote {
-                user: url,
-                is_upvote,
-            });
+        if rec.upvotes.to_u64().unwrap() != 0 && rec.downvotes.to_u64().unwrap()!= 0 {
+            let votes = sqlx::query!(
+                r#"
+                SELECT 
+                    pv.user_id,
+                    i.implementation_url,
+                    pv.is_upvote
+                FROM posts_votes pv
+                INNER JOIN implementations i ON
+                    pv.implementation_id = i.implementation_id
+                WHERE pv.post_id = ?
+                "#,
+                rec.post_id
+                )
+                .fetch_all(pool)
+                .await?;
+
+            for rec in votes {
+                // construct url: <url>/api/users/{id}
+                let url = format!("{}/api/users/{}", rec.implementation_url, rec.user_id);
+                let mut is_upvote = false;
+                if rec.is_upvote > 0 {is_upvote = true;}
+                user_votes_vec.push(UserVote {
+                    user: url,
+                    is_upvote,
+                });
+            }
         }
         let user_votes = UserVotes { posts_votes: user_votes_vec };
 
-        log::info!("{:?}", rec.upvotes);
         posts.push(Post {
             id: rec.post_id,
             post_title: rec.post_title,
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
-            total_votes: rec.total_votes,
-            upvotes: rec.upvotes.unwrap().to_u64().unwrap(), 
+            // MariaDB returns Decimal from sum, so need to convert
+            // TODO: do this to u64 - unwrap only once
+            downvotes: rec.downvotes.to_u64().unwrap(),
+            upvotes: rec.upvotes.to_u64().unwrap(), 
             user_votes,
             links: generate_post_links(
                 rec.post_id,
@@ -277,7 +280,7 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
         SELECT
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!",
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
-            count(pv.post_id) AS "total_votes!: u64",
+            sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes: u64",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes: u64"
         FROM posts p
         INNER JOIN subforums ON 
@@ -327,8 +330,9 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
         post_title: rec.post_title,
         post_contents: rec.post_contents,
         subforum_id: rec.subforum_id,
-        total_votes: rec.total_votes,
-        upvotes: rec.upvotes.unwrap_or(0),
+        // MariaDB returns Decimal from sum, so need to convert
+        downvotes: rec.downvotes.unwrap().to_u64().unwrap(),
+        upvotes: rec.upvotes.unwrap().to_u64().unwrap(), 
         user_votes,
         links: generate_post_links(
             rec.post_id,
