@@ -11,7 +11,7 @@ actix-web = {version = "3.3.2", features = ["openssl"]}
 rustls = "*"
 actix-files = "0.5"
 actix-cors = "0.5.4"
-sqlx = { version = "0.4.0", default-features = false, features = [ "runtime-actix-native-tls", "macros", "mysql", "json", "uuid" ] }
+sqlx = { version = "0.4.0", default-features = false, features = [ "runtime-actix-native-tls", "macros", "mysql", "json", "uuid", "bigdecimal" ] }
 futures-util = "0.3.7"
 dotenv = "0.15.0"
 serde = "1.0"
@@ -29,3 +29,5 @@ base64 = "0.13"
 log = "0.4"
 thiserror= "1.0"
 actix-multipart = "*"
+bigdecimal = "0.2.0"
+json = "0.12.4"

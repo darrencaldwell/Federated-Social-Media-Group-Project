@@ -37,8 +37,9 @@ class PostList extends Component {
                     }
                 }
             );
-            let result = await res.json();
-            this.setState({postList: result._embedded.postList, loading: false, listingPosts: true});
+            let result_posts = await res.json();
+
+            this.setState({postList: result_posts._embedded.postList, loading: false, listingPosts: true});
         } catch (e) {
             this.setState({loading: false});
         }
