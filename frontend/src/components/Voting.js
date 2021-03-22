@@ -4,7 +4,6 @@ import up_solid from './../images/up_solid.png'
 import down_hollow from './../images/down_hollow.png'
 import down_solid from './../images/down_solid.png'
 import "./../styling/buttons.css"
-import { Card } from '@material-ui/core';
 
 
 // props: upvote, downvote, _userVotes, type ('posts' or 'comments'), postID, impID
