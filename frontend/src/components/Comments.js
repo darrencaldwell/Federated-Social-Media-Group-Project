@@ -13,12 +13,11 @@ class Comment extends Component {
                 <Card>
                     <div className="comment-columns">
                         <Card.Body>
-                        <Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
-            {"  "} {this.props.comment.username} | {this.props.comment.commentContent}
+                        <Card.Text><Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
+                        {"  "} {this.props.comment.username} | {this.props.comment.commentContent}
+                        </Card.Text>
+                        <Card.Link href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
                         </Card.Body>
-                        <a className="button create-comment-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>
-                            Reply to {this.props.comment.username}
-                        </a>
                     </div>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
                 </Card>
@@ -81,7 +80,7 @@ export default class Comments extends Component {
                     <a className="button" href={this.props.posturl + "/" + this.props.commentID}>Expand</a>
                 </Container>
             )
-        } else if (this.state.commentList.length > 0) {
+        } else {
 
             // if there are comments, display them
             return(
@@ -93,17 +92,6 @@ export default class Comments extends Component {
                     ))}
                 </Container>
             )
-
-        } else {    // otherwise, display a message saying there are no comments
-            return(
-                <Container>
-                    <Card>
-                        <Card.Body>
-                            There are no comments.
-                        </Card.Body>
-                    </Card>
-                </Container>
-            )
-        }
+        } 
     }
 }
