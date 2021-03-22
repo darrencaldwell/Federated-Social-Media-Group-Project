@@ -4,32 +4,35 @@ import up_solid from './../images/up_solid.png'
 import down_hollow from './../images/down_hollow.png'
 import down_solid from './../images/down_solid.png'
 import "./../styling/buttons.css"
+import { Card } from '@material-ui/core';
 
 
 // props: upvote, downvote, _userVotes, type ('posts' or 'comments'), postID, impID
 export class Voting extends Component {
     constructor(props){
         super(props)
-        this.state = {
-          count: 0 + this.props.upvotes - this.props.downvotes,
-      }
-        // determine start state of the current users votes
-        let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
-        let is_upvote = null
-        this.props._userVotes.postsVotes.forEach( (list) => {
-          if (list.user === userUrl) {
-            is_upvote = list.isUpvote
+        if (this.props._userVotes) {
+          this.state = {
+            count: 0 + this.props.upvotes - this.props.downvotes,
+        }
+          // determine start state of the current users votes
+          let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
+          let is_upvote = null
+          this.props._userVotes.postsVotes.forEach( (list) => {
+            if (list.user === userUrl) {
+              is_upvote = list.isUpvote
+            }
+          })
+          if (is_upvote === true) {
+            this.state.is_downvote = false
+            this.state.is_upvote = true
+          } else if (is_upvote === null) {
+            this.state.is_downvote = false
+            this.state.is_upvote = false
+          } else {
+            this.state.is_downvote = true
+            this.state.is_upvote = false
           }
-        })
-        if (is_upvote === true) {
-          this.state.is_downvote = false
-          this.state.is_upvote = true
-        } else if (is_upvote === null) {
-          this.state.is_downvote = false
-          this.state.is_upvote = false
-        } else {
-          this.state.is_downvote = true
-          this.state.is_upvote = false
         }
     }
 
@@ -110,6 +113,10 @@ export class Voting extends Component {
     }
 
 render() {
+
+    if (!this.props._userVotes) {
+      return <Card.Subtitle>Voting not supported here :(</Card.Subtitle>
+    }
     const upImage = this.getUpvoteImg();
     const downImage = this.getDownvoteImg();
     
