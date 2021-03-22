@@ -5,7 +5,6 @@ use serde::ser::{Serializer, SerializeStruct};
 use super::super::request_errors::RequestError;
 use bigdecimal::ToPrimitive;
 
-
 /// Represents a request to POST a post
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -98,6 +97,26 @@ pub struct PostLinks {
 #[serde(rename_all = "camelCase")]
 pub struct Link {
     pub href: String,
+}
+
+fn parse_mariadb(json_string: String) -> UserVotes {
+    // MariaDB has a bug where it forgets to add the brackets when there are < 7 votes in the
+    // database, so we have to manually correct that
+    let mut user_votes: UserVotes = match serde_json::from_str(&json_string) {
+        Ok(user_votes) => {
+            user_votes
+        },
+        Err(_) => {
+            let tmp = json_string.replace("{\"postsVotes\": \"{", "{\"postsVotes\": [{");
+            let mut tmp2 = tmp.replace("\\","");
+            tmp2.replace_range(tmp2.len()-3..tmp2.len(), "}]}");
+            serde_json::from_str(&tmp2).unwrap()
+        },
+    };
+    // a small hack to remove any null results, would take much more code to write a custom
+    // vec deserializer / serializer and it's only like N complexity
+    user_votes.posts_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
+    user_votes
 }
 
 /// Modifies an existing post
@@ -201,9 +220,9 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
-            JSON_OBJECT("postsVotes", JSON_EXTRACT( CONCAT( '[', JSON_ARRAYAGG(
+            JSON_OBJECT("postsVotes", JSON_ARRAYAGG(
                 JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user", 
-                    CONCAT(i.implementation_url, '/api/users/', pv.user_id))), ']'), '$')
+                    CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
             ) AS "user_votes"
         FROM posts p
         INNER JOIN subforums s on p.subforum_id = s.subforum_id
@@ -220,10 +239,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     .await?;
 
     for rec in recs {
-        let mut user_votes: UserVotes = serde_json::from_str(&rec.user_votes.unwrap()).unwrap();
-        // a small hack to remove any null results, would take much more code to write a custom
-        // vec deserializer / serializer and it's only like N complexity
-        user_votes.posts_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
+        let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
 
         posts.push(Post {
             id: rec.post_id,
@@ -277,40 +293,8 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
     )
     .fetch_one(pool)
     .await?;
-    /*
-    let votes = sqlx::query!(
-        r#"
-        SELECT 
-            pv.user_id,
-            i.implementation_url,
-            pv.is_upvote
-        FROM posts_votes pv
-        INNER JOIN implementations i ON
-            pv.implementation_id = i.implementation_id
-        WHERE pv.post_id = ?
-        "#,
-        id
-        )
-        .fetch_all(pool)
-        .await?;
 
-    let mut user_votes_vec = Vec::new();
-    for rec in votes {
-        // construct url: <url>/api/users/{id}
-        let url = format!("{}/api/users/{}", rec.implementation_url, rec.user_id);
-        let mut is_upvote = false;
-        if rec.is_upvote > 0 {is_upvote = true;}
-        user_votes_vec.push(UserVote {
-            user: Some(url),
-            is_upvote: Some(is_upvote),
-        });
-    }
-    let user_votes = UserVotes { posts_votes: user_votes_vec };
-    */
-    let mut user_votes: UserVotes = serde_json::from_str(&rec.user_votes.unwrap()).unwrap();
-    // a small hack to remove any null results, would take much more code to write a custom
-    // vec deserializer / serializer and it's only like N complexity
-    user_votes.posts_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
+    let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
 
     let user_id = rec.user_id;
     let post = Post {
