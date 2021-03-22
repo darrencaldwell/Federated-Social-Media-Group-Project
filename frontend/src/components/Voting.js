@@ -113,9 +113,8 @@ export class Voting extends Component {
     }
 
 render() {
-
     if (!this.props._userVotes) {
-      return <Card.Subtitle>Voting not supported here :(</Card.Subtitle>
+      return null
     }
     const upImage = this.getUpvoteImg();
     const downImage = this.getDownvoteImg();
