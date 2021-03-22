@@ -83,7 +83,7 @@ pub struct CommentList {
     pub comment_list: Vec<Comment>,
 }
 
-fn gen_links(comment_id: u64, parent_comment_id: u64, user_id: &str, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
+pub fn gen_links(comment_id: u64, parent_comment_id: u64, user_id: &str, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
     Links {
         _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}", comment_id) },
         post: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}", post_id) },
