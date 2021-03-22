@@ -13,7 +13,6 @@ export class Voting extends Component {
         this.state = {
           count: 0 + this.props.upvotes - this.props.downvotes,
       }
-        console.log(props)
         // determine start state of the current users votes
         let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
         let is_upvote = null
@@ -37,13 +36,10 @@ export class Voting extends Component {
     send_vote = () => {
       let destUrl = "/api/" + this.props.type + "/" + this.props.postID + "/vote"
       let is_upvote = null
-      console.log(this.state.is_upvote)
-      console.log(this.state.is_downvote)
 
-      if (this.state.is_upvote === true) {console.log("AA"); is_upvote = true}
-      else if (this.state.is_downvote === true) {console.log("BB"); is_upvote = false}
+      if (this.state.is_upvote === true) {is_upvote = true}
+      else if (this.state.is_downvote === true) {is_upvote = false}
       else {is_upvote = null}
-      console.log(is_upvote)
 
       fetch(destUrl, {
         method: "PUT",
@@ -57,8 +53,6 @@ export class Voting extends Component {
         body: JSON.stringify({
             "isUpvote": is_upvote
         })
-    }).then(responseJson => { 
-        console.log(responseJson);
     }).catch(error => this.setState({
         message: "Error posting post: " + error
     }));
