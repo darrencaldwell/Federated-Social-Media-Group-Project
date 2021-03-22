@@ -237,7 +237,9 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.post_id = ? AND parent_id IS NULL"#,
+        WHERE comments.post_id = ? AND parent_id IS NULL
+        GROUP BY comment_id
+        "#,
         post_id)
         .fetch_all(pool)
         .await?;
@@ -274,7 +276,9 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.parent_id = ?"#,
+        WHERE comments.parent_id = ?
+        GROUP BY comment_id
+        "#,
         comment_id)
         .fetch_all(pool)
         .await?;
