@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, MySqlPool, Done};
-use serde::ser::{Serializer, SerializeStruct, SerializeSeq};
+use serde::ser::{Serializer, SerializeStruct};
 use super::super::request_errors::RequestError;
 use bigdecimal::ToPrimitive;
 

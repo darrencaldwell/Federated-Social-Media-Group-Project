@@ -1,7 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, MySqlPool, Done};
-use serde::ser::{Serializer, SerializeStruct};
+use sqlx::{MySqlPool, Done};
 use super::super::request_errors::RequestError;
 
 #[derive(Deserialize, Serialize)]

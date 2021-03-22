@@ -1,5 +1,5 @@
 use super::model;
-use actix_web::{get, post, put, delete, web, HttpResponse, Responder};
+use actix_web::{get, put, web, HttpResponse, Responder};
 use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
 use crate::implementation_id_extractor::ImplementationId;

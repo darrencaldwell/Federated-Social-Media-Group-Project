@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import PostPreview from './PostPreview';
-import Voting from './Voting';
 import {Alert, Container, Spinner} from "react-bootstrap";
 import '../styling/container-pages.css';
 

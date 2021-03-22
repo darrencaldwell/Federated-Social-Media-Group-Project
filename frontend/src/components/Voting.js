@@ -122,11 +122,11 @@ render() {
     return (
       <div class="voting">
         {<button class="vote" onClick={this.upvote}>
-          <img src={upImage} width="20" height="30"></img>
+          <img src={upImage} alt="up arrow" width="20" height="30"></img>
         </button>}
         {this.state.count}
         {<button class="vote" onClick={this.downvote}>
-          <img src={downImage} width="20" height="30"></img>
+          <img src={downImage} alt="down arrow" width="20" height="30"></img>
         </button>}
       </div>
     );
