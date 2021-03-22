@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, MySqlPool, Done};
-use serde::ser::{Serializer, SerializeStruct};
+use serde::ser::{Serializer, SerializeStruct, SerializeSeq};
 use super::super::request_errors::RequestError;
 use bigdecimal::ToPrimitive;
 
@@ -23,17 +23,17 @@ pub struct PostPatchRequest {
     pub post_contents: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UserVotes {
     pub posts_votes: Vec<UserVote>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UserVote {
-    pub is_upvote: bool,
-    pub user: String,
+    pub is_upvote: Option<bool>,
+    pub user: Option<String>,
 }
 
 /// Represents the database record for a given post
@@ -200,11 +200,17 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!",
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
-            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!"
+            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+            JSON_OBJECT("postsVotes", JSON_EXTRACT( CONCAT( '[', JSON_ARRAYAGG(
+                JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user", 
+                    CONCAT(i.implementation_url, '/api/users/', pv.user_id))), ']'), '$')
+            ) AS "user_votes"
         FROM posts p
         INNER JOIN subforums s on p.subforum_id = s.subforum_id
         LEFT JOIN posts_votes pv ON
             p.post_id = pv.post_id
+        LEFT JOIN implementations i ON
+            pv.implementation_id = i.implementation_id
         WHERE p.subforum_id = ?
         GROUP BY p.post_id
         "#,
@@ -214,38 +220,10 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     .await?;
 
     for rec in recs {
-        // because the supergroup decided this was better, we need to know all the users for each
-        // post!
-        let mut user_votes_vec = Vec::new();
-        if rec.upvotes.to_u64().unwrap() != 0 && rec.downvotes.to_u64().unwrap()!= 0 {
-            let votes = sqlx::query!(
-                r#"
-                SELECT 
-                    pv.user_id,
-                    i.implementation_url,
-                    pv.is_upvote
-                FROM posts_votes pv
-                INNER JOIN implementations i ON
-                    pv.implementation_id = i.implementation_id
-                WHERE pv.post_id = ?
-                "#,
-                rec.post_id
-                )
-                .fetch_all(pool)
-                .await?;
-
-            for rec in votes {
-                // construct url: <url>/api/users/{id}
-                let url = format!("{}/api/users/{}", rec.implementation_url, rec.user_id);
-                let mut is_upvote = false;
-                if rec.is_upvote > 0 {is_upvote = true;}
-                user_votes_vec.push(UserVote {
-                    user: url,
-                    is_upvote,
-                });
-            }
-        }
-        let user_votes = UserVotes { posts_votes: user_votes_vec };
+        let mut user_votes: UserVotes = serde_json::from_str(&rec.user_votes.unwrap()).unwrap();
+        // a small hack to remove any null results, would take much more code to write a custom
+        // vec deserializer / serializer and it's only like N complexity
+        user_votes.posts_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
 
         posts.push(Post {
             id: rec.post_id,
@@ -253,7 +231,6 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
             // MariaDB returns Decimal from sum, so need to convert
-            // TODO: do this to u64 - unwrap only once
             downvotes: rec.downvotes.to_u64().unwrap(),
             upvotes: rec.upvotes.to_u64().unwrap(), 
             user_votes,
@@ -281,11 +258,17 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!",
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes: u64",
-            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes: u64"
+            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes: u64",
+            JSON_OBJECT("postsVotes", JSON_ARRAYAGG(
+                JSON_OBJECT("isUpvote", CASE WHEN is_upvote = 1 then true else false end, "user", 
+                CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
+            ) AS "user_votes"
         FROM posts p
-        INNER JOIN subforums ON 
+        LEFT JOIN implementations i ON
+            p.implementation_id = i.implementation_id
+        LEFT JOIN subforums ON 
             p.subforum_id = subforums.subforum_id
-        INNER JOIN posts_votes pv ON
+        LEFT JOIN posts_votes pv ON
             pv.post_id = p.post_id 
         WHERE p.post_id = ?
         HAVING p.post_id = ?
@@ -294,7 +277,7 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
     )
     .fetch_one(pool)
     .await?;
-
+    /*
     let votes = sqlx::query!(
         r#"
         SELECT 
@@ -318,11 +301,16 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
         let mut is_upvote = false;
         if rec.is_upvote > 0 {is_upvote = true;}
         user_votes_vec.push(UserVote {
-            user: url,
-            is_upvote,
+            user: Some(url),
+            is_upvote: Some(is_upvote),
         });
     }
     let user_votes = UserVotes { posts_votes: user_votes_vec };
+    */
+    let mut user_votes: UserVotes = serde_json::from_str(&rec.user_votes.unwrap()).unwrap();
+    // a small hack to remove any null results, would take much more code to write a custom
+    // vec deserializer / serializer and it's only like N complexity
+    user_votes.posts_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
 
     let user_id = rec.user_id;
     let post = Post {

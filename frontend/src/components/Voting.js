@@ -1,4 +1,10 @@
 import React, {Component} from 'react';
+import up_hollow from './../images/up_hollow.png'
+import up_solid from './../images/up_solid.png'
+import down_hollow from './../images/down_hollow.png'
+import down_solid from './../images/down_solid.png'
+import "./../styling/buttons.css"
+
 
 // props: upvote, downvote, _userVotes, type ('posts' or 'comments'), postID, impID
 export class Voting extends Component {
@@ -7,6 +13,7 @@ export class Voting extends Component {
         this.state = {
           count: 0 + this.props.upvotes - this.props.downvotes,
       }
+        console.log(props)
         // determine start state of the current users votes
         let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
         let is_upvote = null
@@ -15,7 +22,7 @@ export class Voting extends Component {
             is_upvote = list.isUpvote
           }
         })
-        if (is_upvote) {
+        if (is_upvote === true) {
           this.state.is_downvote = false
           this.state.is_upvote = true
         } else if (is_upvote === null) {
@@ -33,8 +40,8 @@ export class Voting extends Component {
       console.log(this.state.is_upvote)
       console.log(this.state.is_downvote)
 
-      if (this.state.is_upvote == true) {console.log("AA"); is_upvote = true}
-      else if (this.state.is_downvote == true) {console.log("BB"); is_upvote = false}
+      if (this.state.is_upvote === true) {console.log("AA"); is_upvote = true}
+      else if (this.state.is_downvote === true) {console.log("BB"); is_upvote = false}
       else {is_upvote = null}
       console.log(is_upvote)
 
@@ -57,6 +64,9 @@ export class Voting extends Component {
     }));
   }
 
+    getUpvoteImg = () => this.state.is_upvote ? up_solid : up_hollow
+    getDownvoteImg = () => this.state.is_downvote ? down_solid : down_hollow
+
     upvote = () => {
       if (this.state.is_downvote) { // then undo users downvote
         this.setState({
@@ -76,6 +86,7 @@ export class Voting extends Component {
         this.setState({
           count: this.state.count + 1,
           is_upvote: true,
+          is_downvote: false,
         }, () => {this.send_vote()})
       }
     }
@@ -99,19 +110,23 @@ export class Voting extends Component {
         this.setState({
           count: this.state.count - 1,
           is_downvote: true,
+          is_upvote: false,
         }, () => {this.send_vote()})
       } 
     }
 
 render() {
+    const upImage = this.getUpvoteImg();
+    const downImage = this.getDownvoteImg();
+    
     return (
-      <div>
-        {<button onClick={this.upvote}>
-          +
+      <div class="voting">
+        {<button class="vote" onClick={this.upvote}>
+          <img src={upImage} width="20" height="30"></img>
         </button>}
-        <span>{this.state.count}</span>
-        {<button onClick={this.downvote}>
-          -
+        {this.state.count}
+        {<button class="vote" onClick={this.downvote}>
+          <img src={downImage} width="20" height="30"></img>
         </button>}
       </div>
     );

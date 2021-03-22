@@ -16,10 +16,12 @@ export class PostPreview extends Component {
                     postID={this.props.post.id}
                     impID={this.props.impID}
                     ></Voting>
-                    <Card.Title>{this.props.post.postTitle}</Card.Title>    {/*Use the title from the prop as the title text */}
-                    <Card.Text>{this.props.post.postContent}</Card.Text>     {/*Use the body from the prop as the body */}
                     {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}
-                    <Card.Link href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>View Post</Card.Link>
+                    <Card.Link href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>{this.props.post.postTitle}</Card.Link>
+                    <Card.Subtitle className="text-muted">
+                    Post made by: {this.props.post.username} on TIME
+                    </Card.Subtitle>
+                    <Card.Text>{this.props.post.postContents}</Card.Text>     {/*Use the body from the prop as the body */}
                 </Card.Body>
             </Card>
         )

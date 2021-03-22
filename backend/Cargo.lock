@@ -18,6 +18,7 @@ dependencies = [
  "env_logger",
  "futures",
  "futures-util",
+ "json",
  "jsonwebtoken",
  "log",
  "openssl",
@@ -1210,6 +1211,12 @@ checksum = "5cfb73131c35423a367daf8cbd24100af0d077668c8c2943f0e7dd775fef0f65"
 dependencies = [
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "json"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
 
 [[package]]
 name = "jsonwebtoken"
