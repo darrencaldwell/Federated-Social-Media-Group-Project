@@ -36,7 +36,6 @@ rust-build:
     - apk add openssl-dev
     - apk add build-base
     - apk add pkgconfig
-    - apk add mariadb-client
     - rustup component add clippy
 
   script:
@@ -62,7 +61,4 @@ deploy_staging:
     - master
 
 variables:
-    MYSQL_DATABASE: "cs3099user-b5_project"
-    MYSQL_ROOT_PASSWORD: "pass"
-    MYSQL_PASSWORD: "123"
     CARGO_HOME: $CI_PROJECT_DIR/actix/cargo
