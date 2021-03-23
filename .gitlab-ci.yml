@@ -69,6 +69,8 @@ node-build-merge:
     paths:
       - $CI_PROJECT_DIR/.cache/npm
   before_script:
+    - apk update
+    - apk add git
     - mkdir -p $CI_PROJECT_DIR/.cache/npm
   script:
     - branch=`git branch | grep \* | cut -d ' ' -f2`
@@ -100,6 +102,7 @@ rust-build-merge:
     - apk add openssl-dev
     - apk add build-base
     - apk add pkgconfig
+    - apk add git
     - rustup component add clippy
 
   script:
