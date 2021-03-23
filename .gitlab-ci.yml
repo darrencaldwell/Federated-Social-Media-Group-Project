@@ -41,7 +41,7 @@ rust-build:
 
   script:
     - cd backend
-    - ssh -f cs3099user-b5@cs3099user-b5.cs.st-andrews.ac.uk -L 21463:localhost:21463 -N
+    - ssh -f cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk -L 21463:localhost:21463 -N
     - cargo clippy --all-targets --all-features -- -D warnings
 
 deploy_staging:
