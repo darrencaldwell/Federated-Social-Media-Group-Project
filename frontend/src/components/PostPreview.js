@@ -9,7 +9,7 @@ export class PostPreview extends Component {
         return (
             <Card className="mt-3" >
                 <Card.Body>
-                    <div class="post-vote-container">
+                    <div class="post-preview-container">
                     <Voting class="voting-post" upvotes={this.props.post.upvotes} 
                     downvotes={this.props.post.downvotes} 
                     _userVotes={this.props.post._userVotes}

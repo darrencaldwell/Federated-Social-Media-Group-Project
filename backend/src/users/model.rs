@@ -2,9 +2,6 @@ use anyhow::Result;
 use serde::{Serialize, Deserialize};
 use bcrypt::hash;
 use sqlx::{Row, FromRow, MySqlPool};
-use crate::comments::{Comments, Comment, CommentList, gen_links as gen_comment_links, SelfLink, Link as CommentLink};
-use crate::posts::{Post, PostList, Embedded as PostEmbedded, generate_post_links};
-use chrono::{DateTime, Utc};
 
 /// Represents an entire user
 #[derive(Serialize, FromRow)]
@@ -30,7 +27,6 @@ pub struct LocalUser {
     pub email: String,
     #[serde(rename = "_links")]
     pub links: UserLinks,
-    pub date_joined: i64,
 }
 
 /// The links sent with a [User] object
@@ -161,94 +157,21 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
     })
 }
 
-/// Returns a list of comments for a user
-pub async fn get_user_comments(user_id: String, pool: &MySqlPool) -> Result<Comments> {
-    let recs = sqlx::query!(r#"SELECT comment, comments.user_id, comment_id,
-        posts.subforum_id AS "subforum_id!", comments.post_id as "post_id", subforums.forum_id AS "forum_id!", username AS "username!"
-        FROM comments
-        LEFT JOIN users on comments.user_id = users.user_id
-        LEFT JOIN posts on comments.post_id = posts.post_id
-        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.user_id = ?"#, &user_id)
-        .fetch_all(pool)
-        .await?;
-
-
-    let comments: Vec<Comment> = recs.into_iter()
-        .map(|rec| {
-            Comment {
-                id: rec.comment_id,
-                comment_content: rec.comment,
-                username: rec.username,
-                post_id: rec.post_id,
-                links: gen_comment_links(rec.comment_id, rec.comment_id, &rec.user_id, rec.post_id,
-                                         rec.subforum_id, rec.forum_id),
-                user_id: rec.user_id,
-            }
-        }).collect();
-    Ok(Comments {
-        embedded: CommentList { comment_list: comments },
-        links: SelfLink {
-            _self: CommentLink {
-                href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/{}/comments", user_id)
-            }
-        },
-    })
-}
-
-/// Returns a list of posts for a user
-pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmbedded> {
-    let mut posts = vec![];
-    let recs = sqlx::query!(
-        r#"
-        SELECT post_id, post_title, post_contents, posts.subforum_id, created_time, forum_id FROM posts
-        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE user_id = ?
-        ORDER BY created_time
-        "#,
-        &user_id
-    )
-        .fetch_all(pool)
-        .await?;
-    for rec in recs {
-        posts.push(Post {
-            id: rec.post_id,
-            post_title: rec.post_title,
-            post_contents: rec.post_contents,
-            subforum_id: rec.subforum_id,
-            links: generate_post_links(
-                rec.post_id,
-                rec.subforum_id,
-                rec.forum_id.unwrap(),
-                &user_id,
-            ),
-            user_id: user_id.to_string(),
-        });
-    }
-    let post_list = PostList { post_list: posts };
-    let embedded = PostEmbedded {
-        _embedded: post_list,
-    };
-    Ok(embedded)
-}
-
-
 /// Get account details
 pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser> {
     let rec = sqlx::query!(
-        r#"SELECT username, first_name, last_name, user_id, email, date_joined FROM users WHERE user_id = (?) and implementation_id = 1"#,
+        r#"SELECT username, first_name, last_name, user_id, email FROM users WHERE user_id = (?) and implementation_id = 1"#,
         user_id) //get comments
         .fetch_one(pool)
         .await?;
 
-    Ok(LocalUser {
+    Ok(LocalUser{
         links: gen_links(&user_id),
         local_username: rec.username.unwrap(),
         local_user_id: user_id,
         first_name: rec.first_name.unwrap(),
         last_name: rec.last_name.unwrap(),
-        email: rec.email.unwrap(),
-        date_joined: rec.date_joined.timestamp(),
+        email: rec.email.unwrap()
     })
 }
 
@@ -257,9 +180,8 @@ pub async fn register(username: String, password: String, first_name: String, la
     let tx = pool.begin().await?;
     let password_hash: String = hash(password, 10)?;
 
-
-    let rec = sqlx::query!(
-        r#"insert into users (username, password_hash, user_id, implementation_id, first_name, last_name, email) values(?, ?, UUID(), ?, ?, ?, ?) RETURNING user_id, date_joined"#,
+    let user_id: String = sqlx::query!(
+        r#"insert into users (username, password_hash, user_id, implementation_id, first_name, last_name, email) values(?, ?, UUID(), ?, ?, ?, ?) RETURNING user_id"#,
         username,
         password_hash,
         1,
@@ -268,23 +190,21 @@ pub async fn register(username: String, password: String, first_name: String, la
         email
     )
         .fetch_one(pool)
-        .await?;
+        .await?
+        // Due to either mariaDB or sqlx, it seems to think the return result is a binary and not a
+        // string, since we know it will be a valid string we can use this get_unchecked to get the
+        // UUID string.
+        .get_unchecked(0);
 
     tx.commit().await?;
-    let user_id: String = rec.get(0);
-    let date_joined: DateTime<Utc> = rec.get(1);
-    let date_joined_ts = date_joined.timestamp();
-    // let date_joined = rec.get::<DateTime<Utc>>(1);
 
     let local_user = LocalUser {
         links: gen_links(&user_id),
         local_username: username,
         local_user_id: user_id,
-
         first_name,
         last_name,
         email,
-        date_joined: date_joined_ts,
     };
 
     Ok(local_user)

@@ -34,7 +34,7 @@ export class Post extends Component {
 
                     withCredentials: true, // we're using authorisation with a token in local storage
                     credentials: 'include',
-                    headers: {git rebase
+                    headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Accept': 'application/json',
                         'redirect': this.props.match.params.impID
@@ -91,7 +91,7 @@ export class Post extends Component {
                 <div className="mt-3">
                     <Card border="dark">
                         <Card.Body>
-                        <div class="post-vote-container">
+                        <div class="post-preview-container">
                             <Voting class="voting-post"
                                 upvotes={this.state.post.upvotes} 
                                 downvotes={this.state.post.downvotes} 

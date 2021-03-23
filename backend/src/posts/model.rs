@@ -71,14 +71,14 @@ pub struct Post {
 #[serde(rename_all = "camelCase")]
 pub struct Embedded {
     #[serde(rename = "_embedded")]
-    pub(crate) _embedded: PostList,
+    _embedded: PostList,
 }
 
 /// Post List
 #[derive(Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct PostList {
-    pub(crate) post_list: Vec<Post>,
+    post_list: Vec<Post>,
 }
 
 /// Contains all of the links for a given post
@@ -318,7 +318,7 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
 }
 
 /// Given parameters, generate the links to meet the protocl specification return JSON
-pub(crate) fn generate_post_links(id: u64, subforum_id: u64, forum_id: u64, user_id: &str) -> PostLinks {
+fn generate_post_links(id: u64, subforum_id: u64, forum_id: u64, user_id: &str) -> PostLinks {
     let self_link = format!(
         "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}", id
     );
