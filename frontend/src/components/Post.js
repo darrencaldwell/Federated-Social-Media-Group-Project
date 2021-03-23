@@ -34,7 +34,7 @@ export class Post extends Component {
 
                     withCredentials: true, // we're using authorisation with a token in local storage
                     credentials: 'include',
-                    headers: {
+                    headers: {git rebase
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Accept': 'application/json',
                         'redirect': this.props.match.params.impID
