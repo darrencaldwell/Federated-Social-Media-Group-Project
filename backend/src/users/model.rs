@@ -3,8 +3,9 @@ use serde::{Serialize, Deserialize};
 use bcrypt::hash;
 use sqlx::{Row, FromRow, MySqlPool};
 use crate::comments::{Comments, Comment, CommentList, gen_links as gen_comment_links, SelfLink, Link as CommentLink};
-use crate::posts::{Post, PostList, Embedded as PostEmbedded, generate_post_links};
+use crate::posts::{Post, PostList, Embedded as PostEmbedded, generate_post_links, parse_mariadb};
 use chrono::{DateTime, Utc};
+use bigdecimal::ToPrimitive;
 
 /// Represents an entire user
 #[derive(Serialize, FromRow)]
@@ -201,25 +202,43 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
     let mut posts = vec![];
     let recs = sqlx::query!(
         r#"
-        SELECT post_id, post_title, post_contents, posts.subforum_id, created_time, forum_id FROM posts
-        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE user_id = ?
+        SELECT
+            p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!",
+            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
+            sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+            JSON_OBJECT("postsVotes", JSON_ARRAYAGG(
+                JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
+                    CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
+            ) AS "user_votes"
+        FROM posts p
+        INNER JOIN subforums s on p.subforum_id = s.subforum_id
+        LEFT JOIN posts_votes pv ON
+            p.post_id = pv.post_id
+        LEFT JOIN implementations i ON
+            pv.implementation_id = i.implementation_id
+        WHERE p.user_id = ?
         ORDER BY created_time
         "#,
         &user_id
     )
         .fetch_all(pool)
         .await?;
+
     for rec in recs {
+        let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
         posts.push(Post {
             id: rec.post_id,
             post_title: rec.post_title,
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
+            downvotes: rec.downvotes.to_u64().unwrap(),
+            upvotes: rec.upvotes.to_u64().unwrap(),
+            user_votes,
             links: generate_post_links(
                 rec.post_id,
                 rec.subforum_id,
-                rec.forum_id.unwrap(),
+                rec.forum_id,
                 &user_id,
             ),
             user_id: user_id.to_string(),
