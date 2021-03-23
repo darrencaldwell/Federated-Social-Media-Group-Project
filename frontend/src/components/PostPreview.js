@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Card} from "react-bootstrap";
+import Voting from './Voting';
 // import '../styling/individualPost.css';
 
 // props: post, impID, forumID, subforumID
@@ -8,10 +9,19 @@ export class PostPreview extends Component {
         return (
             <Card className="mt-3" >
                 <Card.Body>
-                    <Card.Title>{this.props.post.postTitle}</Card.Title>    {/*Use the title from the prop as the title text */}
-                    <Card.Text>{this.props.post.postContent}</Card.Text>     {/*Use the body from the prop as the body */}
+                    <Voting upvotes={this.props.post.upvotes} 
+                    downvotes={this.props.post.downvotes} 
+                    _userVotes={this.props.post._userVotes}
+                    type="posts"
+                    postID={this.props.post.id}
+                    impID={this.props.impID}
+                    ></Voting>
                     {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}
-                    <Card.Link href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>View Post</Card.Link>
+                    <Card.Link href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>{this.props.post.postTitle}</Card.Link>
+                    <Card.Subtitle className="text-muted">
+                    Post made by: {this.props.post.username} on TIME
+                    </Card.Subtitle>
+                    <Card.Text>{this.props.post.postContents}</Card.Text>     {/*Use the body from the prop as the body */}
                 </Card.Body>
             </Card>
         )

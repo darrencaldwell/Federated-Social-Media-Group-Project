@@ -1,0 +1,8 @@
+button.vote {
+    border:0;
+    background:transparent;
+    outline: none !important;
+}
+div.voting {
+    display: block;
+}
