@@ -18,8 +18,6 @@ node-build:
     - npm run build
 
 rust-build:
-  services:
-    - mariadb
   stage: build
   image: rust:alpine
   cache:
@@ -29,6 +27,12 @@ rust-build:
       - backend/target/
   before_script:
     - apk update
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - chmod 600 .ssh/id_rsa
+    - ssh-add .ssh/id_rsa
+    - mkdir -p .ssh
+    - chmod 700 .ssh
     - apk add openssl-dev
     - apk add build-base
     - apk add pkgconfig
@@ -37,8 +41,7 @@ rust-build:
 
   script:
     - cd backend
-    - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
-    - mysql --user=root --password=pass -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
+    - ssh -f cs3099user-b5@cs3099user-b5.cs.st-andrews.ac.uk -L 21463:localhost:21463 -N
     - cargo clippy --all-targets --all-features -- -D warnings
 
 deploy_staging:
