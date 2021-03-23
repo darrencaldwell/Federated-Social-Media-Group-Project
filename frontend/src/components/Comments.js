@@ -9,19 +9,19 @@ class Comment extends Component {
 
     render() {
         return (
-            <div>
-                <Card>
-                    <div className="comment-columns">
+                <Card border="dark">
                         <Card.Body>
-                        <Card.Text><Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
-                        {"  "} {this.props.comment.username} | {this.props.comment.commentContent}
-                        </Card.Text>
-                        <Card.Link href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
+                            <Card.Text>
+                             <Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
+                                {"  "} {this.props.comment.username}
+                            </Card.Text>
+                            <Card.Text>
+                                {this.props.comment.commentContent}
+                            </Card.Text>
+                          <Card.Link href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
                         </Card.Body>
-                    </div>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
                 </Card>
-            </div>
         )
     }
 }

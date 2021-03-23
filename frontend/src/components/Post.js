@@ -105,10 +105,12 @@ export class Post extends Component {
                             <Card.Subtitle className="text-muted">
                                 Post made by: {this.state.post_author.username} on TIME
                             </Card.Subtitle>
-                            <Card.Text>{this.state.post.postContents}</Card.Text>
-                            <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
                             </div>
                             </div>
+                            <Card.Body>
+                               <Card.Text>{this.state.post.postContents}</Card.Text>
+                               <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
+                            </Card.Body>
                         </Card.Body>
                     </Card>
                 </div>

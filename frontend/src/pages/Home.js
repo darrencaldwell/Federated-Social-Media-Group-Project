@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Container, Jumbotron, Button, Dropdown, Card} from "react-bootstrap";
-import {Link} from 'react-router-dom'
+import {Link} from 'react-router-dom';
+import "./../styling/home.css";
 
 // props: match.params.impID
 class Home extends Component {
@@ -67,7 +68,7 @@ class Home extends Component {
         // If username exists, get username from token and output message
         if (localStorage.getItem('username')) {
             return (
-                <Jumbotron id="home">
+                <Container className="jumbotron" fluid>
                     <h1 className="display-3">Welcome {localStorage.getItem('username')}</h1>
                     {/* <p className="lead">
                         The home page currently doesn't contain anything useful but hopefully
@@ -90,7 +91,7 @@ class Home extends Component {
                         ))}
                     </Dropdown>
                     </Card>
-                </Jumbotron>
+                </Container>
             )
         }
 
