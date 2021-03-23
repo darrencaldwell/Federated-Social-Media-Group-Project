@@ -73,8 +73,9 @@ node-build-merge:
     - apk add git
     - mkdir -p $CI_PROJECT_DIR/.cache/npm
   script:
-    - git checkout master
-    - git merge $CI_COMMIT_REF_NAME
+    - git checkout $CI_DEFAULT_BRANCH
+    - git pull
+    - git merge origin/$CI_COMMIT_REF_NAME
     - cd frontend
     - npm ci --cache $CI_PROJECT_DIR/.cache/npm --prefer-offline
     - npm run build
@@ -105,8 +106,9 @@ rust-build-merge:
     - rustup component add clippy
 
   script:
-    - git checkout master
-    - git merge $CI_COMMIT_REF_NAME
+    - git checkout $CI_DEFAULT_BRANCH
+    - git pull
+    - git merge origin/$CI_COMMIT_REF_NAME
     - cd backend
     - ssh -o "StrictHostKeyChecking=no" -f cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk -L 21463:localhost:21463 -N
     - cargo clippy --all-targets --all-features -- -D warnings
