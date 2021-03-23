@@ -91,7 +91,7 @@ export class Post extends Component {
                 <div className="mt-3">
                     <Card border="dark">
                         <Card.Body>
-                        <div class="post-preview-container">
+                        <div class="post-vote-container">
                             <Voting class="voting-post"
                                 upvotes={this.state.post.upvotes} 
                                 downvotes={this.state.post.downvotes} 

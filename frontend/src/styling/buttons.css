@@ -13,6 +13,7 @@ button.vote_b {
 div.middle {
     grid-row: 2;
     text-align: center;
+    align-self: center;
 }
 
 div.voting {
@@ -20,11 +21,11 @@ div.voting {
 }
 .voting-container {
     display: grid;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: 30fr 40fr 30fr;
     padding-right: 10px;
   }
 
-.post-preview-container {
+.post-vote-container {
     width: 100%;
     display: grid;
     grid-template-columns: 10fr 90fr;
