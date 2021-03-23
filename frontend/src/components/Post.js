@@ -91,7 +91,8 @@ export class Post extends Component {
                 <div className="mt-3">
                     <Card border="dark">
                         <Card.Body>
-                            <Voting 
+                        <div class="post-vote-container">
+                            <Voting class="voting-post"
                                 upvotes={this.state.post.upvotes} 
                                 downvotes={this.state.post.downvotes} 
                                 _userVotes={this.state.post._userVotes}
@@ -99,12 +100,15 @@ export class Post extends Component {
                                 postID={this.props.match.params.postID}
                                 impID={this.props.match.params.impID}
                             ></Voting>
+                            <div class="post">
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
                             <Card.Subtitle className="text-muted">
                                 Post made by: {this.state.post_author.username} on TIME
                             </Card.Subtitle>
                             <Card.Text>{this.state.post.postContents}</Card.Text>
                             <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
+                            </div>
+                            </div>
                         </Card.Body>
                     </Card>
                 </div>

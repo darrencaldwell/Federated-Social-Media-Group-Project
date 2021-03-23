@@ -1,8 +1,40 @@
-button.vote {
+button.vote_t    {
     border:0;
     background:transparent;
     outline: none !important;
+    grid-row: 1;
 }
+button.vote_b {
+    border:0;
+    background:transparent;
+    outline: none !important;
+    grid-row: 3;
+}
+div.middle {
+    grid-row: 2;
+    text-align: center;
+    align-self: center;
+}
+
 div.voting {
     display: block;
+}
+.voting-container {
+    display: grid;
+    grid-template-rows: 30fr 40fr 30fr;
+    padding-right: 10px;
+  }
+
+.post-vote-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 10fr 90fr;
+}
+
+.voting-post {
+    grid-column: 1;
+}
+
+.post {
+    grid-column: 2;
 }

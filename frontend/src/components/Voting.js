@@ -10,26 +10,28 @@ import "./../styling/buttons.css"
 export class Voting extends Component {
     constructor(props){
         super(props)
-        this.state = {
-          count: 0 + this.props.upvotes - this.props.downvotes,
-      }
-        // determine start state of the current users votes
-        let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
-        let is_upvote = null
-        this.props._userVotes.postsVotes.forEach( (list) => {
-          if (list.user === userUrl) {
-            is_upvote = list.isUpvote
+        if (this.props._userVotes) {
+          this.state = {
+            count: 0 + this.props.upvotes - this.props.downvotes,
+        }
+          // determine start state of the current users votes
+          let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
+          let is_upvote = null
+          this.props._userVotes.postsVotes.forEach( (list) => {
+            if (list.user === userUrl) {
+              is_upvote = list.isUpvote
+            }
+          })
+          if (is_upvote === true) {
+            this.state.is_downvote = false
+            this.state.is_upvote = true
+          } else if (is_upvote === null) {
+            this.state.is_downvote = false
+            this.state.is_upvote = false
+          } else {
+            this.state.is_downvote = true
+            this.state.is_upvote = false
           }
-        })
-        if (is_upvote === true) {
-          this.state.is_downvote = false
-          this.state.is_upvote = true
-        } else if (is_upvote === null) {
-          this.state.is_downvote = false
-          this.state.is_upvote = false
-        } else {
-          this.state.is_downvote = true
-          this.state.is_upvote = false
         }
     }
 
@@ -110,16 +112,19 @@ export class Voting extends Component {
     }
 
 render() {
+    if (!this.props._userVotes) {
+      return null
+    }
     const upImage = this.getUpvoteImg();
     const downImage = this.getDownvoteImg();
     
     return (
-      <div class="voting">
-        {<button class="vote" onClick={this.upvote}>
+      <div class="voting-container">
+        {<button class="vote_t" onClick={this.upvote}>
           <img src={upImage} alt="up arrow" width="20" height="30"></img>
         </button>}
-        {this.state.count}
-        {<button class="vote" onClick={this.downvote}>
+        <div class="middle">{this.state.count}</div>
+        {<button class="vote_b" onClick={this.downvote}>
           <img src={downImage} alt="down arrow" width="20" height="30"></img>
         </button>}
       </div>
