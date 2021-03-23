@@ -10,28 +10,26 @@ import "./../styling/buttons.css"
 export class Voting extends Component {
     constructor(props){
         super(props)
-        if (this.props._userVotes) {
-          this.state = {
-            count: 0 + this.props.upvotes - this.props.downvotes,
-        }
-          // determine start state of the current users votes
-          let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
-          let is_upvote = null
-          this.props._userVotes.postsVotes.forEach( (list) => {
-            if (list.user === userUrl) {
-              is_upvote = list.isUpvote
-            }
-          })
-          if (is_upvote === true) {
-            this.state.is_downvote = false
-            this.state.is_upvote = true
-          } else if (is_upvote === null) {
-            this.state.is_downvote = false
-            this.state.is_upvote = false
-          } else {
-            this.state.is_downvote = true
-            this.state.is_upvote = false
+        this.state = {
+          count: 0 + this.props.upvotes - this.props.downvotes,
+      }
+        // determine start state of the current users votes
+        let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
+        let is_upvote = null
+        this.props._userVotes.postsVotes.forEach( (list) => {
+          if (list.user === userUrl) {
+            is_upvote = list.isUpvote
           }
+        })
+        if (is_upvote === true) {
+          this.state.is_downvote = false
+          this.state.is_upvote = true
+        } else if (is_upvote === null) {
+          this.state.is_downvote = false
+          this.state.is_upvote = false
+        } else {
+          this.state.is_downvote = true
+          this.state.is_upvote = false
         }
     }
 
@@ -112,9 +110,6 @@ export class Voting extends Component {
     }
 
 render() {
-    if (!this.props._userVotes) {
-      return null
-    }
     const upImage = this.getUpvoteImg();
     const downImage = this.getDownvoteImg();
     
