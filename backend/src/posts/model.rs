@@ -3,8 +3,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, MySqlPool, Done};
 use serde::ser::{Serializer, SerializeStruct};
 use super::super::request_errors::RequestError;
-use bigdecimal::ToPrimitive;
-
 
 /// Represents a request to POST a post
 #[derive(Serialize, Deserialize)]
@@ -23,19 +21,6 @@ pub struct PostPatchRequest {
     pub post_contents: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct UserVotes {
-    pub posts_votes: Vec<UserVote>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct UserVote {
-    pub is_upvote: Option<bool>,
-    pub user: Option<String>,
-}
-
 /// Represents the database record for a given post
 impl Serialize for Post {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -47,9 +32,6 @@ impl Serialize for Post {
         state.serialize_field("userId", &self.user_id.to_string())?;
         state.serialize_field("id", &self.id.to_string())?;
         state.serialize_field("subforumId", &self.subforum_id.to_string())?;
-        state.serialize_field("downvotes", &self.downvotes)?;
-        state.serialize_field("upvotes", &self.upvotes)?;
-        state.serialize_field("_userVotes", &self.user_votes)?;
         state.serialize_field("_links", &self.links)?;
         state.end()
     }
@@ -61,9 +43,6 @@ pub struct Post {
     pub user_id: String,
     pub id: u64,
     pub subforum_id: u64,
-    pub downvotes: u64,
-    pub upvotes: u64,
-    pub user_votes: UserVotes,
     pub links: PostLinks,
 }
 
@@ -183,9 +162,6 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
         user_id: post.user_id.clone(),
         id,
         subforum_id,
-        downvotes: 0,
-        upvotes: 0,
-        user_votes: UserVotes { posts_votes: Vec::with_capacity(0) },
         links: generate_post_links(id, subforum_id, forum_id.forum_id, &post.user_id),
     };
     Ok(new_post)
@@ -196,23 +172,10 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     let mut posts = vec![];
     let recs = sqlx::query!(
         r#"
-        SELECT
-            p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!",
-            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
-            sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
-            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
-            JSON_OBJECT("postsVotes", JSON_EXTRACT( CONCAT( '[', JSON_ARRAYAGG(
-                JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user", 
-                    CONCAT(i.implementation_url, '/api/users/', pv.user_id))), ']'), '$')
-            ) AS "user_votes"
-        FROM posts p
-        INNER JOIN subforums s on p.subforum_id = s.subforum_id
-        LEFT JOIN posts_votes pv ON
-            p.post_id = pv.post_id
-        LEFT JOIN implementations i ON
-            pv.implementation_id = i.implementation_id
-        WHERE p.subforum_id = ?
-        GROUP BY p.post_id
+        SELECT post_id, post_title, user_id, post_contents, posts.subforum_id, forum_id FROM posts
+        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        WHERE posts.subforum_id = ?
+        ORDER BY post_id
         "#,
         subforum_id
     )
@@ -220,27 +183,19 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
     .await?;
 
     for rec in recs {
-        let mut user_votes: UserVotes = serde_json::from_str(&rec.user_votes.unwrap()).unwrap();
-        // a small hack to remove any null results, would take much more code to write a custom
-        // vec deserializer / serializer and it's only like N complexity
-        user_votes.posts_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
-
+        let user_id = rec.user_id;
         posts.push(Post {
             id: rec.post_id,
             post_title: rec.post_title,
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
-            // MariaDB returns Decimal from sum, so need to convert
-            downvotes: rec.downvotes.to_u64().unwrap(),
-            upvotes: rec.upvotes.to_u64().unwrap(), 
-            user_votes,
             links: generate_post_links(
                 rec.post_id,
                 rec.subforum_id,
-                rec.forum_id,
-                &rec.user_id,
+                rec.forum_id.unwrap(),
+                &user_id,
             ),
-            user_id: rec.user_id.to_string(),
+            user_id: user_id.to_string(),
         });
     }
     let post_list = PostList { post_list: posts };
@@ -254,63 +209,14 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
 pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
     let rec = sqlx::query!(
         r#"
-        SELECT
-            p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!",
-            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
-            sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes: u64",
-            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes: u64",
-            JSON_OBJECT("postsVotes", JSON_ARRAYAGG(
-                JSON_OBJECT("isUpvote", CASE WHEN is_upvote = 1 then true else false end, "user", 
-                CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
-            ) AS "user_votes"
-        FROM posts p
-        LEFT JOIN implementations i ON
-            p.implementation_id = i.implementation_id
-        LEFT JOIN subforums ON 
-            p.subforum_id = subforums.subforum_id
-        LEFT JOIN posts_votes pv ON
-            pv.post_id = p.post_id 
-        WHERE p.post_id = ?
-        HAVING p.post_id = ?
+        SELECT post_id, post_title, user_id, post_contents, posts.subforum_id, forum_id FROM posts
+        LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        WHERE post_id = ?
         "#,
-        id, id
+        id
     )
     .fetch_one(pool)
     .await?;
-    /*
-    let votes = sqlx::query!(
-        r#"
-        SELECT 
-            pv.user_id,
-            i.implementation_url,
-            pv.is_upvote
-        FROM posts_votes pv
-        INNER JOIN implementations i ON
-            pv.implementation_id = i.implementation_id
-        WHERE pv.post_id = ?
-        "#,
-        id
-        )
-        .fetch_all(pool)
-        .await?;
-
-    let mut user_votes_vec = Vec::new();
-    for rec in votes {
-        // construct url: <url>/api/users/{id}
-        let url = format!("{}/api/users/{}", rec.implementation_url, rec.user_id);
-        let mut is_upvote = false;
-        if rec.is_upvote > 0 {is_upvote = true;}
-        user_votes_vec.push(UserVote {
-            user: Some(url),
-            is_upvote: Some(is_upvote),
-        });
-    }
-    let user_votes = UserVotes { posts_votes: user_votes_vec };
-    */
-    let mut user_votes: UserVotes = serde_json::from_str(&rec.user_votes.unwrap()).unwrap();
-    // a small hack to remove any null results, would take much more code to write a custom
-    // vec deserializer / serializer and it's only like N complexity
-    user_votes.posts_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
 
     let user_id = rec.user_id;
     let post = Post {
@@ -318,14 +224,10 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
         post_title: rec.post_title,
         post_contents: rec.post_contents,
         subforum_id: rec.subforum_id,
-        // MariaDB returns Decimal from sum, so need to convert
-        downvotes: rec.downvotes.unwrap().to_u64().unwrap(),
-        upvotes: rec.upvotes.unwrap().to_u64().unwrap(), 
-        user_votes,
         links: generate_post_links(
             rec.post_id,
             rec.subforum_id,
-            rec.forum_id,
+            rec.forum_id.unwrap(),
             &user_id,
         ),
         user_id: user_id.to_string(),
