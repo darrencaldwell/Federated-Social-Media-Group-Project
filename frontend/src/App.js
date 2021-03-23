@@ -13,6 +13,8 @@ import PostList from "./components/PostList";
 import SubforumList from "./components/SubforumList";
 import CreateComment from "./components/CreateComment";
 import Account from "./pages/Account";
+import AccountComments from "./components/account/AccountComments";
+import AccountPosts from "./components/account/AccountPosts";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styling/container-pages.css';
 // import BackButton from "./components/BackButton";
@@ -54,15 +56,16 @@ class App extends React.Component {
                             <Route path="/:impID/:something" component={ForumList}/>
                         </Switch>
                         <Switch>
-                            <Route exact path="/:impID/forums"/> 
-                            <Route exact path="/:impID/new"/> 
+                            <Route exact path="/:impID/forums"/>
+                            <Route exact path="/:impID/new"/>
                             <Route path="/:impID/:forumID" component={SubforumList}/>  {/*SubForumList gets forum ID from this.props.match.params.forumID */}
                         </Switch>
                         <Switch>
                             <Route exact path="/" component={() => <Home user={this.state.user}/>}/> {/*default homepage*/}
                             <Route exact path="/login" component={() => <Login login={this.login}/>}/> {/*login page*/}
                             <Route exact path="/register" component={Register}/> {/*registration page*/}
-
+                            <Route exact path="/usercomments" component={AccountComments}/>
+                            <Route exact path="/userposts" component={AccountPosts}/>
                             {/*these should all contain some sort of identifier for the instance, but that is not implemented yet*/}
                             <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
                             {/*<Route exact path="/account" component={() => <Account user={this.user_id}}/>}/>*/}

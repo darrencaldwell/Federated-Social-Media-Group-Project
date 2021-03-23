@@ -45,7 +45,7 @@ pub struct Links {
 
 impl Serialize for Comment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
+        where
             S: Serializer {
         let mut state = serializer.serialize_struct("Comment", 6)?;
         state.serialize_field("id", &self.id.to_string())?;
@@ -83,7 +83,7 @@ pub struct CommentList {
     pub comment_list: Vec<Comment>,
 }
 
-pub fn gen_links(comment_id: u64, parent_comment_id: u64, user_id: &str, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
+pub(crate) fn gen_links(comment_id: u64, parent_comment_id: u64, user_id: &str, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
     Links {
         _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}", comment_id) },
         post: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}", post_id) },
@@ -139,10 +139,10 @@ pub async fn insert_comment(post_id: u64,
 
 /// POSTS a comment given a comment to comment on and a comment request
 pub async fn insert_child_comment(parent_id: u64,
-                            user_id: String,
-                            comment_request: CommentRequest,
-                            pool: &MySqlPool,
-                            implementation_id: u64
+                                  user_id: String,
+                                  comment_request: CommentRequest,
+                                  pool: &MySqlPool,
+                                  implementation_id: u64
 ) -> Result<Comment> {
     let post_id = sqlx::query!("SELECT post_id FROM comments where comment_id = ?", parent_id)
         .fetch_one(pool)
@@ -197,9 +197,9 @@ pub async fn patch(comment_id: u64, comment: CommentPatchRequest, pool: &MySqlPo
         comment.comment_content,
         comment_id
     )
-    .execute(pool)
-    .await?
-    .rows_affected();
+        .execute(pool)
+        .await?
+        .rows_affected();
 
     if number_modified != 1 {
         Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
@@ -217,9 +217,9 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
         "#,
         comment_id
     )
-    .execute(pool)
-    .await?
-    .rows_affected();
+        .execute(pool)
+        .await?
+        .rows_affected();
 
     if number_modified != 1 {
         Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
@@ -237,7 +237,9 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.post_id = ? AND parent_id IS NULL"#,
+        WHERE comments.post_id = ? AND parent_id IS NULL
+        GROUP BY comment_id
+        "#,
         post_id)
         .fetch_all(pool)
         .await?;
@@ -274,7 +276,9 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.parent_id = ?"#,
+        WHERE comments.parent_id = ?
+        GROUP BY comment_id
+        "#,
         comment_id)
         .fetch_all(pool)
         .await?;

@@ -25,16 +25,16 @@ async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>,
         // add to database
         sqlx::query!(
             r#"
-            UPDATE users 
+            UPDATE users
             SET profile_picture = ?
             WHERE user_id = ?
             "#,
             vec,
             id
         )
-        .execute(pool.as_ref())
-        .await.unwrap();
-        }
+            .execute(pool.as_ref())
+            .await.unwrap();
+    }
     Ok(HttpResponse::Ok().into())
 }
 #[get("/api/users/{id}/profilepicture")]
@@ -47,9 +47,9 @@ async fn get_profile_picture(pool: web::Data<MySqlPool>, web::Path(id): web::Pat
         "#,
         id
     )
-    .fetch_one(pool.as_ref())
-    .await.unwrap() // TODO: MATCH THIS PROPERLY
-    .pp.unwrap();
+        .fetch_one(pool.as_ref())
+        .await.unwrap() // TODO: MATCH THIS PROPERLY
+        .pp.unwrap();
     let res = HttpResponseBuilder::new(StatusCode::OK).content_type("image").body(img);
     Ok(res)
 }
@@ -139,6 +139,7 @@ async fn get_user_posts(
     }
 }
 
+
 #[get("/api/users/{id}/comments")]
 async fn get_user_comments(
     web::Path(id): web::Path<String>,
@@ -151,6 +152,7 @@ async fn get_user_comments(
     }
 }
 
+
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
@@ -162,3 +164,4 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(profile_picture);
     cfg.service(get_profile_picture);
 }
+
