@@ -1,10 +1,11 @@
+use actix::Actor;
 use actix_web::{App, HttpServer, middleware, web::PathConfig, error, client::Client};
 
 use anyhow::Result;
 use dotenv::dotenv;
 use env_logger::Env;
 use sqlx::MySqlPool;
-use std::env;
+use std::{env, sync::{Arc, atomic::AtomicUsize}};
 
 mod posts;
 mod users;
@@ -17,6 +18,7 @@ mod implementation_id_extractor;
 mod request_errors;
 mod implementations;
 mod voting;
+mod chat;
 
 use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
@@ -49,6 +51,8 @@ async fn main() -> Result<()> {
     let key_pair = Rsa::generate(2048).unwrap();
     let key_pair: PKey<Private> = PKey::from_rsa(key_pair).unwrap();
 
+    let chat_server = chat::ChatServer::new(Arc::new(AtomicUsize::new(0))).start();
+
     HttpServer::new(move || {
 
         App::new()
@@ -58,6 +62,7 @@ async fn main() -> Result<()> {
             .data(pool.clone())
             // construct a client for each worker
             .data(Client::default())
+            .data(chat_server.clone())
             // configures the error that is returned when an unparsable var is used in the path,
             // eg an id that is not a u64
             .app_data(PathConfig::default().error_handler(|err, _req| {
@@ -82,6 +87,7 @@ async fn main() -> Result<()> {
             .configure(forums::init)
             .configure(implementations::init)
             .configure(voting::init)
+            .service(web::resource("/local/ws/").to(chat::chat_route))
     })
     .bind("127.0.0.1:21450")?
     .workers(4)
