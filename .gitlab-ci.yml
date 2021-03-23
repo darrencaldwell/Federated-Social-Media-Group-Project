@@ -79,7 +79,6 @@ node-build-merge:
     - npm run build
   
   only:
-    - master
     - merge_requests
 
 rust-build-merge:
@@ -112,7 +111,6 @@ rust-build-merge:
     - cargo clippy --all-targets --all-features -- -D warnings
 
   only:
-    - master
     - merge_requests
 
 variables:
