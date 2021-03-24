@@ -6,7 +6,8 @@ class AccountPosts extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            postList: []
+            postList: [],
+            impId: 1
         }
     }
 
@@ -25,6 +26,7 @@ class AccountPosts extends React.Component {
     }
 
     render() {
+        const start_url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/1/"
         // console.log(this.state.postList)
         if (this.state.postList.length === 0) {
             return (
@@ -38,16 +40,26 @@ class AccountPosts extends React.Component {
             )
         } else {
             return (
+
                 <Container>
                     <Card.Title>Your Posts</Card.Title>
                     {this.state.postList.map((post) => (
+                        // {const forum_Id = post._links.self.href.pop()}
                         <Card>
                             <Card.Body>
                                 <Card.Title>{post.postTitle}</Card.Title>
                                 <Card.Subtitle>Post Id: {post.id}</Card.Subtitle>
                                 <Card.Text>{post.postContents}</Card.Text>
-                                <Card.Link href={post._links.self.href}>Take me to the post {post.postId}</Card.Link>
-                                {/*<Card.Link href={post._links.self.href}>Take me to my comment</Card.Link>*/}
+                                {console.log('PATH TO POSTS',start_url +
+                                    JSON.stringify(parseInt(post._links.forum.href.split("/").pop())) + '/' +
+                                    JSON.stringify(parseInt(post._links.subforum.href.split("/").pop())) + '/' +
+                                    JSON.stringify(parseInt(post._links.self.href.split("/").pop()
+                                    )))}
+                                <Card.Link href={start_url +
+                                    JSON.stringify(parseInt(post._links.forum.href.split("/").pop())) + '/' +
+                                    JSON.stringify(parseInt(post._links.subforum.href.split("/").pop())) + '/' +
+                                    JSON.stringify(parseInt(post._links.self.href.split("/").pop()
+                                    ))}>Take me to the post {post.postId}</Card.Link>
                             </Card.Body>
                         </Card>
                     ))}
