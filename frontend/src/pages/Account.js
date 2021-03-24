@@ -28,7 +28,8 @@ class Account extends React.Component {
 
     render() {
         const date = new Date(this.state.userInfo.dateJoined * 1000)
-        console.log('date 1', date)
+        const forums_url = "/1/forums"
+        console.log(this.state.userInfo)
         return (
             <Container>
                 <Card.Title>Your Account</Card.Title>
@@ -77,8 +78,15 @@ class Account extends React.Component {
                         <Card.Text>
                             Total Subscribed Forums:
                         </Card.Text>
-                        <Link to={'/'}><Button variant='light' as="input" type="button" value="Return home"/>{' '}
-                        </Link>
+                        <Nav fill variant="tabs" defaultActiveKey="/">
+                            <Nav.Item>
+                                {/*<Link as={Link} variant-"light" to='/'>Return home</.Link>*/}
+                                <Link to={'/'}><Button variant='light' as="input" type="button" value="Return home"/>{' '}</Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Link to={forums_url}><Button variant='secondary' as="input" type="button" value="Go to Forums"/>{' '}</Link>
+                            </Nav.Item>
+                        </Nav>
                     </Card.Body>
                 </Card>
             </Container>
