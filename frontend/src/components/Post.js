@@ -103,7 +103,7 @@ export class Post extends Component {
                             <div class="post">
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
                             <Card.Subtitle className="text-muted">
-                                Post made by: {this.state.post_author.username} on TIME
+                                Post made by: <Card.Link href={'/account'}>{this.state.post_author.username}</Card.Link> on TIME
                             </Card.Subtitle>
                             </div>
                             </div>
