@@ -3,31 +3,56 @@ use serde::{Deserialize, Serialize};
 use sqlx::{MySqlPool, Done};
 use super::super::request_errors::RequestError;
 
+/*
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UserVotes {
+    #[serde(rename = "_userVotes")]
+    pub user_votes: Vec<UserVote>,
+}
+*/
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UserVote {
+    pub is_upvote: Option<bool>,
+    pub user: Option<String>,
+}
+
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VoteRequest {
     pub is_upvote: Option<bool>,
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PostsVotes {
-    pub posts_votes: Vec<PostVotes>,
+#[derive(Deserialize, Serialize)]
+pub struct DbUserVotes {
+    #[serde(rename = "_userVotes")]
+    user_votes: Vec<UserVote>,
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PostVotes {
-    pub post_id: u64,
-    pub total_votes: u64,
-    pub upvote_count: u64,
-    // if user has reacted then these will exist
-    pub user_id: Option<String>,
-    pub is_upvote: Option<bool>,
+/// Deals with the bug in MariaDB where sometimes it incorrectly formats JSON
+pub fn parse_mariadb(json_string: String) -> Vec<UserVote> {
+    // MariaDB has a bug where it forgets to add the brackets when there are < 7 votes in the
+    // database, so we have to manually correct that
+    let db_user_votes: DbUserVotes = match serde_json::from_str(&json_string) {
+        Ok(user_votes) => {
+            user_votes
+        },
+        Err(_) => {
+            let tmp = json_string.replace("{\"_userVotes\": \"{", "{\"_userVotes\": [{");
+            let mut tmp2 = tmp.replace("\\","");
+            tmp2.replace_range(tmp2.len()-3..tmp2.len(), "}]}");
+            serde_json::from_str(&tmp2).unwrap()
+        },
+    };
+    // a small hack to remove any null results, would take much more code to write a custom
+    // vec deserializer / serializer and it's only like N complexity
+    let mut user_votes = db_user_votes.user_votes;
+    user_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
+    user_votes
 }
-
 /// Modifies an existing post
-pub async fn put_vote(post_id: u64, user_id: String, implementation_id: u64, vote: VoteRequest, pool: &MySqlPool) -> Result<(), RequestError> {
+pub async fn put_post_vote(post_id: u64, user_id: String, implementation_id: u64, vote: VoteRequest, pool: &MySqlPool) -> Result<(), RequestError> {
     let is_upvote = vote.is_upvote;
 
     // delete if theres no vote
@@ -70,51 +95,46 @@ pub async fn put_vote(post_id: u64, user_id: String, implementation_id: u64, vot
     Ok(())
 }
 
-/// Get all the votes for all posts in a subforum, including information about whether the user who
-/// requested it has voted on any of them
-pub async fn get_posts_votes(subforum_id: u64, user_id: String, implementation_id: u64,pool: &MySqlPool) -> Result<PostsVotes> {
-    let mut posts_votes = vec![];
-    let recs = sqlx::query!(
-        r#"
-		SELECT 
-            pv1.post_id,
-            count(pv1.post_id) AS "total_votes: u64",
-            sum(case when pv1.is_upvote = 1 then 1 else 0 end) AS "upvote_count: u64",
-            pv2.user_id,
-            pv2.is_upvote
-        FROM posts_votes pv1
-        LEFT JOIN posts p2 ON pv1.post_id = p2.post_id
-        LEFT JOIN subforums s2 ON p2.subforum_id = s2.subforum_id
-        LEFT JOIN posts_votes pv2 ON 
-            pv1.post_id = pv2.post_id AND
-            pv1.is_upvote = pv2.is_upvote AND
-            pv1.implementation_id = ? AND
-            pv1.user_id = ?
-        WHERE p2.subforum_id = ?
-        GROUP BY post_id
-        "#,
-        implementation_id,
-        user_id,
-        subforum_id
-    )
-    .fetch_all(pool)
-    .await?;
+/// Modifies an existing comments
+pub async fn put_comment_vote(comment_id: u64, user_id: String, implementation_id: u64, vote: VoteRequest, pool: &MySqlPool) -> Result<(), RequestError> {
+    let is_upvote = vote.is_upvote;
 
-    for rec in recs {
-        let is_upvote;
-        if rec.is_upvote.is_some() {
-            if rec.is_upvote.unwrap() > 0 {
-                is_upvote = Some(true);
-            } else {is_upvote = Some(false);}
-        } else {is_upvote = None;}
-        posts_votes.push(PostVotes {
-            post_id: rec.post_id,
-            total_votes: rec.total_votes,
-            upvote_count: rec.upvote_count.unwrap(),
-            user_id: rec.user_id,
-            is_upvote,
-        });
+    // delete if theres no vote
+    if is_upvote.is_none() {
+        let number_modified = sqlx::query!(
+            r#"
+            DELETE FROM comments_votes
+            WHERE comment_id = ? AND user_id = ? AND implementation_id = ?
+            "#,
+            comment_id,
+            user_id,
+            implementation_id
+            )
+            .execute(pool)
+            .await?
+            .rows_affected();
+        if number_modified != 1 {
+            return Err(RequestError::NotFound(format!("post_id: {} not found for user: {}#{}", comment_id, user_id, implementation_id)))
+        }
+        return Ok(())
     }
-    let post_list = PostsVotes { posts_votes };
-    Ok(post_list)
+
+    let number_modified = sqlx::query!(
+        r#"
+        INSERT INTO comments_votes
+        (comment_id, user_id, implementation_id, is_upvote)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE is_upvote = ?
+        "#,
+        comment_id,
+        user_id,
+        implementation_id,
+        is_upvote.unwrap(), is_upvote.unwrap()
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    if number_modified != 1 {return Err(RequestError::NotFound(format!("comment_id: {} not found to upvote", comment_id)))} 
+    Ok(())
 }

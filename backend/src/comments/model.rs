@@ -2,7 +2,9 @@ use sqlx::{MySqlPool, Done};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde::ser::{Serializer, SerializeStruct};
+use bigdecimal::ToPrimitive;
 use super::super::request_errors::RequestError;
+use super::super::voting::{UserVote, parse_mariadb};
 
 /// Represents a request to post a comment on a post
 #[derive(Deserialize)]
@@ -53,6 +55,9 @@ impl Serialize for Comment {
         state.serialize_field("userId", &self.user_id)?;
         state.serialize_field("username", &self.username)?;
         state.serialize_field("postId", &self.post_id.to_string())?;
+        state.serialize_field("downvotes", &self.downvotes)?;
+        state.serialize_field("upvotes", &self.upvotes)?;
+        state.serialize_field("_userVotes", &self.user_votes)?;
         state.serialize_field("_links", &self.links)?;
         state.end()
     }
@@ -64,6 +69,9 @@ pub struct Comment {
     pub user_id: String,
     pub username: String,
     pub post_id: u64,
+    pub downvotes: u64,
+    pub upvotes: u64,
+    pub user_votes: Vec<UserVote>,
     pub links: Links,
 }
 
@@ -131,6 +139,9 @@ pub async fn insert_comment(post_id: u64,
         comment_content: comment_request.comment_content,
         username: rec.username,
         post_id,
+        downvotes: 0,
+        upvotes: 0,
+        user_votes: Vec::with_capacity(0),
         links: gen_links(comment_id, comment_id, &user_id, post_id, rec.subforum_id, rec.forum_id),
         user_id,
     })
@@ -179,6 +190,9 @@ pub async fn insert_child_comment(parent_id: u64,
         comment_content: comment_request.comment_content,
         username: rec.username,
         post_id,
+        downvotes: 0,
+        upvotes: 0,
+        user_votes: Vec::with_capacity(0),
         links: gen_links(comment_id, parent_id, &user_id, post_id, rec.subforum_id, rec.forum_id),
         user_id,
     })
@@ -231,14 +245,24 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
 /// Get all top level comments within a post
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, comments.user_id, comment_id,
-        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
+        r#"SELECT comment, comments.user_id, comments.comment_id,
+        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
+        sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+        sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+        JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
+                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+        ) AS "user_votes"
         FROM comments
+        LEFT JOIN comments_votes cv ON
+            comments.comment_id = cv.comment_id
+        LEFT JOIN implementations i ON
+            cv.implementation_id = i.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
         WHERE comments.post_id = ? AND parent_id IS NULL
-        GROUP BY comment_id
+        GROUP BY comments.comment_id
         "#,
         post_id)
         .fetch_all(pool)
@@ -246,11 +270,16 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
 
     let comments: Vec<Comment> = recs.into_iter()
         .map(|rec| {
+            let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
                 post_id,
+                // MariaDB returns Decimal from sum, so need to convert
+                downvotes: rec.downvotes.to_u64().unwrap(),
+                upvotes: rec.upvotes.to_u64().unwrap(),
+                user_votes,
                 links: gen_links(rec.comment_id, rec.comment_id, &rec.user_id, post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
@@ -270,9 +299,19 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
 /// Get all top level child comments of a comment
 pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, comments.user_id, comment_id, comments.post_id,
-        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
+        r#"SELECT comment, comments.user_id, comments.comment_id, comments.post_id,
+        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
+        sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+        sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+        JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
+                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+        ) AS "user_votes"
         FROM comments
+        LEFT JOIN comments_votes cv ON
+            comments.comment_id = cv.comment_id
+        LEFT JOIN implementations i ON
+            cv.implementation_id = i.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -285,11 +324,16 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
 
     let comments: Vec<Comment> = recs.into_iter()
         .map(|rec| {
+            let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
                 post_id: rec.post_id,
+                // MariaDB returns Decimal from sum, so need to convert
+                downvotes: rec.downvotes.to_u64().unwrap(),
+                upvotes: rec.upvotes.to_u64().unwrap(),
+                user_votes,
                 links: gen_links(rec.comment_id, rec.comment_id, &rec.user_id, rec.post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
@@ -316,22 +360,39 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
 /// Get a single comment by it's id
 pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
     let rec = sqlx::query!(
-        r#"SELECT comment, comments.user_id, comments.post_id,
-        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
+        r#"SELECT comment AS "comment!", comments.user_id as "user_id!", comments.comment_id, comments.post_id AS "post_id!",
+        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
+        sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+        sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+        JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
+                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+        ) AS "user_votes"
         FROM comments
-        LEFT JOIN users on comments.user_id = users.user_id
+        LEFT JOIN comments_votes cv ON
+            comments.comment_id = cv.comment_id
+        LEFT JOIN implementations i ON
+            cv.implementation_id = i.implementation_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comment_id = ?"#,
-        comment_id)
+        LEFT JOIN users on comments.user_id = users.user_id
+        WHERE comments.comment_id = ?
+        HAVING comments.comment_id = ?
+        "#,
+        comment_id, comment_id)
         .fetch_one(pool)
         .await?;
 
+    let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
     Ok(Comment {
         id: comment_id,
         comment_content: rec.comment,
         username: rec.username,
         post_id: rec.post_id,
+        // MariaDB returns Decimal from sum, so need to convert
+        downvotes: rec.downvotes.to_u64().unwrap(),
+        upvotes: rec.upvotes.to_u64().unwrap(),
+        user_votes,
         links: gen_links(comment_id, comment_id, &rec.user_id, rec.post_id, rec.subforum_id, rec.forum_id),
         user_id: rec.user_id,
     })
