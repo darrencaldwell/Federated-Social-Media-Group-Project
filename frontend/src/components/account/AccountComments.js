@@ -50,8 +50,16 @@ class AccountComments extends React.Component {
                                 <Card.Title>Comment by {comment.username}</Card.Title>
                                 <Card.Subtitle>Comment Id: {comment.id} Post Id: {comment.postId}</Card.Subtitle>
                                 <Card.Text>{comment.commentContent}</Card.Text>
-                                <Card.Link href={comment._links.post.href}>Take me to the post {comment.postId}</Card.Link>
-                                <Card.Link href={comment._links.self.href}>Take me to my comment</Card.Link>
+                                {/*{console.log('PATH TO COMMENTS',start_url +*/}
+                                {/*    JSON.stringify(parseInt(post._links.forum.href.split("/").pop())) + '/' +*/}
+                                {/*    JSON.stringify(parseInt(post._links.subforum.href.split("/").pop())) + '/' +*/}
+                                {/*    JSON.stringify(parseInt(post._links.self.href.split("/").pop()*/}
+                                {/*    )))}*/}
+                                {/*<Card.Link href={start_url +*/}
+                                {/*JSON.stringify(parseInt(post._links.forum.href.split("/").pop())) + '/' +*/}
+                                {/*JSON.stringify(parseInt(post._links.subforum.href.split("/").pop())) + '/' +*/}
+                                {/*JSON.stringify(parseInt(post._links.self.href.split("/").pop()*/}
+                                {/*))}>Take me to the post {post.postId}</Card.Link>*/}
                             </Card.Body>
                         </Card>
                     ))}
