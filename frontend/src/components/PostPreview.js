@@ -21,7 +21,7 @@ export class PostPreview extends Component {
                     <div class="post">
                     <Card.Link href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>{this.props.post.postTitle}</Card.Link>
                     <Card.Subtitle className="text-muted">
-                        Post made by: <Card.Link href={'/account'}>{this.props.post.username} USERNAME_HERE</Card.Link> on TIME
+                        Post made by: <Card.Link href={'/account'}>{this.props.post.username}USERNAME_HERE</Card.Link> on TIME
                     </Card.Subtitle>
                     <Card.Text>{this.props.post.postContents}</Card.Text>     {/*Use the body from the prop as the body */}
                     </div>
