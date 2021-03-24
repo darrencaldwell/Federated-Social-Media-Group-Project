@@ -24,17 +24,17 @@ div.voting {
     padding-right: 10px;
   }
 
-.post-preview-container {
+.post-comment-voting-container {
     width: 100%;
     display: grid;
-    grid-template-columns: 10fr 90fr;
+    grid-template-columns: 1fr 99fr;
 }
 
-.voting-post {
+.voting {
     grid-column: 1;
 }
 
-.post {
+.voting-adj {
     grid-column: 2;
     align-self: center;
 }

@@ -3,7 +3,7 @@ import up_hollow from './../images/up_hollow.png'
 import up_solid from './../images/up_solid.png'
 import down_hollow from './../images/down_hollow.png'
 import down_solid from './../images/down_solid.png'
-import "./../styling/buttons.css"
+import "./../styling/voting.css"
 
 
 // props: upvote, downvote, _userVotes, type ('posts' or 'comments'), postID, impID
@@ -17,7 +17,7 @@ export class Voting extends Component {
           // determine start state of the current users votes
           let userUrl = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/" + localStorage.getItem("userId")
           let is_upvote = null
-          this.props._userVotes.postsVotes.forEach( (list) => {
+          this.props._userVotes.forEach( (list) => {
             if (list.user === userUrl) {
               is_upvote = list.isUpvote
             }

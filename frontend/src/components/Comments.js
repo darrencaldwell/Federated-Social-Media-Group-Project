@@ -3,6 +3,7 @@ import {Card} from "react-bootstrap";
 import {Container} from 'react-bootstrap';
 import '../styling/container-pages.css';
 import Avatar from 'react-avatar';
+import Voting from './Voting'
 
 // props: comment (json), posturl, impID, level
 class Comment extends Component {
@@ -11,14 +12,24 @@ class Comment extends Component {
         return (
                 <Card border="dark">
                         <Card.Body>
-                            <Card.Text>
-                             <Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
-                                {"  "} {this.props.comment.username}
-                            </Card.Text>
-                            <Card.Text>
-                                {this.props.comment.commentContent}
-                            </Card.Text>
-                          <Card.Link href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
+                            <div class="post-comment-voting-container">
+                                <Voting class="voting-post"
+                                    upvotes={this.props.comment.upvotes} 
+                                    downvotes={this.props.comment.downvotes} 
+                                    _userVotes={this.props.comment._userVotes}
+                                    type="comments"
+                                    postID={this.props.comment.id}
+                                    impID={this.props.impID}
+                                ></Voting>
+                                <div class="voting-adj">
+                                    <Card.Text>
+                                        <Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
+                                            {"  "} {this.props.comment.username}
+                                    </Card.Text>
+                                </div>
+                            </div>
+                            <Card.Text className="mt-3">{this.props.comment.commentContent}</Card.Text>
+                            <Card.Link href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
                         </Card.Body>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
                 </Card>

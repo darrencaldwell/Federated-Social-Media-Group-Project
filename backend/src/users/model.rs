@@ -3,7 +3,8 @@ use serde::{Serialize, Deserialize};
 use bcrypt::hash;
 use sqlx::{Row, FromRow, MySqlPool};
 use crate::comments::{Comments, Comment, CommentList, gen_links as gen_comment_links, SelfLink, Link as CommentLink};
-use crate::posts::{Post, PostList, Embedded as PostEmbedded, generate_post_links, parse_mariadb};
+use crate::posts::{Post, PostList, Embedded as PostEmbedded, generate_post_links};
+use super::super::voting::parse_mariadb;
 use chrono::{DateTime, Utc};
 use bigdecimal::ToPrimitive;
 
@@ -164,9 +165,19 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
 
 /// Returns a list of comments for a user
 pub async fn get_user_comments(user_id: String, pool: &MySqlPool) -> Result<Comments> {
-    let recs = sqlx::query!(r#"SELECT comment, comments.user_id, comment_id,
-        posts.subforum_id AS "subforum_id!", comments.post_id as "post_id", subforums.forum_id AS "forum_id!", username AS "username!"
+    let recs = sqlx::query!(r#"SELECT comment AS "comment!", comments.user_id AS "user_id!", comments.comment_id AS "comment_id!",
+        posts.subforum_id AS "subforum_id!", comments.post_id as "post_id!", subforums.forum_id AS "forum_id!", username AS "username!",
+        sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+        sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+        JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
+                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+        ) AS "user_votes"
         FROM comments
+        LEFT JOIN comments_votes cv ON
+            comments.comment_id = cv.comment_id
+        LEFT JOIN implementations i ON
+            cv.implementation_id = i.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -174,14 +185,17 @@ pub async fn get_user_comments(user_id: String, pool: &MySqlPool) -> Result<Comm
         .fetch_all(pool)
         .await?;
 
-
     let comments: Vec<Comment> = recs.into_iter()
         .map(|rec| {
+            let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
                 post_id: rec.post_id,
+                downvotes: rec.downvotes.to_u64().unwrap(),
+                upvotes: rec.upvotes.to_u64().unwrap(),
+                user_votes,
                 links: gen_comment_links(rec.comment_id, rec.comment_id, &rec.user_id, rec.post_id,
                                          rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
@@ -207,7 +221,7 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
-            JSON_OBJECT("postsVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
                 JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
                     CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
             ) AS "user_votes"

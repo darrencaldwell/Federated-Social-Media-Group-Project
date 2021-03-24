@@ -4,7 +4,7 @@ use sqlx::{FromRow, MySqlPool, Done};
 use serde::ser::{Serializer, SerializeStruct};
 use super::super::request_errors::RequestError;
 use bigdecimal::ToPrimitive;
-
+use super::super::voting::{UserVote, parse_mariadb};
 /// Represents a request to POST a post
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,19 +20,6 @@ pub struct PostRequest {
 pub struct PostPatchRequest {
     pub post_title: String,
     pub post_contents: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct UserVotes {
-    pub posts_votes: Vec<UserVote>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct UserVote {
-    pub is_upvote: Option<bool>,
-    pub user: Option<String>,
 }
 
 /// Represents the database record for a given post
@@ -62,7 +49,7 @@ pub struct Post {
     pub subforum_id: u64,
     pub downvotes: u64,
     pub upvotes: u64,
-    pub user_votes: UserVotes,
+    pub user_votes: Vec<UserVote>,
     pub links: PostLinks,
 }
 
@@ -99,25 +86,6 @@ pub struct Link {
     pub href: String,
 }
 
-pub fn parse_mariadb(json_string: String) -> UserVotes {
-    // MariaDB has a bug where it forgets to add the brackets when there are < 7 votes in the
-    // database, so we have to manually correct that
-    let mut user_votes: UserVotes = match serde_json::from_str(&json_string) {
-        Ok(user_votes) => {
-            user_votes
-        },
-        Err(_) => {
-            let tmp = json_string.replace("{\"postsVotes\": \"{", "{\"postsVotes\": [{");
-            let mut tmp2 = tmp.replace("\\","");
-            tmp2.replace_range(tmp2.len()-3..tmp2.len(), "}]}");
-            serde_json::from_str(&tmp2).unwrap()
-        },
-    };
-    // a small hack to remove any null results, would take much more code to write a custom
-    // vec deserializer / serializer and it's only like N complexity
-    user_votes.posts_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
-    user_votes
-}
 
 /// Modifies an existing post
 pub async fn patch(post_id: u64, post: PostPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
@@ -204,7 +172,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
         subforum_id,
         downvotes: 0,
         upvotes: 0,
-        user_votes: UserVotes { posts_votes: Vec::with_capacity(0) },
+        user_votes: Vec::with_capacity(0),
         links: generate_post_links(id, subforum_id, forum_id.forum_id, &post.user_id),
     };
     Ok(new_post)
@@ -220,7 +188,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
-            JSON_OBJECT("postsVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
                 JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
                     CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
             ) AS "user_votes"
@@ -275,7 +243,7 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes: u64",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes: u64",
-            JSON_OBJECT("postsVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
                 JSON_OBJECT("isUpvote", CASE WHEN is_upvote = 1 then true else false end, "user",
                 CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
             ) AS "user_votes"

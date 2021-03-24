@@ -38,6 +38,7 @@ class PostList extends Component {
                 }
             );
             let result_posts = await res.json();
+            console.log(result_posts)
 
             this.setState({postList: result_posts._embedded.postList, loading: false, listingPosts: true});
         } catch (e) {
