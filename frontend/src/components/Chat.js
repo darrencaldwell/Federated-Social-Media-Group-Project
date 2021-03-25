@@ -64,13 +64,23 @@ export class Chat extends Component {
     };
 
     render() {
-        return (
-            <div>
-                {this.state.messages.map(item => (
-                    <div class="myclass"> {item} </div>
-                ))}
-            </div>
-        );
+        if (this.state.ws == null) {
+            return "Loading";
+        } else {
+            return (
+                <div>
+                    <div>
+                        {this.state.messages.map(item => (
+                            <div class="myclass"> {item} </div>
+                        ))}
+                    </div>
+                    <div>
+                        <input type="text" id="message" onChange={e => this.message = e.target.value}/>
+                        <input type="button" onClick={() => this.state.ws.send(this.message)} value="send message"/>
+                    </div>
+                </div>
+            );
+        }
     }
 }
 
