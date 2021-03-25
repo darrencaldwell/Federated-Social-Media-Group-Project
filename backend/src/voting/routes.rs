@@ -4,6 +4,7 @@ use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
 use crate::implementation_id_extractor::ImplementationId;
 use super::super::request_errors::RequestError;
+use log::info;
 
 // update a users vote to post or comment
 #[put("/api/posts/{post_id}/vote")]
@@ -16,9 +17,12 @@ async fn put_post_vote(
     ) -> impl Responder {
     match model::put_post_vote(post_id, user_id, implementation_id, vote.into_inner(), pool.get_ref()).await {
         Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => match e {
-            RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
-            RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, put_post_vote: {}", implementation_id, e.to_string());
+            match e {
+                RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+                RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+            }
         }
     }
 }
@@ -32,9 +36,12 @@ async fn put_comment_vote(
     ) -> impl Responder {
     match model::put_comment_vote(comment_id, user_id, implementation_id, vote.into_inner(), pool.get_ref()).await {
         Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => match e {
-            RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
-            RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, put_comment_vote: {}", implementation_id, e.to_string());
+            match e {
+                RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+                RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+            }
         }
     }
 }

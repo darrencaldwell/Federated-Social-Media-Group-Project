@@ -119,12 +119,12 @@ render() {
     const downImage = this.getDownvoteImg();
     
     return (
-      <div class="voting-container">
-        {<button class="vote_t" onClick={this.upvote}>
+      <div className="voting-container">
+        {<button className="vote_t" onClick={this.upvote}>
           <img src={upImage} alt="up arrow" width="20" height="30"></img>
         </button>}
-        <div class="middle">{this.state.count}</div>
-        {<button class="vote_b" onClick={this.downvote}>
+        <div className="middle">{this.state.count}</div>
+        {<button className="vote_b" onClick={this.downvote}>
           <img src={downImage} alt="down arrow" width="20" height="30"></img>
         </button>}
       </div>

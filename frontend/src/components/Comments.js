@@ -2,18 +2,79 @@ import React, { Component } from 'react'
 import {Card} from "react-bootstrap";
 import {Container} from 'react-bootstrap';
 import '../styling/container-pages.css';
-import Avatar from 'react-avatar';
+import Avatar, {Cache} from 'react-avatar';
 import Voting from './Voting'
+
+// for react avatar
+const cache = new Cache({
+
+    // Keep cached source failures for up to 7 days
+    sourceTTL: 7 * 24 * 3600 * 1000,
+
+    // Keep a maximum of 0 entries in the source cache (we don't care about remembering broken links!)
+    sourceSize: 0
+});
 
 // props: comment (json), posturl, impID, level
 class Comment extends Component {
 
+    constructor(props) {
+        super(props);
+        let date_created = new Date(this.props.comment.createdTime * 1000)
+        let date_modified = new Date(this.props.comment.modifiedTime * 1000)
+        let diff = new Date (Math.abs(date_modified - date_created))
+        let modified_string
+        if (diff < 60000) { // 60s before editing is noticed
+            modified_string = "Never"
+        } else {
+            modified_string = diff.getHours() + 'h ' + diff.getMinutes() + 'm ago'
+        }
+        this.state = {
+            loading: true, // Set to true if loading
+            time:  date_created.getHours() + ':' + date_created.getMinutes() + ', ' + date_created.toDateString(),
+            mod_time: modified_string,
+        }
+    }
+
+    // Runs when the component is loaded, fetching the details of the user who created the comment
+    componentDidMount = async () => {
+        try {
+            // the url to make the request to is given by the parent
+            let url = "/api/users/" + this.props.comment.userId
+            let res = await fetch(url
+                , {
+                    method: 'get', // we're making a GET request
+
+                    withCredentials: true, // we're using authorisation with a token in local storage
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token'),
+                        'Accept': 'application/json',
+                        'redirect-url': this.props.comment._links.user.href
+                    }
+                }
+            );
+
+            let result = await res.json(); // we know the result will be json
+            this.setState({profilePicture: result.profileImageURL, user: result, loading: false})
+
+        } catch (e) {
+            console.log("GET_USER " + e);
+            this.setState({loading: false, profilePicture: ""})
+        }
+    }
+
     render() {
-        return (
+        if (this.state.loading) {
+            return (
+                null
+            )
+        }
+            return (
                 <Card border="dark">
                         <Card.Body>
-                            <div class="post-comment-voting-container">
-                                <Voting class="voting-post"
+                            <div className="post-comment-voting-container">
+                                <Voting className="voting-post"
                                     upvotes={this.props.comment.upvotes} 
                                     downvotes={this.props.comment.downvotes} 
                                     _userVotes={this.props.comment._userVotes}
@@ -21,11 +82,15 @@ class Comment extends Component {
                                     postID={this.props.comment.id}
                                     impID={this.props.impID}
                                 ></Voting>
-                                <div class="voting-adj">
-                                    <Card.Text>
-                                        <Avatar size="50" round={true} src={"/api/users/" + this.props.comment.userId + "/profilepicture"} name={this.props.comment.username}/> 
-                                            {"  "} {this.props.comment.username}
-                                    </Card.Text>
+                                <div className="voting-adj">
+                                        <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture} name={this.props.comment.username}/> 
+                                            {"  "} {this.props.comment.username} 
+                                    <Card.Subtitle className="text-muted mt-1">
+                                        {this.state.time}   
+                                    </Card.Subtitle>
+                                    <Card.Subtitle className="text-muted mt-1">
+                                         last modified: {this.state.mod_time}
+                                    </Card.Subtitle>
                                 </div>
                             </div>
                             <Card.Text className="mt-3">{this.props.comment.commentContent}</Card.Text>
@@ -99,7 +164,7 @@ export default class Comments extends Component {
                     {/*map is used to apply this html for each comment in the list */}
                     {this.state.commentList.map((comment) => (
                         // the Comment element above is used for this, which takes the comment json
-                        <Comment comment={comment} impID={this.props.impID} level={this.state.level} posturl={this.props.posturl}/>
+                        <Comment key={comment.id} comment={comment} impID={this.props.impID} level={this.state.level} posturl={this.props.posturl}/>
                     ))}
                 </Container>
             )
