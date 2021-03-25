@@ -134,6 +134,7 @@ pub async fn chat_route(
     web::Path(id): web::Path<String>,
     UserId(user_id): UserId,
 ) -> Result<HttpResponse, Error> {
+    println!("new conenctiojn");
     ws::start(
         WsChatSession {
             id: 0,

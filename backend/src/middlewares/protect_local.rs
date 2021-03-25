@@ -59,7 +59,7 @@ where
             // want to authenticate local paths
             if req.path().starts_with("/local") {
                 // check if authenticated with Auth header
-                if !req.headers().contains_key("Authorization") {
+                if !req.headers().contains_key("Authorization") && !req.path().contains("/chat") {
                     return Ok(req.into_response(HttpResponse::Unauthorized().body("Local routes unavailable to remote implementations").into_body()))
                 }
             }
