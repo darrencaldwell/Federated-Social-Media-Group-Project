@@ -10,7 +10,7 @@ class Account extends React.Component {
         super(props);
         this.state = {
             uploadedPicture: false,
-            userInfo: {}
+            userInfo: []
         }
     }
 
@@ -21,12 +21,14 @@ class Account extends React.Component {
                     userInfo: res.data
                 })
             }).catch(err => {
-                alert("something went wrong")
+            alert("something went wrong")
         })
     }
 
 
     render() {
+        const date = new Date(this.state.userInfo.dateJoined * 1000)
+        const forums_url = "/1/forums"
         return (
             <Container>
                 <Card.Title>Your Account</Card.Title>
@@ -43,10 +45,10 @@ class Account extends React.Component {
                         <Nav.Link as={Link} to='/'>About Us</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link as={Link} to='/'>Your Posts</Nav.Link>
+                        <Nav.Link as={Link} to='/userposts'>Your Posts</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link as={Link} to='/'>Your Comments</Nav.Link>
+                        <Nav.Link as={Link} to='/usercomments'>Your Comments</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
                         <Nav.Link as={Link} to='/'>Your Roles</Nav.Link>
@@ -70,12 +72,20 @@ class Account extends React.Component {
                             Email: {this.state.userInfo.email}
                         </Card.Text>
                         <Card.Text>
-                            Joined:
+                            Joined: {date.toLocaleString()}
                         </Card.Text>
                         <Card.Text>
                             Total Subscribed Forums:
                         </Card.Text>
-                        <Link to={'/'}><Button variant='light' as="input" type="button" value="Return home"/>{' '}</Link>
+                        <Nav fill variant="tabs" defaultActiveKey="/">
+                            <Nav.Item>
+                                {/*<Link as={Link} variant-"light" to='/'>Return home</.Link>*/}
+                                <Link to={'/'}><Button variant='light' as="input" type="button" value="Return home"/>{' '}</Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Link to={forums_url}><Button variant='secondary' as="input" type="button" value="Go to Forums"/>{' '}</Link>
+                            </Nav.Item>
+                        </Nav>
                     </Card.Body>
                 </Card>
             </Container>

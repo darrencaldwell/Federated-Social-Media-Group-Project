@@ -2,6 +2,7 @@ use super::model;
 use actix_web::{get, post, put, delete, web, HttpResponse, Responder};
 use sqlx::MySqlPool;
 use super::super::request_errors::RequestError;
+use log::info;
 
 #[put("/local/implementations/{id}")]
 async fn put_implementation(
@@ -12,9 +13,12 @@ async fn put_implementation(
     // TODO: validate permission to modify implementation
     match model::put(id, implementation.into_inner(), pool.get_ref()).await {
         Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => match e {
-            RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
-            RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+        Err(e) => {
+           info!("ROUTE ERROR: put_implementation: {}", e.to_string());
+           match e {
+               RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+               RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+           }
         }
     }
 }
@@ -26,9 +30,12 @@ async fn delete_implementation(
     // TODO: validate permission to delete implementation
     match model::delete(id, pool.get_ref()).await {
         Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => match e {
-            RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
-            RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+        Err(e) => {
+           info!("ROUTE ERROR: delete_implementation: {}", e.to_string());
+           match e {
+               RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+               RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+           }
         }
     }
 }
@@ -40,7 +47,10 @@ async fn post_implementation(
     let result = model::post(implementation.into_inner(), pool.get_ref()).await;
     match result {
         Ok(implementation) => HttpResponse::Ok().json(implementation),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => {
+           info!("ROUTE ERROR: post_implementation: {}", e.to_string());
+           HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 #[get("/local/implementations")]
@@ -50,7 +60,10 @@ async fn get_implementations(
     let result = model::get_all(pool.get_ref()).await;
     match result {
         Ok(implementations) => HttpResponse::Ok().json(implementations),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => {
+           info!("ROUTE ERROR: get_implementations: {}", e.to_string());
+           HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 
@@ -62,7 +75,10 @@ async fn get_one_implementation(
     let result = model::get_one(id, pool.get_ref()).await;
     match result {
         Ok(implementation) => HttpResponse::Ok().json(implementation),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => {
+           info!("ROUTE ERROR: get_one_implementation: {}", e.to_string());
+           HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 stages:
   - build
+  - build_merge
   - test
   - deploy
 
@@ -18,8 +19,6 @@ node-build:
     - npm run build
 
 rust-build:
-  services:
-    - mariadb
   stage: build
   image: rust:alpine
   cache:
@@ -29,16 +28,20 @@ rust-build:
       - backend/target/
   before_script:
     - apk update
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - chmod 600 .ssh/id_rsa
+    - ssh-add .ssh/id_rsa
+    - mkdir -p .ssh
+    - chmod 700 .ssh
     - apk add openssl-dev
     - apk add build-base
     - apk add pkgconfig
-    - apk add mariadb-client
     - rustup component add clippy
 
   script:
     - cd backend
-    - export DATABASE_URL=mysql://root:pass@mariadb/cs3099user-b5_project
-    - mysql --user=root --password=pass -h mariadb --protocol=tcp cs3099user-b5_project < sql/schema.sql
+    - ssh -o "StrictHostKeyChecking=no" -f cs3099user-b5@cs3099user-b5.host.cs.st-andrews.ac.uk -L 21463:localhost:21463 -N
     - cargo clippy --all-targets --all-features -- -D warnings
 
 deploy_staging:
@@ -59,7 +62,4 @@ deploy_staging:
     - master
 
 variables:
-    MYSQL_DATABASE: "cs3099user-b5_project"
-    MYSQL_ROOT_PASSWORD: "pass"
-    MYSQL_PASSWORD: "123"
     CARGO_HOME: $CI_PROJECT_DIR/actix/cargo

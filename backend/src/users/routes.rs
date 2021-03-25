@@ -3,8 +3,10 @@ use crate::auth;
 use actix_web::{get, post, web, HttpResponse, Responder, Error, http::StatusCode, dev::HttpResponseBuilder};
 use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
+use crate::implementation_id_extractor::ImplementationId;
 use actix_multipart as mp;
 use futures_util::stream::StreamExt;
+use log::info;
 
 #[post("/local/users/{id}/profilepicture")]
 async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>, web::Path(id): web::Path<String>) -> Result<HttpResponse, Error> {
@@ -25,16 +27,16 @@ async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>,
         // add to database
         sqlx::query!(
             r#"
-            UPDATE users 
+            UPDATE users
             SET profile_picture = ?
             WHERE user_id = ?
             "#,
             vec,
             id
         )
-        .execute(pool.as_ref())
-        .await.unwrap();
-        }
+            .execute(pool.as_ref())
+            .await.unwrap();
+    }
     Ok(HttpResponse::Ok().into())
 }
 #[get("/api/users/{id}/profilepicture")]
@@ -47,9 +49,9 @@ async fn get_profile_picture(pool: web::Data<MySqlPool>, web::Path(id): web::Pat
         "#,
         id
     )
-    .fetch_one(pool.as_ref())
-    .await.unwrap() // TODO: MATCH THIS PROPERLY
-    .pp.unwrap();
+        .fetch_one(pool.as_ref())
+        .await.unwrap() // TODO: MATCH THIS PROPERLY
+        .pp.unwrap();
     let res = HttpResponseBuilder::new(StatusCode::OK).content_type("image").body(img);
     Ok(res)
 }
@@ -97,10 +99,14 @@ async fn get_user(
     web::Path(id): web::Path<String>,
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
+    ImplementationId(implementation_id): ImplementationId,
 ) -> impl Responder {
     match model::get_user(id, &pool).await {
         Ok(user) => HttpResponse::Ok().json(user),
-        Err(_) => HttpResponse::InternalServerError().body(""),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, get_user: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 
@@ -108,10 +114,14 @@ async fn get_user(
 async fn get_users(
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
+    ImplementationId(implementation_id): ImplementationId,
 ) -> impl Responder {
     match model::get_users(&pool).await {
         Ok(user) => HttpResponse::Ok().json(user),
-        Err(_) => HttpResponse::InternalServerError().body(""),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, get_users: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 
@@ -127,12 +137,49 @@ async fn get_account(
     }
 }
 
+#[get("/api/users/{id}/posts")]
+async fn get_user_posts(
+    web::Path(id): web::Path<String>,
+    pool: web::Data<MySqlPool>,
+    ImplementationId(implementation_id): ImplementationId,
+    UserId(_user_id): UserId,
+) -> impl Responder {
+    match model::get_user_posts(id, pool.get_ref()).await {
+        Ok(posts) => HttpResponse::Ok().json(posts),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, get_user_posts: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
+    }
+}
+
+
+#[get("/api/users/{id}/comments")]
+async fn get_user_comments(
+    web::Path(id): web::Path<String>,
+    pool: web::Data<MySqlPool>,
+    ImplementationId(implementation_id): ImplementationId,
+    UserId(_user_id): UserId,
+) -> impl Responder {
+    match model::get_user_comments(id, &pool).await {
+        Ok(comments) => HttpResponse::Ok().json(comments),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, get_user_comments: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
+    }
+}
+
+
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
     cfg.service(get_users);
     cfg.service(get_user);
     cfg.service(get_account);
+    cfg.service(get_user_posts);
+    cfg.service(get_user_comments);
     cfg.service(profile_picture);
     cfg.service(get_profile_picture);
 }
+

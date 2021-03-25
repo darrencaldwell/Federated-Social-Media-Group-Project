@@ -17,7 +17,7 @@ export class Post extends Component {
             expanded: expanded,
             loading: true, // Set to true if loading
             post: {}, // the post is stored here once loaded
-            post_author: {}
+            post_author: {},
         }
     }
 
@@ -41,27 +41,19 @@ export class Post extends Component {
                     }
                 }
             );
-
             let result_post = await res.json(); // we know the result will be json
+            let date_created = new Date(result_post.createdTime * 1000)
+            let date_modified = new Date(result_post.modifiedTime * 1000)
+            let diff = new Date (Math.abs(date_modified - date_created))
+            let modified_string
+            if (diff < 60000) { // 60s before editing is noticed
+                modified_string = "Never"
+            } else {
+                modified_string = diff.getHours() + 'h ' + diff.getMinutes() + 'm ago'
+            }
 
-            // the url needs the post id from the props
-            url = '/api/users/' + result_post.userId;
-            res = await fetch(url
-                , {
-                    method: 'get', // we're making a GET request
-
-                    withCredentials: true, // we're using authorisation with a token in local storage
-                    credentials: 'include',
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token'),
-                        'Accept': 'application/json',
-                        'redirect': this.props.match.params.impID
-                    }
-                }
-            );
-
-            let result_auth = await res.json(); // we know the result will be json
-            this.setState({post: result_post, post_author: result_auth, loading: false }); // we store the json for the post in the state
+            let time = date_created.getHours() + ':' + date_created.getMinutes() + ', ' + date_created.toDateString()
+            this.setState({post: result_post, loading: false, time: time, mod_time: modified_string}); // we store the json for the post in the state
 
         } catch (e) {
             console.log(e)
@@ -91,8 +83,8 @@ export class Post extends Component {
                 <div className="mt-3">
                     <Card border="dark">
                         <Card.Body>
-                        <div class="post-preview-container">
-                            <Voting class="voting-post"
+                        <div className="post-comment-voting-container">
+                            <Voting className="voting"
                                 upvotes={this.state.post.upvotes} 
                                 downvotes={this.state.post.downvotes} 
                                 _userVotes={this.state.post._userVotes}
@@ -100,15 +92,20 @@ export class Post extends Component {
                                 postID={this.props.match.params.postID}
                                 impID={this.props.match.params.impID}
                             ></Voting>
-                            <div class="post">
+                            <div className="voting-adj">
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
                             <Card.Subtitle className="text-muted">
-                                Post made by: {this.state.post_author.username} on TIME
+                                Post made by: {this.state.post.username} at {this.state.time}
                             </Card.Subtitle>
-                            <Card.Text>{this.state.post.postContents}</Card.Text>
-                            <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
+                            <Card.Subtitle className="text-muted mt-1">
+                            last modified: {this.state.mod_time}
+                            </Card.Subtitle>
                             </div>
                             </div>
+                            <Card.Body>
+                               <Card.Text>{this.state.post.postContents}</Card.Text>
+                               <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
+                            </Card.Body>
                         </Card.Body>
                     </Card>
                 </div>
