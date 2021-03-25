@@ -1,7 +1,7 @@
 use std::{sync::{Arc, atomic::{AtomicUsize, Ordering}}, time::{Duration, Instant}};
 
 use actix::prelude::*;
-use actix_web::{Error, HttpRequest, HttpResponse, Responder, web};
+use actix_web::{Error, HttpRequest, HttpResponse, Responder, web, get};
 use actix_web_actors::ws;
 
 use crate::{chat::server, id_extractor::UserId};
@@ -41,7 +41,7 @@ impl Actor for WsChatSession {
 
         let addr = ctx.address();
         self.addr
-            .send(server::Connect { addr: addr.recipient() })
+            .send(server::Connect { addr: addr.recipient(), room: self.room.clone() })
             .into_actor(self)
             .then(|res, act, ctx| {
                 match res {
@@ -126,21 +126,27 @@ async fn get_count(count: web::Data<Arc<AtomicUsize>>) -> impl Responder {
     format!("Visitors: {}", current_count)
 }
 
+#[get("/local/forums/{id}/chat")]
 pub async fn chat_route(
     req: HttpRequest,
     stream: web::Payload,
     srv: web::Data<Addr<server::ChatServer>>,
+    web::Path(id): web::Path<String>,
     UserId(user_id): UserId,
 ) -> Result<HttpResponse, Error> {
     ws::start(
         WsChatSession {
             id: 0,
             hb: Instant::now(),
-            room: "Main".to_owned(),
+            room: id,
             name: Some(user_id),
             addr: srv.get_ref().clone(),
         },
         &req,
         stream,
     )
+}
+
+pub fn init(cfg: &mut web::ServiceConfig) {
+    cfg.service(chat_route);
 }

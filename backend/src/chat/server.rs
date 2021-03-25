@@ -12,6 +12,7 @@ pub struct Message(pub String);
 #[rtype(usize)]
 pub struct Connect {
     pub addr: Recipient<Message>,
+    pub room: String,
 }
 
 #[derive(Message)]
@@ -78,18 +79,18 @@ impl Handler<Connect> for ChatServer {
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) -> Self::Result {
         println!("User joined");
 
-        self.send_message("Main", "user joined", 0);
+        self.send_message(&msg.room, "user joined", 0);
 
         let id = self.rng.gen::<usize>();
         self.sessions.insert(id, msg.addr);
 
         self.rooms
-            .entry("Main".to_owned())
+            .entry(msg.room.clone())
             .or_insert_with(HashSet::new)
             .insert(id);
 
         let count = self.visitor_count.fetch_add(1, Ordering::SeqCst);
-        self.send_message("Main", &format!("Total visitors {}", count), 0);
+        self.send_message(&msg.room, &format!("Total visitors {}", count), 0);
 
         id
     }

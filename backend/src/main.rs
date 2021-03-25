@@ -87,7 +87,7 @@ async fn main() -> Result<()> {
             .configure(forums::init)
             .configure(implementations::init)
             .configure(voting::init)
-            .service(web::resource("/local/ws/").to(chat::chat_route))
+            .configure(chat::init)
     })
     .bind("127.0.0.1:21450")?
     .workers(4)
