@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import CreateForum from "./components/CreateForum";
 import CreatePost from "./components/CreatePost";
 import CreateSubforum from "./components/CreateSubforum";
+import Chat from "./components/Chat";
 import ForumList from "./components/ForumList";
 import Post from "./components/Post";
 import PostList from "./components/PostList";
@@ -73,6 +74,7 @@ class App extends React.Component {
                             <Route exact path="/:impID/new" component={CreateForum}/> {/*page to create a new forum*/}
                             <Route exact path="/:impID/:forumID"/> {/*could have forum info here*/}
 
+                            <Route exact path="/:impID/:forumID/chat" component={Chat}/> {/*could have forum info here*/}
                             <Route exact path="/:impID/:forumID/new" component={CreateSubforum}/> {/*page to create a new subforum in the forum*/}
                             <Route exact path="/:impID/:forumID/:subforumID" component={PostList}/> {/*page for a specific subforum*/}
 
