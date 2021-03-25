@@ -29,7 +29,6 @@ class Account extends React.Component {
     render() {
         const date = new Date(this.state.userInfo.dateJoined * 1000)
         const forums_url = "/1/forums"
-        console.log(this.state.userInfo)
         return (
             <Container>
                 <Card.Title>Your Account</Card.Title>
