@@ -6,6 +6,14 @@ import BackButton from './BackButton';
 import {Card, Container} from "react-bootstrap";
 import styles from '../styling/chat.css';
 
+class Message {
+    constructor(message, sender, timestamp) {
+        this.message = message;
+        this.sender = sender;
+        this.timestamp = timestamp;
+    }
+}
+
 // props: match.params.impID, match.params.forumID
 export class Chat extends Component {
 
@@ -21,6 +29,12 @@ export class Chat extends Component {
     // Runs when the component is loaded, fetching the post into state
     componentDidMount = async () => {
         this.connect();
+    }
+
+    componentWillUnmount = async () => {
+        if (this.state.ws != null) {
+            this.state.ws.close();
+        }
     }
 
     connect = () => {
@@ -52,7 +66,7 @@ export class Chat extends Component {
 
         ws.onmessage = event => {
             console.log("Message: ", event);
-            that.state.messages.push(event.data);
+            that.state.messages.push(new Message(event.data, "other", event.timeStamp));
             console.log(this.state.messages);
             this.setState(that)
         };
@@ -63,6 +77,23 @@ export class Chat extends Component {
         if (!ws || ws.readystate === WebSocket.CLOSED) this.connect();
     };
 
+    sendMessage = () => {
+        if (this.message != null && this.message.length !== 0) {
+            this.state.ws.send(this.message);
+            this.state.messages.push(new Message(this.message, "self", new Date().toLocaleTimeString()))
+            this.message = "";
+            this.setState(this);
+        }
+    };
+
+    renderMessage = (message) => {
+        if (message.sender == "self") {
+            return <div class="sentMessage"> {message.message} </div>
+        } else {
+            return <div class="recievedMessage"> {message.message} </div>
+        }
+    };
+
     render() {
         if (this.state.ws == null) {
             return "Loading";
@@ -70,13 +101,11 @@ export class Chat extends Component {
             return (
                 <div>
                     <div>
-                        {this.state.messages.map(item => (
-                            <div class="myclass"> {item} </div>
-                        ))}
+                        {this.state.messages.map(this.renderMessage)}
                     </div>
-                    <div>
-                        <input type="text" id="message" onChange={e => this.message = e.target.value}/>
-                        <input type="button" onClick={() => this.state.ws.send(this.message)} value="send message"/>
+                    <div class="input">
+                        <input class="textbox" type="text" id="message" onChange={e => this.message = e.target.value}/>
+                        <input class="button" type="button" onClick={this.sendMessage} value="send"/>
                     </div>
                 </div>
             );

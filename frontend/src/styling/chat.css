@@ -1,7 +1,36 @@
-.myclass {
+.recievedMessage {
     background-color: #bfdffc;
     border: 1px solid #a5d3fb;
     margin: 10px 10px;
     width: 100%;
     padding: 5px;
+}
+
+.sentMessage {
+    background-color: #FFFFF;
+    border: 1px solid #a5d3fb;
+    margin: 10px 10px;
+    width: 100%;
+    text-align: right;
+    padding: 5px;
+}
+
+.input {
+    background-color: #bfdffc;
+    margin: 10px 10px;
+}
+
+.textbox {
+    background-color: #C4D7F3;
+    height: 100%;
+    width: fill;
+    padding: 0px;
+    border: none;
+}
+
+.button {
+    background-color: #C4C7F3;
+    display: inline-block;
+    height: 100%;
+    border: none;
 }
