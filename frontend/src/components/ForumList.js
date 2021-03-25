@@ -55,12 +55,12 @@ export default class ForumList extends Component {
                 {/*Use the map function to apply the html to all forums in the list */}
                 {this.state.forumList.map((forum) => (
                     <Card key={forum.id} className="forum" >  {/*each forum is displayed as a card with className forum */}
-                        <Card.Body>
+                    <Card.Link href={'/' + this.props.match.params.impID + '/' + forum.id}>
+                        <Card.Body className="forum-body">
                             {/*The card consists of the name of the forum, which links to the forum itself */}
-                            <Card.Link href={'/' + this.props.match.params.impID + '/' + forum.id}>
                                 {forum.forumName}
-                            </Card.Link> 
                         </Card.Body>                    
+                    </Card.Link> 
                     </Card>
                     ))}
                 </Container>
