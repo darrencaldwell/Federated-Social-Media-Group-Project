@@ -18,12 +18,17 @@
 .input {
     background-color: #bfdffc;
     margin: 10px 10px;
+    display: inline;
 }
 
 .textbox {
     background-color: #C4D7F3;
-    height: 100%;
-    width: fill;
+    padding: 0px;
+    border: none;
+}
+
+.textbox:focus {
+    background-color: #C4D7F3;
     padding: 0px;
     border: none;
 }
@@ -31,6 +36,5 @@
 .button {
     background-color: #C4C7F3;
     display: inline-block;
-    height: 100%;
     border: none;
 }

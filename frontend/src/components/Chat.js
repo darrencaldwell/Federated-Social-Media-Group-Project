@@ -23,6 +23,7 @@ export class Chat extends Component {
         this.state = {
             ws: null,
             messages: [],
+            message: "",
         };
     }
 
@@ -78,16 +79,23 @@ export class Chat extends Component {
     };
 
     sendMessage = () => {
-        if (this.message != null && this.message.length !== 0) {
-            this.state.ws.send(this.message);
-            this.state.messages.push(new Message(this.message, "self", new Date().toLocaleTimeString()))
-            this.message = "";
-            this.setState(this);
+        if (this.state.message != null && this.state.message.length !== 0) {
+            this.state.ws.send(this.state.message);
+            this.state.messages.push(new Message(this.state.message, "self", new Date().toLocaleTimeString()))
+            let that = this;
+            that.state.message = "";
+            this.setState(that);
         }
     };
 
+    onChange = (e) => {
+        let that = this;
+        that.state.message = e.target.value;
+        this.setState(that);
+    };
+
     renderMessage = (message) => {
-        if (message.sender == "self") {
+        if (message.sender === "self") {
             return <div class="sentMessage"> {message.message} </div>
         } else {
             return <div class="recievedMessage"> {message.message} </div>
@@ -104,7 +112,7 @@ export class Chat extends Component {
                         {this.state.messages.map(this.renderMessage)}
                     </div>
                     <div class="input">
-                        <input class="textbox" type="text" id="message" onChange={e => this.message = e.target.value}/>
+                        <input class="textbox" type="text" id="message" onChange={this.onChange} value={this.state.message}/>
                         <input class="button" type="button" onClick={this.sendMessage} value="send"/>
                     </div>
                 </div>
