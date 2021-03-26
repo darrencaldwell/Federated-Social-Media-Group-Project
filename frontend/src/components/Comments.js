@@ -4,6 +4,7 @@ import {Container} from 'react-bootstrap';
 import '../styling/container-pages.css';
 import Avatar, {Cache} from 'react-avatar';
 import Voting from './Voting'
+import TimeSince from './TimeSince';
 
 // for react avatar
 const cache = new Cache({
@@ -20,19 +21,8 @@ class Comment extends Component {
 
     constructor(props) {
         super(props);
-        let date_created = new Date(this.props.comment.createdTime * 1000)
-        let date_modified = new Date(this.props.comment.modifiedTime * 1000)
-        let diff = new Date (Math.abs(date_modified - date_created))
-        let modified_string
-        if (diff < 60000) { // 60s before editing is noticed
-            modified_string = "Never"
-        } else {
-            modified_string = diff.getHours() + 'h ' + diff.getMinutes() + 'm ago'
-        }
         this.state = {
             loading: true, // Set to true if loading
-            time:  date_created.getHours() + ':' + date_created.getMinutes() + ', ' + date_created.toDateString(),
-            mod_time: modified_string,
         }
     }
 
@@ -86,10 +76,10 @@ class Comment extends Component {
                                         <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture} name={this.props.comment.username}/> 
                                             {"  "} {this.props.comment.username} 
                                     <Card.Subtitle className="text-muted mt-1">
-                                        {this.state.time}   
+                                        <TimeSince createdTime={this.props.comment.createdTime}/>
                                     </Card.Subtitle>
                                     <Card.Subtitle className="text-muted mt-1">
-                                         last modified: {this.state.mod_time}
+                                         <TimeSince createdTime={this.props.comment.createdTime} modifiedTime={this.props.comment.modifiedTime}/>
                                     </Card.Subtitle>
                                 </div>
                             </div>

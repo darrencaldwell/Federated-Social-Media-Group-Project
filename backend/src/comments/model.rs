@@ -239,7 +239,7 @@ pub async fn insert_child_comment(parent_id: u64,
         LEFT JOIN implementations i ON
             comments.implementation_id = i.implementation_id
         WHERE comment_id = ?"#,
-        comment_id, user_id)
+        user_id, comment_id)
         .fetch_one(pool)
         .await?;
 

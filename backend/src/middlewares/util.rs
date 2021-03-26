@@ -155,7 +155,7 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     #[derive(Deserialize)]
     struct Key {
         key: String,
-    };
+    }
 
     // TODO: potentially cache key in db per domain
     // TODO: extract domain from keyId
