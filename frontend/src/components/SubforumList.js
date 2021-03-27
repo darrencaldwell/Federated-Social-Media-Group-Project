@@ -75,13 +75,13 @@ export default class SubforumList extends Component {
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}
                     {this.state.subforumList.map((subforum) => (
-                        <Card key={subforum.id} className="subforum" >  {/*each forum is displayed as a card with className forum */}
-                            <Card.Body>
+                        <Card key={subforum.id} className="forum" >  {/*each forum is displayed as a card with className forum */}
+                            <Card.Link href={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + subforum.id}>
+                                <Card.Body className="forum-body">
                                 {/*The card consists of the name of the forum, which links to the forum itself */}
-                                <Card.Link href={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + subforum.id}>
                                     {subforum.subforumName}
-                                </Card.Link>
-                            </Card.Body>
+                                </Card.Body>
+                            </Card.Link>
                         </Card>
                     ))}
                 </Container>
