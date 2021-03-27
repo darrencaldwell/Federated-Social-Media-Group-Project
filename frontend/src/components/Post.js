@@ -90,7 +90,9 @@ export class Post extends Component {
                                         : ('/api/posts/' + this.props.match.params.postID + '/comments');
         console.log('in post',this.state.post_author)
         console.log('user link', this.state.post_author._links.self.href)
-        const parsed_user_link =  this.state.post_author._links.self.href.toString().split("//")[1]
+        // const parsed_user_link =  this.state.post_author._links.self.href.toString().split("//")[1]
+        const parsed_user_link = btoa(this.state.post_author._links.self.href)
+
         console.log('parsed link', parsed_user_link)
         return (
             <Container className="post-container">
@@ -114,7 +116,7 @@ export class Post extends Component {
                                 {/*<Account user_id={this.state.post_author.userId}/>*/}
                                 {console.log('info on post author',this.state.post_author)}
                                 {console.log('before linking to /user/'+this.state.post_author.userId)}
-                                {/*{console.log('user link', this.state.post_author._links.self.href)}*/}
+                                {console.log('user link', this.state.post_author._links.self.href)}
 
                                 {/*<Route name="" path="/users/:id" handler={User} />*/}
                                 {/*<UserAccount user={this.state.post_author}/>*/}

@@ -20,28 +20,22 @@ class UserAccount extends React.Component {
 
 
     componentDidMount = async () => {
-        console.log('did mount props', this.props)
-        console.log('did mount url???!', this.props.match.params)
-        // console.log('did mount props userid', this.props.match.params.userId)
-        // let user_url = 'local/users/' + this.props.match.params.userId
-        // let user_url = 'local/users/'
-
-        // try {
-        //     let url = "/api/users/" + this.props.match.params.userId
-        //     let res = await fetch(url
-        //         , {
-        //             method: 'get',
-        //             withCredentials: true,
-        //             credentials: 'include',
-        //             headers: {
-        //                 'Authorization': "Bearer" + localStorage.getItem('token'),
-        //                 'Accept': 'application/json',
-        //                 'redirect-url': this.props.match
-        //             }
-        //         })
-        // } catch (e) {
-        //     console.log(e)
-        // }
+        try {
+            let url = "/api/users/"
+            let res = await fetch(url
+                , {
+                    method: 'get',
+                    withCredentials: true,
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': "Bearer" + localStorage.getItem('token'),
+                        'Accept': 'application/json',
+                        'redirect-url': atob(this.props.match.params.userURL)
+                    }
+                })
+        } catch (e) {
+            console.log(e)
+        }
 
     }
 

@@ -53,11 +53,13 @@ class App extends React.Component {
                     {/*<BackButton/>*/}
                     <div className="columns">
                         <Switch>
+                            <Route exact path="/user/:userURL"/>
                             <Route path="/:impID/:something" component={ForumList}/>
                         </Switch>
                         <Switch>
                             <Route exact path="/:impID/forums"/>
                             <Route exact path="/:impID/new"/>
+                            <Route exact path="/user/:userURL"/>
                             <Route path="/:impID/:forumID" component={SubforumList}/>  {/*SubForumList gets forum ID from this.props.match.params.forumID */}
                         </Switch>
                         <Switch>
@@ -73,9 +75,6 @@ class App extends React.Component {
                             {/*<Route exact path="/userposts" component={AccountPosts}/>*/}
                             {/*these should all contain some sort of identifier for the instance, but that is not implemented yet*/}
                             <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
-                            {/*<Route exact path="/account" component={() => <Account user={this.user_id}}/>}/>*/}
-                            {/*<Route exact path="/user/:id" component={() => <UserAccount user={this.state.post_author}/>}/>*/}
-                            {/*<Route exact path="/user/:userURL" component={UserAccount}/>*/}
                             <Route exact path="/user/:userURL" component={UserAccount}/>
                             {/*<Route exact path="/user/:impID/:userId" component={UserAccount}/>*/}
 
