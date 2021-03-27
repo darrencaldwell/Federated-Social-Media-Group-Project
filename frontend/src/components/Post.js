@@ -100,6 +100,7 @@ export class Post extends Component {
                                     <Card.Text className="post-body">{this.state.post.postContents}</Card.Text>
                                 </Card.Body>
                                 <a className="button create-comment-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</a>
+                                <a className="button create-comment-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>Edit</a>
                             </div>
                         </Card.Body>
                     </Card>
