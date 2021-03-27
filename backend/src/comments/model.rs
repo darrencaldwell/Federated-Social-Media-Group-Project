@@ -176,6 +176,7 @@ pub async fn insert_comment(post_id: u64,
         downvotes: 0,
         upvotes: 0,
         user_votes: Vec::with_capacity(0),
+        // this is a root comment so it is it's own parent
         links: gen_links(comment_id, comment_id, rec.user_endpoint.unwrap(), post_id, rec.subforum_id, rec.forum_id),
         user_id,
     })
@@ -253,7 +254,7 @@ pub async fn insert_child_comment(parent_id: u64,
         downvotes: 0,
         upvotes: 0,
         user_votes: Vec::with_capacity(0),
-        links: gen_links(comment_id, comment_id, rec.user_endpoint.unwrap(), post_id, rec.subforum_id, rec.forum_id),
+        links: gen_links(comment_id, parent_id, rec.user_endpoint.unwrap(), post_id, rec.subforum_id, rec.forum_id),
         user_id,
     })
 
@@ -305,7 +306,7 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
 /// Get all top level comments within a post
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, comments.user_id, comments.comment_id, comments.created_time, comments.modified_time,
+        r#"SELECT comment, comments.user_id, comments.comment_id, comments.created_time, comments.modified_time, comments.parent_id,
         posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
         sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
         sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
@@ -343,7 +344,8 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
                 downvotes: rec.downvotes.to_u64().unwrap(),
                 upvotes: rec.upvotes.to_u64().unwrap(),
                 user_votes,
-                links: gen_links(rec.comment_id, rec.comment_id, rec.user_endpoint.unwrap(), post_id,
+                // use parent id if not null, else use comment_id
+                links: gen_links(rec.comment_id, rec.parent_id.unwrap_or(rec.comment_id), rec.user_endpoint.unwrap(), post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
             }
@@ -363,6 +365,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
 pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
         r#"SELECT comment, comments.user_id, comments.comment_id, comments.post_id, comments.created_time, comments.modified_time,
+        comments.parent_id,
         posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
         sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
         sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
@@ -400,7 +403,8 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
                 downvotes: rec.downvotes.to_u64().unwrap(),
                 upvotes: rec.upvotes.to_u64().unwrap(),
                 user_votes,
-                links: gen_links(rec.comment_id, rec.comment_id, rec.user_endpoint.unwrap(), rec.post_id,
+                // use parent id if not null, else use comment_id
+                links: gen_links(rec.comment_id, rec.parent_id.unwrap_or(rec.comment_id), rec.user_endpoint.unwrap(), rec.post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
             }
