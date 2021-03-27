@@ -1,11 +1,12 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {Nav, Navbar} from 'react-bootstrap'
+import {Nav, Navbar, SplitButton, Dropdown} from 'react-bootstrap'
+import '../styling/navStyling.css'
 
 
 class NavigationBar extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             navExpanded: false
         }
@@ -22,6 +23,10 @@ class NavigationBar extends React.Component {
     container = React.createRef();
     state = {
         open: false,
+    }
+
+    componentWillReceiveProps = (props) => {
+        this.setState({imps: this.getImps(props)});
     }
 
     componentDidMount() {
@@ -43,6 +48,19 @@ class NavigationBar extends React.Component {
     handleLogout = () => { // used to update App state from within navbar
         localStorage.clear();
         this.props.setState(null)
+    }
+
+    getImps = (props) => {
+        if (!props.isLoggedIn || props.currImp == null || props.imps == null) return "";
+        return (
+        <SplitButton title={props.currImp.name}>
+            {props.imps.map(imp => {
+                return (
+                    <Dropdown.Item href={"/"+imp.id} onClick={() => this.props.changeImp({name: imp.name, id: imp.id})}>{imp.name}</Dropdown.Item>
+                );
+            })}
+        </SplitButton>
+        );
     }
 
     render() {
@@ -74,6 +92,7 @@ class NavigationBar extends React.Component {
                 <div>
                     <Navbar collapseOnSelect expand="lg" bg="light" variant="light" fixed="top" onToggle={this.setNavExpanded} expanded={this.state.navExpanded}>
                         <Navbar.Brand as={Link} to='/'>CS3099 B5</Navbar.Brand>
+                        {this.state.imps}
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         <Navbar.Collapse id="basic-navbar-nav">
                             <Nav className="ml-auto" onClick={this.setNavClose}>

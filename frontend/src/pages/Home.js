@@ -87,7 +87,7 @@ class Home extends Component {
                         </Card.Body>
                     <Dropdown>
                         {this.state.impList.map((impl) => (
-                            <Dropdown.Item key={impl.id} href={"/" + impl.id}>{impl.name}</Dropdown.Item>
+                            <Dropdown.Item key={impl.id} href={"/" + impl.id} onClick={() => this.props.changeImp({id: impl.id, name: impl.name})}>{impl.name}</Dropdown.Item>
                         ))}
                     </Dropdown>
                     </Card>

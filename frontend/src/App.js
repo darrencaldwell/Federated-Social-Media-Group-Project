@@ -21,8 +21,33 @@ import './styling/container-pages.css';
 // import BackButton from "./components/BackButton";
 
 class App extends React.Component {
-    componentDidMount() {
+    componentDidMount = async () => {
         document.title = 'St BeeFives'
+        try {
+            // the url needs the post id from the props
+            let url = '/local/implementations';
+            let res = await fetch(url
+                , {
+                    method: 'get', // we're making a GET request
+
+                    withCredentials: true, // we're using authorisation with a token in local storage
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token'),
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            let result = await res.json(); // we know the result will be json
+            this.setState({imp: {name: "local", id: 1}, impList: result._embedded.implementationList }); // we store the json for the post in the state
+
+            console.log(this.state);
+
+        } catch (e) {
+            console.log("error: " + e);
+        }
     }
     constructor(props) {
         super(props);
@@ -38,19 +63,24 @@ class App extends React.Component {
         this.setState({token: localStorage.getItem('token')});
     }
 
+    changeImp = (imp) => {
+        console.log("changing imp");
+        this.setState({imp: imp});
+    }
+
     /**
      *
      * @returns {JSX.Element}
      */
     render() {
         // Whether user is logged in or logged out
-        const {token} = this.state;
+        const {token, impList, imp} = this.state;
         return (
 
             <Router>
                 <div className="App">
                     {/* Pass the state onto Nav bar about state of user login /*/}
-                    <NavigationBar isLoggedIn={token} logout={this.logout}/>
+                    <NavigationBar imps={impList} currImp={imp} changeImp={this.changeImp} isLoggedIn={token} logout={this.logout}/>
                     {/*<BackButton/>*/}
                     <div className="columns">
                         <Switch>
