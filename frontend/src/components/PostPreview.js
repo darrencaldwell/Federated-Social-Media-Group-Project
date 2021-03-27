@@ -2,30 +2,13 @@ import React, {Component} from 'react';
 import {Card} from "react-bootstrap";
 import {Link} from 'react-router-dom';
 import Voting from './Voting';
+import TimeSince from './TimeSince';
 // import '../styling/individualPost.css';
 
 // props: post, impID, forumID, subforumID
 export class PostPreview extends Component {
 
-    constructor(props) {
-        super(props);
-        let date_created = new Date(this.props.post.createdTime * 1000)
-        let date_modified = new Date(this.props.post.modifiedTime * 1000)
-        let diff = new Date (Math.abs(date_modified - date_created))
-        let modified_string
-        if (diff < 60000) { // 60s before editing is noticed
-            modified_string = "Never"
-        } else {
-            modified_string = diff.getHours() + 'h ' + diff.getMinutes() + 'm ago'
-        }
-        this.state = {
-            time:  date_created.getHours() + ':' + date_created.getMinutes() + ', ' + date_created.toDateString(),
-            mod_time: modified_string
-        };
-    }
-
     render() {
-
         return (
             <Card border="dark" className="mt-3" >
                 <Card.Body>
@@ -41,10 +24,10 @@ export class PostPreview extends Component {
                         <div className="voting-adj">
                             <Card.Link as={Link} to={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>{this.props.post.postTitle}</Card.Link>
                             <Card.Subtitle className="text-muted mt-1">
-                                by: {this.props.post.username} at {this.state.time}
+                                Post made by {this.props.post.username} <TimeSince createdTime={this.props.post.createdTime}/>
                             </Card.Subtitle>
                             <Card.Subtitle className="text-muted mt-1">
-                              last modified: {this.state.mod_time}
+                            <TimeSince createdTime={this.props.post.createdTime} modifiedTime={this.props.post.modifiedTime}/>
                             </Card.Subtitle>
                         </div>
                     </div>

@@ -7,6 +7,7 @@ import BackButton from './BackButton';
 import {Card, Container, Spinner} from "react-bootstrap";
 import {Link} from 'react-router-dom';
 import Voting from './Voting';
+import TimeSince from './TimeSince';
 
 // props: match.params.impID, match.params.postID, match.params.subforumID, match.params.forumID, match.params.commentID
 export class Post extends Component {
@@ -43,18 +44,8 @@ export class Post extends Component {
                 }
             );
             let result_post = await res.json(); // we know the result will be json
-            let date_created = new Date(result_post.createdTime * 1000)
-            let date_modified = new Date(result_post.modifiedTime * 1000)
-            let diff = new Date (Math.abs(date_modified - date_created))
-            let modified_string
-            if (diff < 60000) { // 60s before editing is noticed
-                modified_string = "Never"
-            } else {
-                modified_string = diff.getHours() + 'h ' + diff.getMinutes() + 'm ago'
-            }
 
-            let time = date_created.getHours() + ':' + date_created.getMinutes() + ', ' + date_created.toDateString()
-            this.setState({post: result_post, loading: false, time: time, mod_time: modified_string}); // we store the json for the post in the state
+            this.setState({post: result_post, loading: false}); // we store the json for the post in the state
 
         } catch (e) {
             console.log(e)
@@ -96,10 +87,10 @@ export class Post extends Component {
                             <div className="voting-adj">
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
                             <Card.Subtitle className="text-muted">
-                                Post made by: {this.state.post.username} at {this.state.time}
+                                Post made by {this.state.post.username}, <TimeSince createdTime={this.state.post.createdTime}/>
                             </Card.Subtitle>
                             <Card.Subtitle className="text-muted mt-1">
-                            last modified: {this.state.mod_time}
+                            <TimeSince createdTime={this.state.post.createdTime} modifiedTime={this.state.post.modifiedTime}/>
                             </Card.Subtitle>
                             </div>
                             </div>
