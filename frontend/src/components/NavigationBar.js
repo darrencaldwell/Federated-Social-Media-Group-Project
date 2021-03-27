@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {Nav, Navbar, SplitButton, Dropdown} from 'react-bootstrap'
+import {Nav, Navbar, SplitButton, Dropdown, Button, ButtonGroup} from 'react-bootstrap'
 import '../styling/navStyling.css'
 
 
@@ -53,13 +53,17 @@ class NavigationBar extends React.Component {
     getImps = (props) => {
         if (!props.isLoggedIn || props.currImp == null || props.imps == null) return "";
         return (
-        <SplitButton title={props.currImp.name}>
+        <Dropdown as={ButtonGroup}>
+          <Button as={Link} to={"/"+props.currImp.id+"/forums"}>{props.currImp.name}</Button>
+          <Dropdown.Toggle split id="dropdown-split-basic" />
+          <Dropdown.Menu>
             {props.imps.map(imp => {
                 return (
-                    <Dropdown.Item href={"/"+imp.id} onClick={() => this.props.changeImp({name: imp.name, id: imp.id})}>{imp.name}</Dropdown.Item>
+                    <Dropdown.Item as={Link} to={"/"+imp.id} onClick={() => this.props.changeImp({name: imp.name, id: imp.id})}>{imp.name}</Dropdown.Item>
                 );
             })}
-        </SplitButton>
+          </Dropdown.Menu>
+        </Dropdown>
         );
     }
 

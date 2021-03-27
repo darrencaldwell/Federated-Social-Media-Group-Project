@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Card} from "react-bootstrap";
+import {Link} from 'react-router-dom';
 import Voting from './Voting';
 // import '../styling/individualPost.css';
 
@@ -38,7 +39,7 @@ export class PostPreview extends Component {
                         ></Voting>
                         {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}
                         <div className="voting-adj">
-                            <Card.Link href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>{this.props.post.postTitle}</Card.Link>
+                            <Card.Link as={Link} to={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>{this.props.post.postTitle}</Card.Link>
                             <Card.Subtitle className="text-muted mt-1">
                                 by: {this.props.post.username} at {this.state.time}
                             </Card.Subtitle>

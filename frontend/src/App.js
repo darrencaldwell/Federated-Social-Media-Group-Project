@@ -22,6 +22,7 @@ import './styling/container-pages.css';
 
 class App extends React.Component {
     componentDidMount = async () => {
+        console.log("reloadiong");
         document.title = 'St BeeFives'
         try {
             // the url needs the post id from the props

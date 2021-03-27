@@ -5,6 +5,7 @@ import Comments from './Comments';
 import BackButton from './BackButton';
 // import '../styling/Post.css';
 import {Card, Container, Spinner} from "react-bootstrap";
+import {Link} from 'react-router-dom';
 import Voting from './Voting';
 
 // props: match.params.impID, match.params.postID, match.params.subforumID, match.params.forumID, match.params.commentID
@@ -104,7 +105,7 @@ export class Post extends Component {
                             </div>
                             <Card.Body>
                                <Card.Text>{this.state.post.postContents}</Card.Text>
-                               <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
+                               <Card.Link as={Link} to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
                             </Card.Body>
                         </Card.Body>
                     </Card>

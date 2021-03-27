@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Card, Container, Button} from "react-bootstrap";
+import {Link} from 'react-router-dom';
 import '../styling/container-pages.css';
 
 // props: match.params.impID, match.params.forumID
@@ -15,8 +16,7 @@ export default class SubforumList extends Component {
         }
     }
 
-    // When the component loads, fetch the list of subforums
-    componentDidMount = async () => {
+    fetchSubforums = async () => {
         try {
             // get the list of subforums
 
@@ -37,9 +37,6 @@ export default class SubforumList extends Component {
             );
 
             let result = await res.json(); // we know the result will be json
-            this.setState({subforumList: result._embedded.subforumList} ); // and we store that json in the state
-
-            
             // get the forum name
 
             let url2 = "/api/forums/" + this.props.match.params.forumID;
@@ -60,10 +57,23 @@ export default class SubforumList extends Component {
 
             let result2 = await res2.json(); // we know the result will be json
             this.setState({forum: result2 }); // and we store that json in the state
+            this.setState({subforumList: result._embedded.subforumList} ); // and we store that json in the state
         } catch (e) {
         }
+
     }
 
+    // When the component loads, fetch the list of subforums
+    componentDidMount = () => {
+        this.fetchSubforums();
+    }
+
+    componentDidUpdate = (oldProps) => {
+        if (this.props.match.params.forumID !== oldProps.match.params.forumID
+            || this.props.match.params.impID !== oldProps.match.params.impID) {
+            this.fetchSubforums();
+        }
+    }
 
     render() {
         //var name = this.state.forumName;
@@ -76,7 +86,7 @@ export default class SubforumList extends Component {
                     {/*Use the map function to apply the html to all forums in the list */}
                     {this.state.subforumList.map((subforum) => (
                         <Card key={subforum.id} className="forum" >  {/*each forum is displayed as a card with className forum */}
-                            <Card.Link href={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + subforum.id}>
+                            <Card.Link as={Link} to={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + subforum.id}>
                                 <Card.Body className="forum-body">
                                 {/*The card consists of the name of the forum, which links to the forum itself */}
                                     {subforum.subforumName}
@@ -85,9 +95,9 @@ export default class SubforumList extends Component {
                         </Card>
                     ))}
                 </Container>
-                <a className="button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/new"}>
+                <Button as={Link} className="button" to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/new"}>
                     New Subforum
-                </a>
+                </Button>
             </div>)
     }
 }
