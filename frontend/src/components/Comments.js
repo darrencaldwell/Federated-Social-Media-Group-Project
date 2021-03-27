@@ -23,6 +23,7 @@ class Comment extends Component {
         super(props);
         this.state = {
             loading: true, // Set to true if loading
+            parentID: this.props.comment._links.parentComment.href.substring(this.props.comment._links.parentComment.href.lastIndexOf('/') + 1)
         }
     }
 
@@ -88,13 +89,15 @@ class Comment extends Component {
                                 <a className="button reply-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
                             </div>
                         </Card.Body>
-                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
+                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} 
+                              impID={this.props.impID} posturl={this.props.posturl} 
+                              level={this.props.level + 1} commentID={this.props.comment.id} parentID={this.state.parentID}/>
                 </Card>
         )
     }
 }
 
-// props: url, posturl, impID, level, commentID
+// props: url, posturl, impID, level, commentID, parentID
 export default class Comments extends Component {
     constructor(props) {
         super(props);
@@ -134,7 +137,7 @@ export default class Comments extends Component {
         }
     }
 
-    render() {
+    render() {        
         if (this.state.expanded) {  // provide a link to return to the post
             return (
                 <Container>
@@ -145,7 +148,7 @@ export default class Comments extends Component {
         } else if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
             return (
                 <Container>
-                    <a className="button" href={this.props.posturl + "/" + this.props.commentID}>Expand</a>
+                    <a className="button expand-button" href={this.props.posturl + "/" + this.props.parentID}>Expand</a>
                 </Container>
             )
         } else {

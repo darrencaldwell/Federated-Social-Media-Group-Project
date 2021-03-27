@@ -65,7 +65,8 @@ export class Post extends Component {
             )
         }
 
-        const backURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
+        const backURL = this.state.expanded ? "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID
+                                            : "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
         const url = this.state.expanded ? ('/api/comments/' + this.props.match.params.commentID + '/comments')
                                         : ('/api/posts/' + this.props.match.params.postID + '/comments');
 

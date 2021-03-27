@@ -69,8 +69,8 @@ export default class SubforumList extends Component {
         //var name = this.state.forumName;
         return (
             <div className="subforum-container">
-                <Button className="button forum-info forum-info-container" href={'/' + this.props.match.params.forumID}>
-                {this.state.forum.forumName} 
+                <Button className="button forum-info forum-info-container" href={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID}>
+                    {this.state.forum.forumName}
                 </Button>
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}
