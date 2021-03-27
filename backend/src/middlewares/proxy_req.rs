@@ -17,10 +17,10 @@ use super::super::implementations::get_one;
 pub struct ProxyReq;
 
 impl<S: 'static, B> Transform<S> for ProxyReq
-where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-    S::Future: 'static,
-    B: 'static,
+    where
+        S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+        S::Future: 'static,
+        B: 'static,
 {
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
@@ -42,11 +42,11 @@ pub struct ProxyReqMiddleware<S> {
 }
 
 impl<S, B> Service for ProxyReqMiddleware<S>
-where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>
+    where
+        S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>
         + 'static,
-    S::Future: 'static,
-    B: 'static,
+        S::Future: 'static,
+        B: 'static,
 {
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
@@ -62,40 +62,47 @@ where
         let mut srv = self.service.clone();
 
         Box::pin(async move {
-            // check if request has header "redirect"
-            if !req.headers().contains_key("redirect") {
+            // check if request has redirection headers
+            if !req.headers().contains_key("redirect") && !req.headers().contains_key("url-redirect") {
                 // if not we don't care
                 return srv.call(req).await
             }
 
-            // make request!
-            // get URL from querying database
-            let pool = req.app_data::<Data<MySqlPool>>().unwrap().clone();
-            // TODO: handle where id isn't a number
-            let id = req.headers().get("redirect").unwrap().to_str().unwrap().parse::<u64>().unwrap();
-            // TODO: first value in db should be local, so don't go for it, maybe we need a less
-            // magic number approach?
-            if id == 1 {
-                return srv.call(req).await
+            let dest_url_complete: String;
+            if req.headers().contains_key("redirect") {
+                // get URL from querying database
+                let pool = req.app_data::<Data<MySqlPool>>().unwrap().clone();
+                // TODO: handle where id isn't a number
+                let id = req.headers().get("redirect").unwrap().to_str().unwrap().parse::<u64>().unwrap();
+                // TODO: first value in db should be local, so don't go for it, maybe we need a less
+                // magic number approach?
+                if id == 1 {
+                    return srv.call(req).await
+                }
+                // TODO: handle impl not existing
+                let implementation = get_one(id, &pool).await.unwrap();
+                dest_url_complete = format!("{}{}", implementation.url, req.path());
+            }
+            // when we are directly redirecting a url we can just set it.
+            else {
+                let dest_url = req.headers().get("redirect-url").unwrap().to_str().unwrap().to_string();
+                dest_url_complete = format!("{}{}", dest_url, req.path());
+                if dest_url.starts_with("https://cs3099user-b5") {
+                    return srv.call(req).await
+                }
             }
 
-            // TODO: handle impl not existing
-            let implementation = get_one(id, &pool).await.unwrap();
-
             // same path, same headers, sign it, send it off
-
             let client = req.app_data::<Data<Client>>().unwrap();
-            let dest_url = implementation.url;
-            let dest_url_complete = format!("{}{}", dest_url, req.path());
             // make request from initial req, copies method and headers
             let mut client_req = client.request(req.method().clone(), &dest_url_complete); // redirect should have url to redirect to "https://yeet.com"
             // add headers from front-end for content-type if exist
             if req.headers().contains_key("content-type") {
-                client_req.headers_mut().append(HeaderName::from_static("content-type"), 
+                client_req.headers_mut().append(HeaderName::from_static("content-type"),
                                                 req.headers().get("content-type").unwrap().clone());
             }
             if req.headers().contains_key("content-length") {
-                client_req.headers_mut().append(HeaderName::from_static("content-length"), 
+                client_req.headers_mut().append(HeaderName::from_static("content-length"),
                                                 req.headers().get("content-length").unwrap().clone());
             }
 
@@ -133,7 +140,7 @@ where
             let new_res = ServiceResponse::new(
                 http_req,
                 new_response.body(body).into_body(),
-                );
+            );
 
             Ok(new_res)
         })
