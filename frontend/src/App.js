@@ -15,6 +15,8 @@ import CreateComment from "./components/CreateComment";
 import Account from "./pages/Account";
 import AccountComments from "./components/account/AccountComments";
 import AccountPosts from "./components/account/AccountPosts";
+import EditPost from "./components/EditPost";
+import EditComment from "./components/EditComment";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styling/container-pages.css';
 // import BackButton from "./components/BackButton";
@@ -81,8 +83,10 @@ class App extends React.Component {
 
                             <Route exact path="/:impID/:forumID/:subforumID/new" component={CreatePost}/> {/*page to create a new post in a subforum*/}
                             <Route exact path="/:impID/:forumID/:subforumID/:postID" component={Post}/> {/*page for a specific post, contains comments and ability to create a comment*/}
+                            <Route exact path="/:impID/:forumID/:subforumID/:postID/edit" component={EditPost}/> {/*like create post, but edits*/}
                             <Route exact path="/:impID/:forumID/:subforumID/:postID/new" component={CreateComment}/> {/*page to comment on a post */}
                             <Route exact path="/:impID/:forumID/:subforumID/:postID/:commentID" component={Post}/> {/*page for a post with expanded comments */}
+                            <Route exact path="/:impID/:forumID/:subforumID/:postID/:commentID/edit" component={EditComment}/> {/*like create comment, but edits*/}
                             <Route exact path="/:impID/:forumID/:subforumID/:postID/:commentID/new" component={CreateComment}/> {/*page to comment on a comment */}
                         </Switch>
                     </div>

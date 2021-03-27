@@ -63,28 +63,30 @@ class Comment extends Component {
             return (
                 <Card border="dark">
                         <Card.Body>
-                            <div className="post-comment-voting-container">
-                                <Voting className="voting-post"
-                                    upvotes={this.props.comment.upvotes} 
-                                    downvotes={this.props.comment.downvotes} 
-                                    _userVotes={this.props.comment._userVotes}
-                                    type="comments"
-                                    postID={this.props.comment.id}
-                                    impID={this.props.impID}
-                                ></Voting>
-                                <div className="voting-adj">
+                            <div className="comment-columns">
+                                <div className="post-comment-voting-container">
+                                    <Voting className="voting-post"
+                                        upvotes={this.props.comment.upvotes} 
+                                        downvotes={this.props.comment.downvotes} 
+                                        _userVotes={this.props.comment._userVotes}
+                                        type="comments"
+                                        postID={this.props.comment.id}
+                                        impID={this.props.impID}
+                                    ></Voting>
+                                    <div className="voting-adj">
                                         <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture} name={this.props.comment.username}/> 
                                             {"  "} {this.props.comment.username} 
-                                    <Card.Subtitle className="text-muted mt-1">
-                                        <TimeSince createdTime={this.props.comment.createdTime}/>
-                                    </Card.Subtitle>
-                                    <Card.Subtitle className="text-muted mt-1">
-                                         <TimeSince createdTime={this.props.comment.createdTime} modifiedTime={this.props.comment.modifiedTime}/>
-                                    </Card.Subtitle>
+                                        <Card.Subtitle className="text-muted mt-1 time-since">
+                                            <TimeSince createdTime={this.props.comment.createdTime}/>
+                                        </Card.Subtitle>
+                                        <Card.Subtitle className="text-muted mt-1 time-since">
+                                             <TimeSince createdTime={this.props.comment.createdTime} modifiedTime={this.props.comment.modifiedTime}/>
+                                        </Card.Subtitle>
+                                    </div>
                                 </div>
+                                <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
+                                <a className="button reply-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
                             </div>
-                            <Card.Text className="mt-3">{this.props.comment.commentContent}</Card.Text>
-                            <Card.Link href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
                         </Card.Body>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
                 </Card>

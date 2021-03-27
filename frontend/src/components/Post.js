@@ -4,6 +4,7 @@ import Comments from './Comments';
 // import CreatePost from './CreatePost.js';
 import BackButton from './BackButton';
 // import '../styling/Post.css';
+import '../styling/container-pages.css';
 import {Card, Container, Spinner} from "react-bootstrap";
 import Voting from './Voting';
 import TimeSince from './TimeSince';
@@ -74,34 +75,38 @@ export class Post extends Component {
                 <div className="mt-3">
                     <Card border="dark">
                         <Card.Body>
-                        <div className="post-comment-voting-container">
-                            <Voting className="voting"
-                                upvotes={this.state.post.upvotes} 
-                                downvotes={this.state.post.downvotes} 
-                                _userVotes={this.state.post._userVotes}
-                                type="posts"
-                                postID={this.props.match.params.postID}
-                                impID={this.props.match.params.impID}
-                            ></Voting>
-                            <div className="voting-adj">
-                            <Card.Title>{this.state.post.postTitle}</Card.Title>
-                            <Card.Subtitle className="text-muted">
-                                Post made by {this.state.post.username}, <TimeSince createdTime={this.state.post.createdTime}/>
-                            </Card.Subtitle>
-                            <Card.Subtitle className="text-muted mt-1">
-                            <TimeSince createdTime={this.state.post.createdTime} modifiedTime={this.state.post.modifiedTime}/>
-                            </Card.Subtitle>
+                            <div className="post-columns">
+                                <div className="post-comment-voting-container post-voting">
+                                    <Voting className="voting"
+                                        upvotes={this.state.post.upvotes} 
+                                        downvotes={this.state.post.downvotes} 
+                                        _userVotes={this.state.post._userVotes}
+                                        type="posts"
+                                        postID={this.props.match.params.postID}
+                                        impID={this.props.match.params.impID}
+                                    ></Voting>
+                                    <div className="voting-adj">
+                                        <Card.Subtitle className="text-muted mt-1 time-since">
+                                            Post made by {this.state.post.username}, <TimeSince createdTime={this.state.post.createdTime}/>
+                                        </Card.Subtitle>
+                                        <Card.Subtitle className="text-muted mt-1 time-since">
+                                            <TimeSince createdTime={this.state.post.createdTime} modifiedTime={this.state.post.modifiedTime}/>
+                                        </Card.Subtitle>
+                                    </div>
+                                </div>
+                                <Card.Body>
+                                    <Card.Title className="post-title">{this.state.post.postTitle}</Card.Title>
+                                    <Card.Text className="post-body">{this.state.post.postContents}</Card.Text>
+                                </Card.Body>
+                                <a className="button create-comment-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</a>
                             </div>
-                            </div>
-                            <Card.Body>
-                               <Card.Text>{this.state.post.postContents}</Card.Text>
-                               <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
-                            </Card.Body>
                         </Card.Body>
                     </Card>
                 </div>
 
                 {/*<CreateComment url={url}/>*/}
+
+                <div className="separator"/>
 
                 {/*<Dropdown className="mt-3">*/}
                 {/*<Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>*/}

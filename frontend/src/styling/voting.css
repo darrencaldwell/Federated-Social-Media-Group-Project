@@ -25,9 +25,12 @@ div.voting {
   }
 
 .post-comment-voting-container {
-    width: 100%;
+    width: 18%;
+    padding: 2px;
+    padding-right: 8px;
     display: grid;
     grid-template-columns: 1fr 99fr;
+    border-right: 1px solid;
 }
 
 .voting {
