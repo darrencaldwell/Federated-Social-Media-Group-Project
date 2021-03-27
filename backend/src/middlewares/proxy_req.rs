@@ -62,8 +62,9 @@ impl<S, B> Service for ProxyReqMiddleware<S>
         let mut srv = self.service.clone();
 
         Box::pin(async move {
+            info!("{:?}", req.headers());
             // check if request has redirection headers
-            if !req.headers().contains_key("redirect") && !req.headers().contains_key("url-redirect") {
+            if !req.headers().contains_key("redirect") && !req.headers().contains_key("redirect-url") {
                 // if not we don't care
                 return srv.call(req).await
             }
@@ -85,9 +86,9 @@ impl<S, B> Service for ProxyReqMiddleware<S>
             }
             // when we are directly redirecting a url we can just set it.
             else {
-                let dest_url = req.headers().get("redirect-url").unwrap().to_str().unwrap().to_string();
-                dest_url_complete = format!("{}{}", dest_url, req.path());
-                if dest_url.starts_with("https://cs3099user-b5") {
+                dest_url_complete = req.headers().get("redirect-url").unwrap().to_str().unwrap().to_string();
+                info!("{:?}", dest_url_complete);
+                if dest_url_complete.starts_with("https://cs3099user-b5") {
                     return srv.call(req).await
                 }
             }

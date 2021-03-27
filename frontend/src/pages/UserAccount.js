@@ -21,18 +21,22 @@ class UserAccount extends React.Component {
 
     componentDidMount = async () => {
         try {
-            let url = "/api/users/"
+            // get user_id, we need it if its a local link for the backend
+            let user_id = /[^/]*$/.exec(atob(this.props.match.params.userURL))[0];
+            let url = "/api/users/" + user_id
             let res = await fetch(url
                 , {
                     method: 'get',
                     withCredentials: true,
                     credentials: 'include',
                     headers: {
-                        'Authorization': "Bearer" + localStorage.getItem('token'),
+                        'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Accept': 'application/json',
                         'redirect-url': atob(this.props.match.params.userURL)
                     }
                 })
+                let result = await res.json(); // we know the result will be json
+                console.log(result)
         } catch (e) {
             console.log(e)
         }
