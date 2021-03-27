@@ -17,6 +17,7 @@ import AccountComments from "./components/account/AccountComments";
 import AccountPosts from "./components/account/AccountPosts";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styling/container-pages.css';
+import UserAccount from "./pages/UserAccount";
 // import BackButton from "./components/BackButton";
 
 class App extends React.Component {
@@ -45,7 +46,6 @@ class App extends React.Component {
         // Whether user is logged in or logged out
         const {token} = this.state;
         return (
-
             <Router>
                 <div className="App">
                     {/* Pass the state onto Nav bar about state of user login /*/}
@@ -66,9 +66,18 @@ class App extends React.Component {
                             <Route exact path="/register" component={Register}/> {/*registration page*/}
                             <Route exact path="/usercomments" component={AccountComments}/>
                             <Route exact path="/userposts" component={AccountPosts}/>
+
+                            {/*<Route exact path="/user/:id/comments" component={AccountComments}/>*/}
+                            {/*<Route exact path="/user/:id/posts" component={AccountPosts}/>*/}
+
+                            {/*<Route exact path="/userposts" component={AccountPosts}/>*/}
                             {/*these should all contain some sort of identifier for the instance, but that is not implemented yet*/}
                             <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
                             {/*<Route exact path="/account" component={() => <Account user={this.user_id}}/>}/>*/}
+                            {/*<Route exact path="/user/:id" component={() => <UserAccount user={this.state.post_author}/>}/>*/}
+                            {/*<Route exact path="/user/:userURL" component={UserAccount}/>*/}
+                            <Route exact path="/user/:userURL" component={UserAccount}/>
+                            {/*<Route exact path="/user/:impID/:userId" component={UserAccount}/>*/}
 
                             <Route exact path="/:impID" component={props => <Home {...props} user={this.state.user}/>}/> {/*default homepage*/}
 
