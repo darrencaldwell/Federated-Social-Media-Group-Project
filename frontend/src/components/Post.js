@@ -15,6 +15,7 @@ export class Post extends Component {
     constructor(props) {
         super(props);
         const expanded = (typeof this.props.match.params.commentID != 'undefined'); // it's an expanded comment if the url has the comment id
+        this.delete = this.delete.bind(this);
         this.state = {
             expanded: expanded,
             loading: true, // Set to true if loading
@@ -52,6 +53,25 @@ export class Post extends Component {
         }
     }
 
+    delete() {
+        // this is the HTML request
+        fetch("/api/posts/" + this.props.match.params.postID, {
+            method: "DELETE",
+            withCredentials: true,
+            credentials: 'include',
+            headers: {
+                'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                'Content-Type': 'application/json',
+                'redirect': this.props.impID
+            }
+
+        }).then(responseJson => { // log the response for debugging
+            console.log(responseJson);
+        }).catch(error => this.setState({ // catch any error
+            message: "Error posting post: " + error
+        }));
+    }
+
     render() {
         // styling for the loading spinner - should be moved to a separate styling file if possible
         const spinnerStyle = { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }
@@ -65,8 +85,9 @@ export class Post extends Component {
             )
         }
 
+        const subforumURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
         const backURL = this.state.expanded ? "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID
-                                            : "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
+                                            : subforumURL;
         const url = this.state.expanded ? ('/api/comments/' + this.props.match.params.commentID + '/comments')
                                         : ('/api/posts/' + this.props.match.params.postID + '/comments');
 
@@ -99,8 +120,10 @@ export class Post extends Component {
                                     <Card.Title className="post-title">{this.state.post.postTitle}</Card.Title>
                                     <Card.Text className="post-body">{this.state.post.postContents}</Card.Text>
                                 </Card.Body>
-                                <a className="button create-comment-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</a>
-                                <a className="button create-comment-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>Edit</a>
+                                <div className="post-buttons">
+                                    <a className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</a>
+                                    <a className="button delete-button" onClick={() => this.delete()} href={subforumURL}>🗑</a>
+                                </div>
                             </div>
                         </Card.Body>
                     </Card>
@@ -117,6 +140,8 @@ export class Post extends Component {
                         posturl={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID}/>
                 {/*</Dropdown.Menu>*/}
                 {/*</Dropdown>*/}
+                
+                <a className="button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</a>
 
             </Container>
         )

@@ -14,7 +14,7 @@ class EditPost extends React.Component {
             buttonText: 'Submit Edit',
             titleText: "", // the title starts empty, before the post gets loaded
             bodyText: "", // the body starts empty, before the post gets loaded
-            url: '/api/post/' + this.props.match.params.postID,
+            url: '/api/posts/' + this.props.match.params.postID,
         };
     }
 

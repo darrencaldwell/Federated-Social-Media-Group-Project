@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Card} from "react-bootstrap";
+import {Card, Button} from "react-bootstrap";
 import {Container} from 'react-bootstrap';
 import '../styling/container-pages.css';
 import Avatar, {Cache} from 'react-avatar';
@@ -21,6 +21,7 @@ class Comment extends Component {
 
     constructor(props) {
         super(props);
+        this.delete = this.delete.bind(this); // bind this so it can override onClick
         this.state = {
             loading: true, // Set to true if loading
             parentID: this.props.comment._links.parentComment.href.substring(this.props.comment._links.parentComment.href.lastIndexOf('/') + 1)
@@ -55,6 +56,25 @@ class Comment extends Component {
         }
     }
 
+    delete() {
+        // this is the HTML request
+        fetch("/api/comments/" + this.props.comment.id, {
+            method: "DELETE",
+            withCredentials: true,
+            credentials: 'include',
+            headers: {
+                'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                'Content-Type': 'application/json',
+                'redirect': this.props.impID
+            }
+
+        }).then(responseJson => { // log the response for debugging
+            console.log(responseJson);
+        }).catch(error => this.setState({ // catch any error
+            message: "Error posting post: " + error
+        }));
+    }
+
     render() {
         if (this.state.loading) {
             return (
@@ -86,7 +106,13 @@ class Comment extends Component {
                                     </div>
                                 </div>
                                 <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
+                                <div className="buttons">
+                                <div className="comment-columns">
+                                    <a className="button edit-button" href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</a>
+                                    <a className="button delete-button" onClick={() => this.delete()} href={this.props.posturl}>🗑</a>
+                                </div>
                                 <a className="button reply-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
+                                </div>
                             </div>
                         </Card.Body>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} 

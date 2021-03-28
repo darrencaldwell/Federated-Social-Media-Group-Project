@@ -10,7 +10,16 @@
 .expand-button{padding-top: 19px!important; height: 60px!important}
 
 .comment-columns{display:flex; flex-direction:row; width: 100%;}
-.reply-button{width: 10%!important; height: 70px!important; display: block!important; margin: auto!important}
+.reply-button{width: 100%!important; height: 70px!important; display: block!important; margin: auto!important}
+.buttons{width: 15%!important; height: 140px!important; display: block!important; margin: auto!important}
+.post-buttons{width: 10%!important; height: 140px!important; padding-right: 0px!important; margin-right: 0px!important;}
+.post-button{width: 100%!important}
+.delete-button{width: 50%; background-color: #bb3333!important; height: 70px!important;}
+.delete-button:hover {
+  background-color: #442c2c!important;
+  color: #ffffff;
+}
+.edit-button{width: 50%; height: 70px!important;}
 .comment-body{margin: 10px!important; width: 80%!important; font-size: 18px!important}
 
 .post-columns{display:flex; flex-direction:row; width: 100%;}
