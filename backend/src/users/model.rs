@@ -16,7 +16,8 @@ pub struct User {
     pub user_id: String,
     pub username: String,
     pub created_time: i64,
-    pub description: String,
+    #[serde(default = "empty_value", skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     #[serde(rename = "profileImageURL")]
     profile_image_url: String,
     #[serde(rename = "_links")]
