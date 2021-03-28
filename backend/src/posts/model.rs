@@ -112,7 +112,7 @@ pub async fn patch(post_id: u64, post: PostPatchRequest, pool: &MySqlPool) -> Re
         .await?
         .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("post_id: {} not found", post_id)))
     } else {
         Ok(())
@@ -132,7 +132,7 @@ pub async fn delete(post_id: u64, pool: &MySqlPool) -> Result<(), RequestError> 
         .await?
         .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("post_id: {} not found", post_id)))
     } else {
         Ok(())
@@ -175,7 +175,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
         .await?
         .rows_affected();
 
-    if rows_affected != 1 {
+    if rows_affected == 0 {
         return Err(RequestError::NotFound(format!("user_id: {} not found", post.user_id)))
     }
 

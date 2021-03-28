@@ -147,7 +147,7 @@ pub async fn insert_comment(post_id: u64,
         .await?
         .rows_affected();
 
-    if rows_affected != 1 {
+    if rows_affected == 0 {
         return Err(RequestError::NotFound(format!("user_id: {} not found", comment_request.user_id)))
     }
 
@@ -226,7 +226,7 @@ pub async fn insert_child_comment(parent_id: u64,
         .await?
         .rows_affected();
 
-    if rows_affected != 1 {
+    if rows_affected == 0 {
         return Err(RequestError::NotFound(format!("user_id: {} not found", comment_request.user_id)))
     }
     tx.commit().await?;
@@ -276,7 +276,7 @@ pub async fn patch(comment_id: u64, comment: CommentPatchRequest, pool: &MySqlPo
         .await?
         .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
     } else {
         Ok(())
@@ -296,7 +296,7 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
         .await?
         .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
     } else {
         Ok(())
