@@ -142,7 +142,7 @@ pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
         profile_image_url: result.profile_picture.unwrap(),
         links: gen_links(&user_id),
         user_id,
-        description: result.description.unwrap(),
+        description: result.description,
     })
 }
 
@@ -165,7 +165,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
             let user_id = rec.user_id;
             User {
                 username: rec.username.unwrap(),
-                description: rec.description.unwrap(),
+                description: rec.description,
                 created_time: rec.date_joined.timestamp(),
                 profile_image_url: rec.profile_picture.unwrap(),
                 links: gen_links(&user_id),
