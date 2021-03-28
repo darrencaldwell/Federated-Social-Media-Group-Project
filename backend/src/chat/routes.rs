@@ -1,7 +1,7 @@
-use std::{sync::{Arc, atomic::{AtomicUsize, Ordering}}, time::{Duration, Instant}};
+use std::time::{Duration, Instant};
 
 use actix::prelude::*;
-use actix_web::{Error, HttpRequest, HttpResponse, Responder, web, get};
+use actix_web::{Error, HttpRequest, HttpResponse, web, get};
 use actix_web_actors::ws;
 
 use crate::{chat::server, id_extractor::UserId};
