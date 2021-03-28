@@ -82,7 +82,8 @@ class Comment extends Component {
             )
         }
             return (
-                <Card border="dark">
+                
+                <Card border="dark small-separator">
                         <Card.Body>
                             <div className="comment-columns">
                                 <div className="post-comment-voting-container">
@@ -118,6 +119,7 @@ class Comment extends Component {
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} 
                               impID={this.props.impID} posturl={this.props.posturl} 
                               level={this.props.level + 1} commentID={this.props.comment.id} parentID={this.state.parentID}/>
+                    
                 </Card>
         )
     }

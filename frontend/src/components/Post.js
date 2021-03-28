@@ -92,9 +92,10 @@ export class Post extends Component {
                                         : ('/api/posts/' + this.props.match.params.postID + '/comments');
 
         return (
+            <div className="post-wrapper">
             <Container className="post-container">
                 <BackButton url={backURL}/>
-                <div className="mt-3">
+                {/* <div className="mt-3"> */}
                     <Card border="dark">
                         <Card.Body>
                             <div className="post-columns">
@@ -116,18 +117,18 @@ export class Post extends Component {
                                         </Card.Subtitle>
                                     </div>
                                 </div>
-                                <Card.Body>
+                                <Card.Body className="post-text">
                                     <Card.Title className="post-title">{this.state.post.postTitle}</Card.Title>
                                     <Card.Text className="post-body">{this.state.post.postContents}</Card.Text>
                                 </Card.Body>
                                 <div className="post-buttons">
                                     <a className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</a>
-                                    <a className="button delete-button" onClick={() => this.delete()} href={subforumURL}>🗑</a>
+                                    <a className="button delete-button" onClick={() => this.delete()} href={subforumURL} >🗑</a>
                                 </div>
                             </div>
                         </Card.Body>
                     </Card>
-                </div>
+                {/* </div> */}
 
                 {/*<CreateComment url={url}/>*/}
 
@@ -141,9 +142,13 @@ export class Post extends Component {
                 {/*</Dropdown.Menu>*/}
                 {/*</Dropdown>*/}
                 
-                <a className="button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</a>
+                <div className="separator"/>
 
             </Container>
+
+            <a className="button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</a>
+
+            </div>
         )
     }
 }

@@ -3,6 +3,8 @@ button.vote_t    {
     background:transparent;
     outline: none !important;
     grid-row: 1;
+    font-style: bold;
+    font-size: 36px;
 }
 button.vote_b {
     border:0;
@@ -25,7 +27,7 @@ div.voting {
   }
 
 .post-comment-voting-container {
-    width: 18%;
+    width: 18%!important;
     padding: 2px;
     padding-right: 8px;
     display: grid;

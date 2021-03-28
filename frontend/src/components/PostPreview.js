@@ -33,7 +33,7 @@ export class PostPreview extends Component {
                                     </Card.Subtitle>
                                 </div>
                             </div>
-                            <Card.Body>
+                            <Card.Body className="post-text">
                                 <Card.Title className="post-title"> {this.props.post.postTitle}</Card.Title>
                                 <Card.Text className="post-body">{this.props.post.postContents}</Card.Text>     {/*Use the body from the prop as the body */}
                             </Card.Body>

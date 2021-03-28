@@ -6,13 +6,14 @@
 .time-since{font-size: 14px!important}
 
 .separator{padding: 8px!important}
+.small-separator{padding: 4px!important}
 
 .expand-button{padding-top: 19px!important; height: 60px!important}
 
-.comment-columns{display:flex; flex-direction:row; width: 100%;}
+.comment-columns{display:flex; flex-direction:row; width: 100%; margin: 0px!important}
 .reply-button{width: 100%!important; height: 70px!important; display: block!important; margin: auto!important}
 .buttons{width: 15%!important; height: 140px!important; display: block!important; margin: auto!important}
-.post-buttons{width: 10%!important; height: 140px!important; padding-right: 0px!important; margin-right: 0px!important;}
+.post-buttons{width: 10%!important; height: 140px!important; padding-right: 0px!important; margin-right: 0px!important; display: block!important; margin-top: auto; margin-bottom: auto}
 .post-button{width: 100%!important}
 .delete-button{width: 50%; background-color: #bb3333!important; height: 70px!important;}
 .delete-button:hover {
@@ -24,8 +25,9 @@
 
 .post-columns{display:flex; flex-direction:row; width: 100%;}
 .create-comment-button{width: 15%!important; height: 100px!important}
-.post-body{margin-left: 10px!important; font-size: 22px!important; width: 80%!important}
+.post-body{margin-left: 10px!important; font-size: 22px!important; }
 .post-title{font-size: 32px!important; margin-left: 10px!important; margin-top: 0px!important}
+.post-text{width: 68%!important}
 
 .forumlist{height: 93%; overflow-y:scroll; padding: 5%}
 .forum-container{width:15%; border-right: 3px solid black; align-items: center; background:grey}
@@ -75,5 +77,5 @@ a.button {
 
 
 .postlist{height:93%; overflow-y:scroll}
-.post-container{height:100%; width:100%; overflow-y:scroll}
-.post-container{width:70%;}
+.post-container{height:93%; width: 70%; overflow-y:scroll;}
+.post-wrapper{width: 70%; overflow-y: scroll}
