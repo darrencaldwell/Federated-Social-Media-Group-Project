@@ -77,8 +77,6 @@ impl Handler<Connect> for ChatServer {
     type Result = usize;
 
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) -> Self::Result {
-        println!("User joined");
-
         self.send_message(&msg.room, "user joined", 0);
 
         let id = self.rng.gen::<usize>();
@@ -100,8 +98,6 @@ impl Handler<Disconnect> for ChatServer {
     type Result = ();
 
     fn handle(&mut self, msg: Disconnect, _: &mut Context<Self>) -> Self::Result {
-        println!("User disconnected");
-
         let mut rooms: Vec<String> = Vec::new();
 
         if self.sessions.remove(&msg.id).is_some() {
