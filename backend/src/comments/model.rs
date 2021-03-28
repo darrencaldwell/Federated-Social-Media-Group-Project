@@ -312,14 +312,16 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
         sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
         JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
             JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
-                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
         ) AS "user_votes",
-        CONCAT(i.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
         LEFT JOIN comments_votes cv ON
             comments.comment_id = cv.comment_id
-        LEFT JOIN implementations i ON
-            comments.implementation_id = i.implementation_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            cv.implementation_id = i_c.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -371,14 +373,16 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
         sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
         JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
             JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
-                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
         ) AS "user_votes",
-        CONCAT(i.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
         LEFT JOIN comments_votes cv ON
             comments.comment_id = cv.comment_id
-        LEFT JOIN implementations i ON
-            comments.implementation_id = i.implementation_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            cv.implementation_id = i_c.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -437,14 +441,16 @@ pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
         sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
         JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
             JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
-                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
         ) AS "user_votes",
-        CONCAT(i.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
         LEFT JOIN comments_votes cv ON
             comments.comment_id = cv.comment_id
-        LEFT JOIN implementations i ON
-            comments.implementation_id = i.implementation_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            cv.implementation_id = i_c.implementation_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
         LEFT JOIN users on comments.user_id = users.user_id
