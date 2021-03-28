@@ -226,16 +226,18 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
             JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
                 JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
-                    CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
+                    CONCAT(i_pv.implementation_url, '/api/users/', pv.user_id)))
             ) AS "user_votes",
-            CONCAT(i.implementation_url, '/api/users/', p.user_id) AS user_endpoint
+            CONCAT(i_p.implementation_url, '/api/users/', p.user_id) AS user_endpoint
 
         FROM posts p
         INNER JOIN subforums s on p.subforum_id = s.subforum_id
         LEFT JOIN posts_votes pv ON
             p.post_id = pv.post_id
-        LEFT JOIN implementations i ON
-            p.implementation_id = i.implementation_id
+        LEFT JOIN implementations i_pv ON
+            pv.implementation_id = i_pv.implementation_id
+        LEFT JOIN implementations i_p ON
+            p.implementation_id = i_p.implementation_id
         LEFT JOIN users u ON
             p.user_id = u.user_id AND p.implementation_id = u.implementation_id
         WHERE p.subforum_id = ?
@@ -284,20 +286,22 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
         SELECT
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!", u.username, p.created_time, p.modified_time,
             post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
-            sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes: u64",
-            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes: u64",
+            sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes",
+            sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes",
             JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
                 JSON_OBJECT("isUpvote", CASE WHEN is_upvote = 1 then true else false end, "user",
-                CONCAT(i.implementation_url, '/api/users/', pv.user_id)))
+                CONCAT(i_pv.implementation_url, '/api/users/', pv.user_id)))
             ) AS "user_votes",
-            CONCAT(i.implementation_url, '/api/users/', p.user_id) AS user_endpoint
+            CONCAT(i_p.implementation_url, '/api/users/', p.user_id) AS user_endpoint
         FROM posts p
-        LEFT JOIN implementations i ON
-            p.implementation_id = i.implementation_id
         LEFT JOIN subforums ON
             p.subforum_id = subforums.subforum_id
         LEFT JOIN posts_votes pv ON
             pv.post_id = p.post_id
+        LEFT JOIN implementations i_pv ON
+            pv.implementation_id = i_pv.implementation_id
+        LEFT JOIN implementations i_p ON
+            p.implementation_id = i_p.implementation_id
         LEFT JOIN users u ON
             p.user_id = u.user_id AND p.implementation_id = u.implementation_id
         WHERE p.post_id = ?
