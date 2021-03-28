@@ -1,10 +1,11 @@
-import React, { Component } from 'react'
-import {Card} from "react-bootstrap";
-import {Container} from 'react-bootstrap';
-import '../styling/container-pages.css';
+import {React, Component } from 'react'
+import {Link} from 'react-router-dom'
+import {Card, Container, Button} from "react-bootstrap";
 import Avatar, {Cache} from 'react-avatar';
+
 import Voting from './Voting'
 import TimeSince from './TimeSince';
+import '../styling/container-pages.css';
 
 // for react avatar
 const cache = new Cache({
@@ -23,6 +24,12 @@ class Comment extends Component {
         super(props);
         this.state = {
             loading: true, // Set to true if loading
+        }
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (this.props.url !== prevProps.url) {
+            this.componentDidMount();
         }
     }
 
@@ -84,7 +91,7 @@ class Comment extends Component {
                                 </div>
                             </div>
                             <Card.Text className="mt-3">{this.props.comment.commentContent}</Card.Text>
-                            <Card.Link href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
+                            <Card.Link as={Link} to={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
                         </Card.Body>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
                 </Card>
@@ -102,6 +109,12 @@ export default class Comments extends Component {
         this.state = {
             level: level,
             commentList: [] // the list of comments will be stored here
+        }
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (this.props.url !== prevProps.url) {
+            this.componentDidMount();
         }
     }
 
@@ -136,14 +149,14 @@ export default class Comments extends Component {
         if (this.state.expanded) {  // provide a link to return to the post
             return (
                 <Container>
-                    <a className="button" href={this.props.posturl}>Return</a>
+                    <Button className="button" as={Link} to={this.props.posturl}>Return</Button>
                     <Comments url={this.props.url} impID={this.props.impID} expanded={false} posturl={this.props.posturl}/>
                 </Container>
             )
         } else if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
             return (
                 <Container>
-                    <a className="button" href={this.props.posturl + "/" + this.props.commentID}>Expand</a>
+                    <Button className="button" as={Link} to={this.props.posturl + "/" + this.props.commentID}>Expand</Button>
                 </Container>
             )
         } else {

@@ -23,6 +23,14 @@ export class Post extends Component {
         }
     }
 
+    componentDidUpdate = (prevProps) => {
+        if (this.props.match.url !== prevProps.match.url) {
+            console.log("new url: " + this.props.match.url);
+            const expanded = (typeof this.props.match.params.commentID != 'undefined'); // it's an expanded comment if the url has the comment id
+            this.setState({expanded: expanded});
+        }
+    }
+
     // Runs when the component is loaded, fetching the post into state
     componentDidMount = async () => {
         // get post

@@ -22,7 +22,6 @@ import './styling/container-pages.css';
 
 class App extends React.Component {
     componentDidMount = async () => {
-        console.log("reloadiong");
         document.title = 'St BeeFives'
         try {
             // the url needs the post id from the props
@@ -44,8 +43,6 @@ class App extends React.Component {
             let result = await res.json(); // we know the result will be json
             this.setState({imp: {name: "local", id: 1}, impList: result._embedded.implementationList }); // we store the json for the post in the state
 
-            console.log(this.state);
-
         } catch (e) {
             console.log("error: " + e);
         }
@@ -65,7 +62,6 @@ class App extends React.Component {
     }
 
     changeImp = (imp) => {
-        console.log("changing imp");
         this.setState({imp: imp});
     }
 

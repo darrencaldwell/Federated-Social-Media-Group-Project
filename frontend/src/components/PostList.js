@@ -51,10 +51,7 @@ class PostList extends Component {
     }
 
     componentDidUpdate = (oldProps) => {
-        if (this.props.match.params.forumID !== oldProps.match.params.forumID
-            || this.props.match.params.subforumID !== oldProps.match.params.subforumID
-            || this.props.match.params.impID !== oldProps.match.params.impID
-        ) {
+        if ( this.props.url !== oldProps.url) {
             this.getPosts();
         }
     }
