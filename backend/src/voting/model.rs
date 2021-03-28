@@ -69,7 +69,7 @@ pub async fn put_post_vote(post_id: u64, user_id: String, implementation_id: u64
             .execute(pool)
             .await?
             .rows_affected();
-        if number_modified != 1 {
+        if number_modified == 0 {
             return Err(RequestError::NotFound(format!("post_id: {} not found for user: {}#{}", post_id, user_id, implementation_id)))
         }
         return Ok(())
@@ -91,7 +91,7 @@ pub async fn put_post_vote(post_id: u64, user_id: String, implementation_id: u64
     .await?
     .rows_affected();
 
-    if number_modified != 1 {return Err(RequestError::NotFound(format!("post_id: {} not found to upvote", post_id)))} 
+    if number_modified == 0 {return Err(RequestError::NotFound(format!("post_id: {} not found to upvote", post_id)))} 
     Ok(())
 }
 
@@ -113,7 +113,7 @@ pub async fn put_comment_vote(comment_id: u64, user_id: String, implementation_i
             .execute(pool)
             .await?
             .rows_affected();
-        if number_modified != 1 {
+        if number_modified == 0 {
             return Err(RequestError::NotFound(format!("post_id: {} not found for user: {}#{}", comment_id, user_id, implementation_id)))
         }
         return Ok(())
@@ -135,6 +135,6 @@ pub async fn put_comment_vote(comment_id: u64, user_id: String, implementation_i
     .await?
     .rows_affected();
 
-    if number_modified != 1 {return Err(RequestError::NotFound(format!("comment_id: {} not found to upvote", comment_id)))} 
+    if number_modified == 0 {return Err(RequestError::NotFound(format!("comment_id: {} not found to upvote", comment_id)))} 
     Ok(())
 }
