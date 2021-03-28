@@ -92,7 +92,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsChatSession {
                     match v[0] {
                         "/help" => ctx.text("List of commands: /help".to_string()),
                         "/ping" => ctx.text("pong".to_string()),
-                        _ => ctx.text(format!("Not a valid command.")),
+                        _ => ctx.text("Not a valid command.".to_string()),
                     }
                 } else {
                     let msg = if let Some(ref name) = self.name {
