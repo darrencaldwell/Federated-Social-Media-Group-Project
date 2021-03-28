@@ -321,7 +321,7 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
         LEFT JOIN implementations i_cv ON
             cv.implementation_id = i_cv.implementation_id
         LEFT JOIN implementations i_c ON
-            cv.implementation_id = i_c.implementation_id
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -382,7 +382,7 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
         LEFT JOIN implementations i_cv ON
             cv.implementation_id = i_cv.implementation_id
         LEFT JOIN implementations i_c ON
-            cv.implementation_id = i_c.implementation_id
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -450,7 +450,7 @@ pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
         LEFT JOIN implementations i_cv ON
             cv.implementation_id = i_cv.implementation_id
         LEFT JOIN implementations i_c ON
-            cv.implementation_id = i_c.implementation_id
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
         LEFT JOIN users on comments.user_id = users.user_id
