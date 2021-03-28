@@ -89,10 +89,12 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsChatSession {
             ws::Message::Text(text) => {
                 let m = text.trim();
 
-                if m.starts_with("/") {
-                    let v: Vec<&str> = m.splitn(2, " ").collect();
+                if m.starts_with('/') {
+                    let v: Vec<&str> = m.splitn(2, ' ').collect();
                     match v[0] {
-                        _ => ctx.text(format!("No commands yet"))
+                        "/help" => ctx.text("List of commands: /help".to_string()),
+                        "/ping" => ctx.text("pong".to_string()),
+                        _ => ctx.text(format!("Not a valid command.")),
                     }
                 } else {
                     let msg = if let Some(ref name) = self.name {
@@ -119,11 +121,6 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsChatSession {
             ws::Message::Nop => (),
         }
     }
-}
-
-async fn get_count(count: web::Data<Arc<AtomicUsize>>) -> impl Responder {
-    let current_count = count.fetch_add(1, Ordering::SeqCst);
-    format!("Visitors: {}", current_count)
 }
 
 #[get("/local/forums/{id}/chat")]

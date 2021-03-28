@@ -1,10 +1,8 @@
 import React, {Component} from 'react';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
 // import CreatePost from './CreatePost.js';
-import BackButton from './BackButton';
 // import '../styling/Post.css';
-import {Card, Container} from "react-bootstrap";
-import styles from '../styling/chat.css';
+import '../styling/chat.css';
 
 class Message {
     constructor(message, sender, timestamp) {

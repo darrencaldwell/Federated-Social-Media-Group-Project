@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Container, Jumbotron, Button, Dropdown, Card} from "react-bootstrap";
+import {Container, Jumbotron, Button, Card} from "react-bootstrap";
 import {Link} from 'react-router-dom';
 import "./../styling/home.css";
 

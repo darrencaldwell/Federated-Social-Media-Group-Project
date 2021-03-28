@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {Nav, Navbar, SplitButton, Dropdown, Button, ButtonGroup} from 'react-bootstrap'
+import {Nav, Navbar, Dropdown, Button, ButtonGroup} from 'react-bootstrap'
 import '../styling/navStyling.css'
 
 
