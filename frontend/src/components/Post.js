@@ -5,6 +5,7 @@ import Comments from './Comments';
 import BackButton from './BackButton';
 // import '../styling/Post.css';
 import {Card, Container, Spinner} from "react-bootstrap";
+import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
 
@@ -19,6 +20,14 @@ export class Post extends Component {
             loading: true, // Set to true if loading
             post: {}, // the post is stored here once loaded
             post_author: {},
+        }
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (this.props.match.url !== prevProps.match.url) {
+            console.log("new url: " + this.props.match.url);
+            const expanded = (typeof this.props.match.params.commentID != 'undefined'); // it's an expanded comment if the url has the comment id
+            this.setState({expanded: expanded});
         }
     }
 
@@ -95,7 +104,7 @@ export class Post extends Component {
                             </div>
                             <Card.Body>
                                <Card.Text>{this.state.post.postContents}</Card.Text>
-                               <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
+                               <Card.Link as={Link} to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
                             </Card.Body>
                         </Card.Body>
                     </Card>
