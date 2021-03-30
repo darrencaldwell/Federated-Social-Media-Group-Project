@@ -77,7 +77,7 @@ export class Post extends Component {
         const url = this.state.expanded ? ('/api/comments/' + this.props.match.params.commentID + '/comments')
                                         : ('/api/posts/' + this.props.match.params.postID + '/comments');
         console.log('post', this.state.post)
-        const parsed_user_link = btoa(this.state.post._links.self.href)
+        const parsed_user_link = btoa(this.state.post._links.user.href)
 
         return (
             <Container className="post-container">

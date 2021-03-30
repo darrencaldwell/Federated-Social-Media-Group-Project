@@ -44,6 +44,7 @@ class UserAccount extends React.Component {
             this.setState({userInfo: res}); // we store the json for the post in the state
                 console.log('result', res)
         } catch (e) {
+            alert("something went wrong")
             console.log(e)
         }
 
