@@ -40,7 +40,8 @@ class Make extends React.Component {
                 body: JSON.stringify({
                     "postTitle": this.state.titleText,
                     "postContents": this.state.bodyText,
-                    "userId": localStorage.getItem('userId') // userId is a string in localStorage
+                    "userId": localStorage.getItem('userId'), // userId is a string in localStorage
+                    "username": localStorage.getItem('username')
                 })
             }).then(responseJson => {
                 console.log(responseJson);

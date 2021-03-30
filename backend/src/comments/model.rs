@@ -1,8 +1,11 @@
-use sqlx::{MySqlPool, Done};
+use sqlx::{MySqlPool, Done, Row};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde::ser::{Serializer, SerializeStruct};
+use bigdecimal::ToPrimitive;
+use chrono::{DateTime, Utc};
 use super::super::request_errors::RequestError;
+use super::super::voting::{UserVote, parse_mariadb};
 
 /// Represents a request to post a comment on a post
 #[derive(Deserialize)]
@@ -53,7 +56,12 @@ impl Serialize for Comment {
         state.serialize_field("userId", &self.user_id)?;
         state.serialize_field("username", &self.username)?;
         state.serialize_field("postId", &self.post_id.to_string())?;
+        state.serialize_field("downvotes", &self.downvotes)?;
+        state.serialize_field("upvotes", &self.upvotes)?;
+        state.serialize_field("_userVotes", &self.user_votes)?;
         state.serialize_field("_links", &self.links)?;
+        state.serialize_field("createdTime", &self.created_time)?;
+        state.serialize_field("modifiedTime", &self.modified_time)?;
         state.end()
     }
 }
@@ -64,6 +72,11 @@ pub struct Comment {
     pub user_id: String,
     pub username: String,
     pub post_id: u64,
+    pub downvotes: u64,
+    pub upvotes: u64,
+    pub user_votes: Vec<UserVote>,
+    pub created_time: i64,
+    pub modified_time: i64,
     pub links: Links,
 }
 
@@ -83,14 +96,14 @@ pub struct CommentList {
     pub comment_list: Vec<Comment>,
 }
 
-pub(crate) fn gen_links(comment_id: u64, parent_comment_id: u64, user_id: &str, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
+pub(crate) fn gen_links(comment_id: u64, parent_comment_id: u64, user_endpoint: String, post_id: u64, subforum_id: u64, forum_id: u64) -> Links {
     Links {
         _self: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}", comment_id) },
         post: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/posts/{}", post_id) },
         parent_comment: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}", parent_comment_id) },
         subforum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/subforums/{}", subforum_id) },
         forum: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums/{}", forum_id) },
-        user: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/{}", user_id) },
+        user: Link { href: user_endpoint },
         child_comments: Link { href: format!("https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/comments/{}/comments", comment_id) },
     }
 }
@@ -101,37 +114,70 @@ pub async fn insert_comment(post_id: u64,
                             comment_request: CommentRequest,
                             pool: &MySqlPool,
                             implementation_id: u64
-) -> Result<Comment> {
+) -> Result<Comment, RequestError> {
     let mut tx = pool.begin().await?;
-    let comment_id = sqlx::query!(
-        "INSERT INTO comments (comment, user_id, post_id, implementation_id) VALUES (?, ?, ?, ?)",
+    let insert_rec = sqlx::query!(
+        "
+        INSERT INTO comments 
+        (comment, user_id, post_id, implementation_id) VALUES (?, ?, ?, ?)
+        RETURNING comment_id, created_time 
+        ",
         comment_request.comment_content,
         comment_request.user_id,
         post_id,
         implementation_id)
+        .fetch_one(pool)
+        .await?;
+
+    let comment_id = insert_rec.get(0);
+    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp();
+
+    // Insert username into users table (user_id may already be pressent post GET request via middleware)
+    let rows_affected = sqlx::query!(
+        r#"
+        INSERT INTO users (username, user_id, implementation_id) VALUES(?,?,?)
+        ON DUPLICATE KEY UPDATE username = ?
+        "#,
+        comment_request.username,
+        comment_request.user_id,
+        implementation_id,
+        comment_request.username
+    )
         .execute(&mut tx)
         .await?
-        .last_insert_id();
+        .rows_affected();
+
+    if rows_affected == 0 {
+        return Err(RequestError::NotFound(format!("user_id: {} not found", comment_request.user_id)))
+    }
 
     tx.commit().await?;
 
     let rec = sqlx::query!(
-        r#"SELECT username as "username!", posts.subforum_id as "subforum_id!", forum_id as "forum_id!"
+        r#"SELECT posts.subforum_id as "subforum_id!", forum_id as "forum_id!",
+            CONCAT(i.implementation_url, '/api/users/', ?) AS user_endpoint
         FROM comments
-        LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        LEFT JOIN implementations i ON
+            comments.implementation_id = i.implementation_id
         WHERE comment_id = ?"#,
-        comment_id)
+        comment_id, comment_id)
         .fetch_one(pool)
         .await?;
 
     Ok(Comment {
+        created_time,
+        modified_time: created_time,
         id: comment_id,
         comment_content: comment_request.comment_content,
-        username: rec.username,
+        username: comment_request.username,
         post_id,
-        links: gen_links(comment_id, comment_id, &user_id, post_id, rec.subforum_id, rec.forum_id),
+        downvotes: 0,
+        upvotes: 0,
+        user_votes: Vec::with_capacity(0),
+        // this is a root comment so it is it's own parent
+        links: gen_links(comment_id, comment_id, rec.user_endpoint.unwrap(), post_id, rec.subforum_id, rec.forum_id),
         user_id,
     })
 
@@ -143,43 +189,72 @@ pub async fn insert_child_comment(parent_id: u64,
                                   comment_request: CommentRequest,
                                   pool: &MySqlPool,
                                   implementation_id: u64
-) -> Result<Comment> {
+) -> Result<Comment, RequestError> {
     let post_id = sqlx::query!("SELECT post_id FROM comments where comment_id = ?", parent_id)
         .fetch_one(pool)
         .await?
         .post_id;
 
     let mut tx = pool.begin().await?;
-    let comment_id = sqlx::query!(
-        "INSERT INTO comments (comment, user_id, post_id, parent_id, implementation_id) VALUES (?, ?, ?, ?, ?)",
+    let insert_rec = sqlx::query!(
+        "INSERT INTO comments (comment, user_id, post_id, parent_id, implementation_id) VALUES (?, ?, ?, ?, ?)
+            RETURNING comment_id, created_time
+        ",
         comment_request.comment_content,
         comment_request.user_id,
         post_id,
         parent_id,
         implementation_id)
+        .fetch_one(pool)
+        .await?;
+
+    let comment_id = insert_rec.get(0);
+    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp();
+
+    // Insert username into users table (user_id may already be pressent post GET request via middleware)
+    let rows_affected = sqlx::query!(
+        r#"
+        INSERT INTO users (username, user_id, implementation_id) VALUES(?,?,?)
+        ON DUPLICATE KEY UPDATE username = ?
+        "#,
+        comment_request.username,
+        comment_request.user_id,
+        implementation_id,
+        comment_request.username
+    )
         .execute(&mut tx)
         .await?
-        .last_insert_id();
+        .rows_affected();
 
+    if rows_affected == 0 {
+        return Err(RequestError::NotFound(format!("user_id: {} not found", comment_request.user_id)))
+    }
     tx.commit().await?;
 
     let rec = sqlx::query!(
-        r#"SELECT username as "username!", posts.subforum_id as "subforum_id!", forum_id as "forum_id!"
+        r#"SELECT posts.subforum_id as "subforum_id!", forum_id as "forum_id!",
+            CONCAT(i.implementation_url, '/api/users/', ?) AS user_endpoint
         FROM comments
-        LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
+        LEFT JOIN implementations i ON
+            comments.implementation_id = i.implementation_id
         WHERE comment_id = ?"#,
-        comment_id)
+        user_id, comment_id)
         .fetch_one(pool)
         .await?;
 
     Ok(Comment {
+        created_time,
+        modified_time: created_time,
         id: comment_id,
         comment_content: comment_request.comment_content,
-        username: rec.username,
+        username: comment_request.username,
         post_id,
-        links: gen_links(comment_id, parent_id, &user_id, post_id, rec.subforum_id, rec.forum_id),
+        downvotes: 0,
+        upvotes: 0,
+        user_votes: Vec::with_capacity(0),
+        links: gen_links(comment_id, parent_id, rec.user_endpoint.unwrap(), post_id, rec.subforum_id, rec.forum_id),
         user_id,
     })
 
@@ -201,7 +276,7 @@ pub async fn patch(comment_id: u64, comment: CommentPatchRequest, pool: &MySqlPo
         .await?
         .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
     } else {
         Ok(())
@@ -221,7 +296,7 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
         .await?
         .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
     } else {
         Ok(())
@@ -231,14 +306,27 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
 /// Get all top level comments within a post
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, comments.user_id, comment_id,
-        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
+        r#"SELECT comment, comments.user_id, comments.comment_id, comments.created_time, comments.modified_time, comments.parent_id,
+        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
+        sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+        sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+        JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
+        ) AS "user_votes",
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
+        LEFT JOIN comments_votes cv ON
+            comments.comment_id = cv.comment_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
         WHERE comments.post_id = ? AND parent_id IS NULL
-        GROUP BY comment_id
+        GROUP BY comments.comment_id
         "#,
         post_id)
         .fetch_all(pool)
@@ -246,12 +334,20 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
 
     let comments: Vec<Comment> = recs.into_iter()
         .map(|rec| {
+            let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
+                created_time: rec.created_time.unwrap().timestamp(),
+                modified_time: rec.modified_time.unwrap().timestamp(),
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
                 post_id,
-                links: gen_links(rec.comment_id, rec.comment_id, &rec.user_id, post_id,
+                // MariaDB returns Decimal from sum, so need to convert
+                downvotes: rec.downvotes.to_u64().unwrap(),
+                upvotes: rec.upvotes.to_u64().unwrap(),
+                user_votes,
+                // use parent id if not null, else use comment_id
+                links: gen_links(rec.comment_id, rec.parent_id.unwrap_or(rec.comment_id), rec.user_endpoint.unwrap(), post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
             }
@@ -270,9 +366,23 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
 /// Get all top level child comments of a comment
 pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, comments.user_id, comment_id, comments.post_id,
-        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
+        r#"SELECT comment, comments.user_id, comments.comment_id, comments.post_id, comments.created_time, comments.modified_time,
+        comments.parent_id,
+        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
+        sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+        sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+        JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
+        ) AS "user_votes",
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
+        LEFT JOIN comments_votes cv ON
+            comments.comment_id = cv.comment_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -285,12 +395,20 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
 
     let comments: Vec<Comment> = recs.into_iter()
         .map(|rec| {
+            let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
+                created_time: rec.created_time.unwrap().timestamp(),
+                modified_time: rec.modified_time.unwrap().timestamp(),
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
                 post_id: rec.post_id,
-                links: gen_links(rec.comment_id, rec.comment_id, &rec.user_id, rec.post_id,
+                // MariaDB returns Decimal from sum, so need to convert
+                downvotes: rec.downvotes.to_u64().unwrap(),
+                upvotes: rec.upvotes.to_u64().unwrap(),
+                user_votes,
+                // use parent id if not null, else use comment_id
+                links: gen_links(rec.comment_id, rec.parent_id.unwrap_or(rec.comment_id), rec.user_endpoint.unwrap(), rec.post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
             }
@@ -316,23 +434,46 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
 /// Get a single comment by it's id
 pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
     let rec = sqlx::query!(
-        r#"SELECT comment, comments.user_id, comments.post_id,
-        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!"
+        r#"SELECT comment AS "comment!", comments.user_id as "user_id!", comments.comment_id, comments.post_id AS "post_id!",
+        comments.created_time, comments.modified_time,
+        posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
+        sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
+        sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
+        JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
+            JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
+        ) AS "user_votes",
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
-        LEFT JOIN users on comments.user_id = users.user_id
+        LEFT JOIN comments_votes cv ON
+            comments.comment_id = cv.comment_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comment_id = ?"#,
-        comment_id)
+        LEFT JOIN users on comments.user_id = users.user_id
+        WHERE comments.comment_id = ?
+        HAVING comments.comment_id = ?
+        "#,
+        comment_id, comment_id)
         .fetch_one(pool)
         .await?;
 
+    let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
     Ok(Comment {
+        created_time: rec.created_time.unwrap().timestamp(),
+        modified_time: rec.modified_time.unwrap().timestamp(),
         id: comment_id,
         comment_content: rec.comment,
         username: rec.username,
         post_id: rec.post_id,
-        links: gen_links(comment_id, comment_id, &rec.user_id, rec.post_id, rec.subforum_id, rec.forum_id),
+        // MariaDB returns Decimal from sum, so need to convert
+        downvotes: rec.downvotes.to_u64().unwrap(),
+        upvotes: rec.upvotes.to_u64().unwrap(),
+        user_votes,
+        links: gen_links(comment_id, comment_id, rec.user_endpoint.unwrap(), rec.post_id, rec.subforum_id, rec.forum_id),
         user_id: rec.user_id,
     })
 }

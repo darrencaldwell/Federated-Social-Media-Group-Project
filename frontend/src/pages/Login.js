@@ -52,14 +52,14 @@ class Login extends React.Component {
                     {/* Username Input */}
                     <FormGroup>
                         <label>Username</label>
-                        <input type="text" className="form-control" placeholder="Username"
+                        <input type="text" input="username" className="form-control" placeholder="Username"
                                onChange={e => this.username = e.target.value}/>
                     </FormGroup>
 
                     {/* Password Input */}
                     <FormGroup>
                         <label>Password</label>
-                        <input type="password" className="form-control" placeholder="Password"
+                        <input type="password" input="current-password"  className="form-control" placeholder="Password"
                                onChange={e => this.password = e.target.value}/>
                     </FormGroup>
 

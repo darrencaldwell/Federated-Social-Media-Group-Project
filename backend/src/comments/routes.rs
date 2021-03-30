@@ -4,19 +4,24 @@ use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
 use crate::implementation_id_extractor::ImplementationId;
 use super::super::request_errors::RequestError;
+use log::info;
 
 #[patch("/api/comments/{id}")]
 async fn patch_comment(
         web::Path(id): web::Path<u64>,
         pool: web::Data<MySqlPool>,
         comment: web::Json<model::CommentPatchRequest>,
+        ImplementationId(implementation_id): ImplementationId,
     ) -> impl Responder {
     // TODO: validate permission to modify comment
     match model::patch(id, comment.into_inner(), pool.get_ref()).await {
         Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => match e {
-            RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
-            RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, patch_comment: {}", implementation_id, e.to_string());
+            match e {
+                RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+                RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+            }
         }
     }
 }
@@ -25,13 +30,17 @@ async fn patch_comment(
 async fn delete_comment(
         web::Path(id): web::Path<u64>,
         pool: web::Data<MySqlPool>,
+        ImplementationId(implementation_id): ImplementationId,
     ) -> impl Responder {
     // TODO: validate permission to delete comment
     match model::delete(id, pool.get_ref()).await {
         Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => match e {
-            RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
-            RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, delete_comment: {}", implementation_id, e.to_string());
+            match e {
+                RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+                RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+            }
         }
     }
 }
@@ -40,11 +49,15 @@ async fn delete_comment(
 async fn get_comment(
     web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
+    ImplementationId(implementation_id): ImplementationId,
     UserId(_user_id): UserId,
 ) -> impl Responder {
     match model::get_comment(id, &pool).await {
         Ok(comment) => HttpResponse::Ok().json(comment),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, get_comment: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 
@@ -53,10 +66,14 @@ async fn get_child_comments(
     web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
+    ImplementationId(implementation_id): ImplementationId,
 ) -> impl Responder {
     match model::get_child_comments(id, &pool).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, get_child_comments: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 
@@ -65,10 +82,14 @@ async fn get_comments(
     web::Path(id): web::Path<u64>,
     pool: web::Data<MySqlPool>,
     UserId(_user_id): UserId,
+    ImplementationId(implementation_id): ImplementationId,
 ) -> impl Responder {
     match model::get_comments(id, &pool).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, get_child_comments: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 
@@ -83,7 +104,10 @@ async fn post_comment(
     if user_id != comment.user_id { return HttpResponse::Forbidden().finish(); }
     match model::insert_comment(id, user_id, comment.into_inner(), &pool, implementation_id).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, post_comment: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 
@@ -98,7 +122,10 @@ async fn post_child_comment(
     if user_id != comment.user_id { return HttpResponse::Forbidden().finish(); }
     match model::insert_child_comment(id, user_id, comment.into_inner(), &pool, implementation_id).await {
         Ok(comments) => HttpResponse::Ok().json(comments),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => {
+            info!("ROUTE ERROR: impl_id: {}, post_child_comment: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
     }
 }
 

@@ -79,6 +79,19 @@ where
                 return srv.call(req).await
             }
 
+
+            if req.path().starts_with("/local/forums/") && req.path().ends_with("/chat") {
+                if let Some(Ok(token)) = req.headers().get("sec-websocket-protocol").map(|token| token.to_str()) {
+                    if let Ok(user_id) = crate::auth::decode_jwt(token) {
+                        req.headers_mut().insert(HeaderName::from_static("user-id"), HeaderValue::from_str(&user_id).unwrap());
+                        // local impl is always first id
+                        req.headers_mut().append(HeaderName::from_static("implementation-id"),
+                            HeaderValue::from_str("1").unwrap());
+                    }
+                    return srv.call(req).await
+                }
+            }
+
             let headers = req.headers();
 
             if (headers.contains_key("Signature") || headers.contains_key("Signature-Input"))
@@ -96,9 +109,9 @@ where
                             // local impl is always first id
                             req.headers_mut().append(HeaderName::from_static("implementation-id"),
                                 HeaderValue::from_str("1").unwrap());
-                            return srv.call(req).await
                         }
                     }
+                    return srv.call(req).await
                 }
                 srv.call(req).await
             } else if headers.contains_key("Signature") && headers.contains_key("Signature-Input") {

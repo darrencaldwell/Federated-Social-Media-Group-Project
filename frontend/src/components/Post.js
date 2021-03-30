@@ -5,11 +5,9 @@ import Comments from './Comments';
 import BackButton from './BackButton';
 // import '../styling/Post.css';
 import {Card, Container, Spinner} from "react-bootstrap";
+import {Link} from 'react-router-dom';
 import Voting from './Voting';
-import Account from "../pages/Account";
-import {Route} from "react-router";
-import UserAccount from "../pages/UserAccount";
-import {Link} from "react-router-dom";
+import TimeSince from './TimeSince';
 
 // props: match.params.impID, match.params.postID, match.params.subforumID, match.params.forumID, match.params.commentID
 export class Post extends Component {
@@ -21,7 +19,15 @@ export class Post extends Component {
             expanded: expanded,
             loading: true, // Set to true if loading
             post: {}, // the post is stored here once loaded
-            post_author: {}
+            post_author: {},
+        }
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (this.props.match.url !== prevProps.match.url) {
+            console.log("new url: " + this.props.match.url);
+            const expanded = (typeof this.props.match.params.commentID != 'undefined'); // it's an expanded comment if the url has the comment id
+            this.setState({expanded: expanded});
         }
     }
 
@@ -45,27 +51,9 @@ export class Post extends Component {
                     }
                 }
             );
-
             let result_post = await res.json(); // we know the result will be json
 
-            // the url needs the post id from the props
-            url = '/api/users/' + result_post.userId;
-            res = await fetch(url
-                , {
-                    method: 'get', // we're making a GET request
-
-                    withCredentials: true, // we're using authorisation with a token in local storage
-                    credentials: 'include',
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token'),
-                        'Accept': 'application/json',
-                        'redirect': this.props.match.params.impID
-                    }
-                }
-            );
-
-            let result_auth = await res.json(); // we know the result will be json
-            this.setState({post: result_post, post_author: result_auth, loading: false }); // we store the json for the post in the state
+            this.setState({post: result_post, loading: false}); // we store the json for the post in the state
 
         } catch (e) {
             console.log(e)
@@ -100,16 +88,16 @@ export class Post extends Component {
                 <div className="mt-3">
                     <Card border="dark">
                         <Card.Body>
-                        <div class="post-preview-container">
-                            <Voting class="voting-post"
-                                upvotes={this.state.post.upvotes}
-                                downvotes={this.state.post.downvotes}
+                        <div className="post-comment-voting-container">
+                            <Voting className="voting"
+                                upvotes={this.state.post.upvotes} 
+                                downvotes={this.state.post.downvotes} 
                                 _userVotes={this.state.post._userVotes}
                                 type="posts"
                                 postID={this.props.match.params.postID}
                                 impID={this.props.match.params.impID}
                             ></Voting>
-                            <div class="post">
+                            <div className="voting-adj">
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
                                 {/*<Route exact path="/user/:id" component={() => <UserAccount user={this.state.post_author}/>}/>*/}
                             <Card.Subtitle className="text-muted">
@@ -131,7 +119,7 @@ export class Post extends Component {
                             <Card.Body>
                                <Card.Text>{this.state.post.postContents}</Card.Text>
 
-                               <Card.Link href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
+                               <Card.Link as={Link} to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/new"}> Create Comment</Card.Link>
                             </Card.Body>
                         </Card.Body>
                     </Card>
