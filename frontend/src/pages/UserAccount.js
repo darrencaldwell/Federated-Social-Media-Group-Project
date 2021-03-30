@@ -24,6 +24,9 @@ class UserAccount extends React.Component {
             // get user_id, we need it if its a local link for the backend
             let user_id = /[^/]*$/.exec(atob(this.props.match.params.userURL))[0];
             let url = "/api/users/" + user_id
+
+            console.log('user id', user_id)
+            console.log('url', url)
             let res = await fetch(url
                 , {
                     method: 'get',
@@ -36,7 +39,9 @@ class UserAccount extends React.Component {
                     }
                 })
                 let result = await res.json(); // we know the result will be json
-                console.log(result)
+
+            this.setState({userInfo: result}); // we store the json for the post in the state
+                console.log('result', result)
         } catch (e) {
             console.log(e)
         }
