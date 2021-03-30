@@ -1,6 +1,6 @@
 import React from "react";
 import {Button, Card, Container, Nav} from "react-bootstrap";
-import {Link} from "react-router-dom";
+import {Link, Redirect} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
 import axios from 'axios'
 
@@ -58,6 +58,10 @@ class UserAccount extends React.Component {
         const date = new Date(this.state.userInfo.createdTime * 1000)
         const forums_url = "/1/forums"
         console.log('user info', this.state.userInfo)
+
+        if (this.state.userInfo.id === localStorage.getItem('userId')) {
+            return <Redirect to={'/account'}/>
+        }
 
         return (
             <Container>
