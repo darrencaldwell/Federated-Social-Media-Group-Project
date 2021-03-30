@@ -122,11 +122,6 @@ class Comment extends Component {
                                 <a className="button reply-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
                                 </div>
                             </div>
-<<<<<<< HEAD
-=======
-                            <Card.Text className="mt-3">{this.props.comment.commentContent}</Card.Text>
-                            <Card.Link as={Link} to={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
->>>>>>> master
                         </Card.Body>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} 
                               impID={this.props.impID} posturl={this.props.posturl} 
@@ -194,11 +189,7 @@ export default class Comments extends Component {
         } else if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
             return (
                 <Container>
-<<<<<<< HEAD
                     <a className="button expand-button" href={this.props.posturl + "/" + this.props.parentID}>Expand</a>
-=======
-                    <Button className="button" as={Link} to={this.props.posturl + "/" + this.props.commentID}>Expand</Button>
->>>>>>> master
                 </Container>
             )
         } else {

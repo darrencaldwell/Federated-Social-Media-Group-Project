@@ -12,9 +12,9 @@ export class PostPreview extends Component {
 
     render() {
         return (
-            <Card border="dark" className="mt-3" >
-                <Card.Body>
-                    <CardActionArea href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
+            <Card border="dark" className="mt-3 post" >
+                <CardActionArea href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
+                    <Card.Body>
                         <div className="post-columns">
                             <div className="post-comment-voting-container">
                                 <Voting className="voting" upvotes={this.props.post.upvotes} 
@@ -39,8 +39,8 @@ export class PostPreview extends Component {
                                 <Card.Text className="post-body">{this.props.post.postContents}</Card.Text>     {/*Use the body from the prop as the body */}
                             </Card.Body>
                         </div>
-                    </CardActionArea>
-                </Card.Body>
+                    </Card.Body>
+                </CardActionArea>
             </Card>
         )
     }

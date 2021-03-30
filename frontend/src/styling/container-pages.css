@@ -34,24 +34,25 @@
     width:15%;
     border-right: 3px solid black;
     align-items: center;
+    background-color: grey;
 }
 
 .forum {
     width: 100%;
-    background-color: #94312b!important;
+    background-color: whitesmoke!important;
     margin-bottom: 5px;
     border: 0px!important;
 }
 .forum:hover {
     width: 100%;
-    background-color: #cd362a!important;
+    background-color: lightgray!important;
     margin-bottom: 5px;
     border: 0px!important;
 }
 
 .forum-body {
     text-align: center;
-    color: #ffffff;
+    color: #000000;
 }
 
 a.button {
@@ -95,6 +96,7 @@ a.button {
 .forum-info{font-weight: bold!important; font-size: 26px!important; text-align: center; color: lightslategrey;}
 
 
-.postlist{height:93%; overflow-y:scroll}
+.postlist{height:93%; overflow-y:scroll;}
 .post-container{height:93%; width: 70%; overflow-y:scroll;}
-.post-wrapper{width: 70%; overflow-y: scroll}
+.post:hover{background-color: lightgray;}
+.post-wrapper{width: 70%; overflow-y: scroll;}
