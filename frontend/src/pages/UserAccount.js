@@ -38,10 +38,11 @@ class UserAccount extends React.Component {
                         'redirect-url': atob(this.props.match.params.userURL)
                     }
                 })
-                let result = await res.json(); // we know the result will be json
+                console.log('here')
+                console.log('here 2')
 
-            this.setState({userInfo: result}); // we store the json for the post in the state
-                console.log('result', result)
+            this.setState({userInfo: res}); // we store the json for the post in the state
+                console.log('result', res)
         } catch (e) {
             console.log(e)
         }
