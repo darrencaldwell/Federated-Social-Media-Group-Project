@@ -40,8 +40,8 @@ class UserAccount extends React.Component {
                 })
                 console.log('here')
                 console.log('here 2')
-
-            this.setState({userInfo: res}); // we store the json for the post in the state
+            const result = res.json()
+            this.setState({userInfo: result}); // we store the json for the post in the state
                 console.log('result', res)
         } catch (e) {
             alert("something went wrong")
@@ -67,42 +67,30 @@ class UserAccount extends React.Component {
                     </Card>
                 </Container>
 
-                <Nav fill variant="tabs" defaultActiveKey="/">
-                    <Nav.Item>
-                        <Nav.Link as={Link} to='/'>About Us</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link as={Link} to='/userposts'>//users name Posts</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link as={Link} to='/usercomments'>//users Comments</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link as={Link} to='/'>//users Roles</Nav.Link>
-                    </Nav.Item>
-                </Nav>
+                {/*<Nav fill variant="tabs" defaultActiveKey="/">*/}
+                {/*    <Nav.Item>*/}
+                {/*        <Nav.Link as={Link} to='/'>About Us</Nav.Link>*/}
+                {/*    </Nav.Item>*/}
+                {/*    <Nav.Item>*/}
+                {/*        <Nav.Link as={Link} to='/userposts'>//users name Posts</Nav.Link>*/}
+                {/*    </Nav.Item>*/}
+                {/*    <Nav.Item>*/}
+                {/*        <Nav.Link as={Link} to='/usercomments'>//users Comments</Nav.Link>*/}
+                {/*    </Nav.Item>*/}
+                {/*    <Nav.Item>*/}
+                {/*        <Nav.Link as={Link} to='/'>//users Roles</Nav.Link>*/}
+                {/*    </Nav.Item>*/}
+                {/*</Nav>*/}
                 <Card>
                     <Card.Body>
                         <Card.Text>
                             Username: {this.state.userInfo.username}
                         </Card.Text>
                         <Card.Text>
-                            First name: {this.state.userInfo.firstName}
-                        </Card.Text>
-                        <Card.Text>
-                            Last name: {this.state.userInfo.lastName}
-                        </Card.Text>
-                        <Card.Text>
-                            User id: {this.state.userInfo.userId}
-                        </Card.Text>
-                        <Card.Text>
-                            Email: {this.state.userInfo.email}
+                            User id: {this.state.userInfo.id}
                         </Card.Text>
                         <Card.Text>
                             Joined: {date.toLocaleString()}
-                        </Card.Text>
-                        <Card.Text>
-                            Total Subscribed Forums:
                         </Card.Text>
                         <Nav fill variant="tabs" defaultActiveKey="/">
                             <Nav.Item>

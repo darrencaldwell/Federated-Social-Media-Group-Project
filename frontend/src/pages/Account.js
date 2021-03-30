@@ -79,9 +79,6 @@ class Account extends React.Component {
                         <Card.Text>
                             Joined: {date.toLocaleString()}
                         </Card.Text>
-                        <Card.Text>
-                            Total Subscribed Forums:
-                        </Card.Text>
                         <Nav fill variant="tabs" defaultActiveKey="/">
                             <Nav.Item>
                                 {/*<Link as={Link} variant-"light" to='/'>Return home</.Link>*/}
