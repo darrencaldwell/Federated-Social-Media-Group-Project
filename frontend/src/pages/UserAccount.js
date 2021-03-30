@@ -38,11 +38,14 @@ class UserAccount extends React.Component {
                         'redirect-url': atob(this.props.match.params.userURL)
                     }
                 })
-                console.log('here')
-                console.log('here 2')
-            const result = res.json()
+            console.log('here')
+            console.log('res', res)
+            const result = await res.json()
             this.setState({userInfo: result}); // we store the json for the post in the state
-                console.log('result', res)
+            console.log('in cdm u info', this.state.userInfo)
+            console.log('here 2')
+                console.log('result', result)
+
         } catch (e) {
             alert("something went wrong")
             console.log(e)
@@ -52,16 +55,16 @@ class UserAccount extends React.Component {
 
 
     render() {
-        const date = new Date(this.state.userInfo.dateJoined * 1000)
+        const date = new Date(this.state.userInfo.createdTime * 1000)
         const forums_url = "/1/forums"
         console.log('user info', this.state.userInfo)
 
         return (
             <Container>
-                <Card.Title>Account for {this.props.userId}</Card.Title>
+                <Card.Title>Account for {this.state.userInfo.username}</Card.Title>
                 {/*<DisplayPicture uploadedPicture={false}/>*/}
                 <Container className="bio">
-                    <Card.Title>Your Bio</Card.Title>
+                    <Card.Title>Their Bio</Card.Title>
                     <Card>
                         <Card.Text>This is where the bio would go</Card.Text>
                     </Card>
