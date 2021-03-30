@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Card} from "react-bootstrap";
 import CardActionArea from '@material-ui/core/CardActionArea';
+import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
 // import '../styling/individualPost.css';

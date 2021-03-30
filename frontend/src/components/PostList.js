@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PostPreview from './PostPreview';
-import {Alert, Container, Spinner} from "react-bootstrap";
+import {Alert, Container, Spinner, Button} from "react-bootstrap";
+import {Link} from 'react-router-dom';
 import '../styling/container-pages.css';
 
 // props: match.params.impID, match.params.forumID, match.params.subforumID
@@ -18,8 +19,7 @@ class PostList extends Component {
         }
     }
 
-    // Runs when the component is loaded, fetching the list of posts into state
-    componentDidMount = async () => {
+    getPosts = async () => {
         try {
             // while fetching the list of posts, show a loading graphic
             this.setState({loading: true, listingPosts: false, listingPost: false});
@@ -42,6 +42,17 @@ class PostList extends Component {
             this.setState({postList: result_posts._embedded.postList, loading: false, listingPosts: true});
         } catch (e) {
             this.setState({loading: false});
+        }
+    }
+
+    // Runs when the component is loaded, fetching the list of posts into state
+    componentDidMount = () => {
+        this.getPosts();
+    }
+
+    componentDidUpdate = (oldProps) => {
+        if ( this.props.url !== oldProps.url) {
+            this.getPosts();
         }
     }
 
@@ -68,9 +79,9 @@ class PostList extends Component {
                             <PostPreview key={post.id} post={post} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID} subforumID={this.props.match.params.subforumID}/>
                         ))}
                     </Container>
-                    <a className="button" href={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + this.props.match.params.subforumID + '/new'}>
+                    <Button className="button" as={Link} to={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + this.props.match.params.subforumID + '/new'}>
                         New Post
-                    </a>
+                    </Button>
                 </div>)
 
 

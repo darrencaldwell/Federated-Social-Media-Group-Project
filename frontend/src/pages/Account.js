@@ -8,13 +8,17 @@ class Account extends React.Component {
 
     constructor(props) {
         super(props);
+
+        // console.log('constructor props',props)
         this.state = {
             uploadedPicture: false,
             userInfo: []
         }
     }
 
-    componentDidMount() {
+
+    componentDidMount = async () => {
+        // console.log('did mount props', this.props)
         axios.get('local/users/' + localStorage.getItem('userId'))
             .then(res => {
                 this.setState({
@@ -29,6 +33,7 @@ class Account extends React.Component {
     render() {
         const date = new Date(this.state.userInfo.dateJoined * 1000)
         const forums_url = "/1/forums"
+
         return (
             <Container>
                 <Card.Title>Your Account</Card.Title>
@@ -74,16 +79,15 @@ class Account extends React.Component {
                         <Card.Text>
                             Joined: {date.toLocaleString()}
                         </Card.Text>
-                        <Card.Text>
-                            Total Subscribed Forums:
-                        </Card.Text>
                         <Nav fill variant="tabs" defaultActiveKey="/">
                             <Nav.Item>
                                 {/*<Link as={Link} variant-"light" to='/'>Return home</.Link>*/}
-                                <Link to={'/'}><Button variant='light' as="input" type="button" value="Return home"/>{' '}</Link>
+                                <Link to={'/'}><Button variant='light' as="input" type="button"
+                                                       value="Return home"/>{' '}</Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Link to={forums_url}><Button variant='secondary' as="input" type="button" value="Go to Forums"/>{' '}</Link>
+                                <Link to={forums_url}><Button variant='secondary' as="input" type="button"
+                                                              value="Go to Forums"/>{' '}</Link>
                             </Nav.Item>
                         </Nav>
                     </Card.Body>

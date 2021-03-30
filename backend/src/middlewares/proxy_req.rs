@@ -17,10 +17,10 @@ use super::super::implementations::get_one;
 pub struct ProxyReq;
 
 impl<S: 'static, B> Transform<S> for ProxyReq
-where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-    S::Future: 'static,
-    B: 'static,
+    where
+        S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+        S::Future: 'static,
+        B: 'static,
 {
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
@@ -42,11 +42,11 @@ pub struct ProxyReqMiddleware<S> {
 }
 
 impl<S, B> Service for ProxyReqMiddleware<S>
-where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>
+    where
+        S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>
         + 'static,
-    S::Future: 'static,
-    B: 'static,
+        S::Future: 'static,
+        B: 'static,
 {
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
@@ -98,11 +98,11 @@ where
             let mut client_req = client.request(req.method().clone(), &dest_url_complete); // redirect should have url to redirect to "https://yeet.com"
             // add headers from front-end for content-type if exist
             if req.headers().contains_key("content-type") {
-                client_req.headers_mut().append(HeaderName::from_static("content-type"), 
+                client_req.headers_mut().append(HeaderName::from_static("content-type"),
                                                 req.headers().get("content-type").unwrap().clone());
             }
             if req.headers().contains_key("content-length") {
-                client_req.headers_mut().append(HeaderName::from_static("content-length"), 
+                client_req.headers_mut().append(HeaderName::from_static("content-length"),
                                                 req.headers().get("content-length").unwrap().clone());
             }
 
@@ -140,7 +140,7 @@ where
             let new_res = ServiceResponse::new(
                 http_req,
                 new_response.body(body).into_body(),
-                );
+            );
 
             Ok(new_res)
         })

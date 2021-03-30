@@ -1,10 +1,11 @@
-import React, { Component } from 'react'
-import {Card, Button} from "react-bootstrap";
-import {Container} from 'react-bootstrap';
-import '../styling/container-pages.css';
+import {React, Component } from 'react'
+import {Link} from 'react-router-dom'
+import {Card, Container, Button} from "react-bootstrap";
 import Avatar, {Cache} from 'react-avatar';
+
 import Voting from './Voting'
 import TimeSince from './TimeSince';
+import '../styling/container-pages.css';
 
 // for react avatar
 const cache = new Cache({
@@ -25,6 +26,12 @@ class Comment extends Component {
         this.state = {
             loading: true, // Set to true if loading
             parentID: this.props.comment._links.parentComment.href.substring(this.props.comment._links.parentComment.href.lastIndexOf('/') + 1)
+        }
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (this.props.url !== prevProps.url) {
+            this.componentDidMount();
         }
     }
 
@@ -115,6 +122,11 @@ class Comment extends Component {
                                 <a className="button reply-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
                                 </div>
                             </div>
+<<<<<<< HEAD
+=======
+                            <Card.Text className="mt-3">{this.props.comment.commentContent}</Card.Text>
+                            <Card.Link as={Link} to={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
+>>>>>>> master
                         </Card.Body>
                     <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} 
                               impID={this.props.impID} posturl={this.props.posturl} 
@@ -135,6 +147,12 @@ export default class Comments extends Component {
         this.state = {
             level: level,
             commentList: [] // the list of comments will be stored here
+        }
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (this.props.url !== prevProps.url) {
+            this.componentDidMount();
         }
     }
 
@@ -169,14 +187,18 @@ export default class Comments extends Component {
         if (this.state.expanded) {  // provide a link to return to the post
             return (
                 <Container>
-                    <a className="button" href={this.props.posturl}>Return</a>
+                    <Button className="button" as={Link} to={this.props.posturl}>Return</Button>
                     <Comments url={this.props.url} impID={this.props.impID} expanded={false} posturl={this.props.posturl}/>
                 </Container>
             )
         } else if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
             return (
                 <Container>
+<<<<<<< HEAD
                     <a className="button expand-button" href={this.props.posturl + "/" + this.props.parentID}>Expand</a>
+=======
+                    <Button className="button" as={Link} to={this.props.posturl + "/" + this.props.commentID}>Expand</Button>
+>>>>>>> master
                 </Container>
             )
         } else {

@@ -6,6 +6,7 @@ import BackButton from './BackButton';
 // import '../styling/Post.css';
 import '../styling/container-pages.css';
 import {Card, Container, Spinner} from "react-bootstrap";
+import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
 
@@ -21,6 +22,14 @@ export class Post extends Component {
             loading: true, // Set to true if loading
             post: {}, // the post is stored here once loaded
             post_author: {},
+        }
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (this.props.match.url !== prevProps.match.url) {
+            console.log("new url: " + this.props.match.url);
+            const expanded = (typeof this.props.match.params.commentID != 'undefined'); // it's an expanded comment if the url has the comment id
+            this.setState({expanded: expanded});
         }
     }
 
@@ -90,6 +99,8 @@ export class Post extends Component {
                                             : subforumURL;
         const url = this.state.expanded ? ('/api/comments/' + this.props.match.params.commentID + '/comments')
                                         : ('/api/posts/' + this.props.match.params.postID + '/comments');
+        console.log('post', this.state.post)
+        const parsed_user_link = btoa(this.state.post._links.user.href)
 
         return (
             <div className="post-wrapper">
@@ -114,6 +125,7 @@ export class Post extends Component {
                                         </Card.Subtitle>
                                         <Card.Subtitle className="text-muted mt-1 time-since">
                                             <TimeSince createdTime={this.state.post.createdTime} modifiedTime={this.state.post.modifiedTime}/>
+                                            <Card.Link href={'/user/' + parsed_user_link}>{this.state.post.username}</Card.Link>
                                         </Card.Subtitle>
                                     </div>
                                 </div>

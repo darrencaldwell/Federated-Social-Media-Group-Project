@@ -147,7 +147,7 @@ pub async fn insert_comment(post_id: u64,
         .await?
         .rows_affected();
 
-    if rows_affected != 1 {
+    if rows_affected == 0 {
         return Err(RequestError::NotFound(format!("user_id: {} not found", comment_request.user_id)))
     }
 
@@ -176,6 +176,7 @@ pub async fn insert_comment(post_id: u64,
         downvotes: 0,
         upvotes: 0,
         user_votes: Vec::with_capacity(0),
+        // this is a root comment so it is it's own parent
         links: gen_links(comment_id, comment_id, rec.user_endpoint.unwrap(), post_id, rec.subforum_id, rec.forum_id),
         user_id,
     })
@@ -225,7 +226,7 @@ pub async fn insert_child_comment(parent_id: u64,
         .await?
         .rows_affected();
 
-    if rows_affected != 1 {
+    if rows_affected == 0 {
         return Err(RequestError::NotFound(format!("user_id: {} not found", comment_request.user_id)))
     }
     tx.commit().await?;
@@ -253,7 +254,7 @@ pub async fn insert_child_comment(parent_id: u64,
         downvotes: 0,
         upvotes: 0,
         user_votes: Vec::with_capacity(0),
-        links: gen_links(comment_id, comment_id, rec.user_endpoint.unwrap(), post_id, rec.subforum_id, rec.forum_id),
+        links: gen_links(comment_id, parent_id, rec.user_endpoint.unwrap(), post_id, rec.subforum_id, rec.forum_id),
         user_id,
     })
 
@@ -275,7 +276,7 @@ pub async fn patch(comment_id: u64, comment: CommentPatchRequest, pool: &MySqlPo
         .await?
         .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
     } else {
         Ok(())
@@ -295,7 +296,7 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
         .await?
         .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("comment_id: {} not found", comment_id)))
     } else {
         Ok(())
@@ -305,20 +306,22 @@ pub async fn delete(comment_id: u64, pool: &MySqlPool) -> Result<(), RequestErro
 /// Get all top level comments within a post
 pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
-        r#"SELECT comment, comments.user_id, comments.comment_id, comments.created_time, comments.modified_time,
+        r#"SELECT comment, comments.user_id, comments.comment_id, comments.created_time, comments.modified_time, comments.parent_id,
         posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
         sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
         sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
         JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
             JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
-                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
         ) AS "user_votes",
-        CONCAT(i.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
         LEFT JOIN comments_votes cv ON
             comments.comment_id = cv.comment_id
-        LEFT JOIN implementations i ON
-            comments.implementation_id = i.implementation_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -343,7 +346,8 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
                 downvotes: rec.downvotes.to_u64().unwrap(),
                 upvotes: rec.upvotes.to_u64().unwrap(),
                 user_votes,
-                links: gen_links(rec.comment_id, rec.comment_id, rec.user_endpoint.unwrap(), post_id,
+                // use parent id if not null, else use comment_id
+                links: gen_links(rec.comment_id, rec.parent_id.unwrap_or(rec.comment_id), rec.user_endpoint.unwrap(), post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
             }
@@ -363,19 +367,22 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
 pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Comments> {
     let recs = sqlx::query!(
         r#"SELECT comment, comments.user_id, comments.comment_id, comments.post_id, comments.created_time, comments.modified_time,
+        comments.parent_id,
         posts.subforum_id AS "subforum_id!", subforums.forum_id AS "forum_id!", username AS "username!",
         sum(case when cv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
         sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
         JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
             JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
-                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
         ) AS "user_votes",
-        CONCAT(i.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
         LEFT JOIN comments_votes cv ON
             comments.comment_id = cv.comment_id
-        LEFT JOIN implementations i ON
-            comments.implementation_id = i.implementation_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
@@ -400,7 +407,8 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
                 downvotes: rec.downvotes.to_u64().unwrap(),
                 upvotes: rec.upvotes.to_u64().unwrap(),
                 user_votes,
-                links: gen_links(rec.comment_id, rec.comment_id, rec.user_endpoint.unwrap(), rec.post_id,
+                // use parent id if not null, else use comment_id
+                links: gen_links(rec.comment_id, rec.parent_id.unwrap_or(rec.comment_id), rec.user_endpoint.unwrap(), rec.post_id,
                                  rec.subforum_id, rec.forum_id),
                 user_id: rec.user_id,
             }
@@ -433,14 +441,16 @@ pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
         sum(case when cv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
         JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
             JSON_OBJECT("isUpvote", (CASE WHEN is_upvote = 1 then true WHEN is_upvote = 0 THEN false END), "user",
-                CONCAT(i.implementation_url, '/api/users/', cv.user_id)))
+                CONCAT(i_cv.implementation_url, '/api/users/', cv.user_id)))
         ) AS "user_votes",
-        CONCAT(i.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
+        CONCAT(i_c.implementation_url, '/api/users/', comments.user_id) AS user_endpoint
         FROM comments
         LEFT JOIN comments_votes cv ON
             comments.comment_id = cv.comment_id
-        LEFT JOIN implementations i ON
-            comments.implementation_id = i.implementation_id
+        LEFT JOIN implementations i_cv ON
+            cv.implementation_id = i_cv.implementation_id
+        LEFT JOIN implementations i_c ON
+            comments.implementation_id = i_c.implementation_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
         LEFT JOIN users on comments.user_id = users.user_id

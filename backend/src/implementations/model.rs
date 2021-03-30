@@ -122,7 +122,7 @@ pub async fn put(implementation_id: u64, implementation: ImplementationRequest, 
     .await?
     .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("implementation_id: {} not found", implementation_id)))
     } else {
         Ok(())
@@ -140,7 +140,7 @@ pub async fn delete(implementation_id: u64, pool: &MySqlPool) -> Result<(), Requ
     .await?
     .rows_affected();
 
-    if number_modified != 1 {
+    if number_modified == 0 {
         Err(RequestError::NotFound(format!("implementation_id: {} not found", implementation_id)))
     } else {
         Ok(())

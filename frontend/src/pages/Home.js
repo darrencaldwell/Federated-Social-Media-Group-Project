@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Container, Jumbotron, Button, Dropdown, Card} from "react-bootstrap";
+import {Container, Jumbotron, Button, Card} from "react-bootstrap";
 import {Link} from 'react-router-dom';
 import "./../styling/home.css";
 
@@ -20,47 +20,47 @@ class Home extends Component {
 
     // Runs when the component is loaded, fetching the list of implementations to load into state
     componentDidMount = async () => {
-        try {
-            // the url needs the post id from the props
-            let url = '/local/implementations';
-            let res = await fetch(url
-                , {
-                    method: 'get', // we're making a GET request
+        //try {
+        //    // the url needs the post id from the props
+        //    let url = '/local/implementations';
+        //    let res = await fetch(url
+        //        , {
+        //            method: 'get', // we're making a GET request
 
-                    withCredentials: true, // we're using authorisation with a token in local storage
-                    credentials: 'include',
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token'),
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                }
-            );
+        //            withCredentials: true, // we're using authorisation with a token in local storage
+        //            credentials: 'include',
+        //            headers: {
+        //                'Authorization': "Bearer " + localStorage.getItem('token'),
+        //                'Content-Type': 'application/json',
+        //                'Accept': 'application/json'
+        //            }
+        //        }
+        //    );
 
-            let result = await res.json(); // we know the result will be json
-            this.setState({impList: result._embedded.implementationList }); // we store the json for the post in the state
-            // the url needs the post id from the props
+        //    let result = await res.json(); // we know the result will be json
+        //    this.setState({impList: result._embedded.implementationList }); // we store the json for the post in the state
+        //    // the url needs the post id from the props
 
-            url = '/local/implementations/' + this.state.impID; // get the name of the current implementation
-            res = await fetch(url
-                , {
-                    method: 'get', // we're making a GET request
+        //    url = '/local/implementations/' + this.state.impID; // get the name of the current implementation
+        //    res = await fetch(url
+        //        , {
+        //            method: 'get', // we're making a GET request
 
-                    withCredentials: true, // we're using authorisation with a token in local storage
-                    credentials: 'include',
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token'),
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                }
-            );
+        //            withCredentials: true, // we're using authorisation with a token in local storage
+        //            credentials: 'include',
+        //            headers: {
+        //                'Authorization': "Bearer " + localStorage.getItem('token'),
+        //                'Content-Type': 'application/json',
+        //                'Accept': 'application/json'
+        //            }
+        //        }
+        //    );
 
-            result = await res.json(); // we know the result will be json
-            this.setState({impName: result.name }); // we store the json for the post in the state
+        //    result = await res.json(); // we know the result will be json
+        //    this.setState({impName: result.name }); // we store the json for the post in the state
 
-        } catch (e) {
-        }
+        //} catch (e) {
+        //}
     }
 
     render() {
@@ -85,11 +85,6 @@ class Home extends Component {
                         <Card.Body>
                             choose a different implementation:
                         </Card.Body>
-                    <Dropdown>
-                        {this.state.impList.map((impl) => (
-                            <Dropdown.Item key={impl.id} href={"/" + impl.id}>{impl.name}</Dropdown.Item>
-                        ))}
-                    </Dropdown>
                     </Card>
                 </Container>
             )

@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import CreateForum from "./components/CreateForum";
 import CreatePost from "./components/CreatePost";
 import CreateSubforum from "./components/CreateSubforum";
+import Chat from "./components/Chat";
 import ForumList from "./components/ForumList";
 import Post from "./components/Post";
 import PostList from "./components/PostList";
@@ -19,11 +20,35 @@ import EditPost from "./components/EditPost";
 import EditComment from "./components/EditComment";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styling/container-pages.css';
+import UserAccount from "./pages/UserAccount";
 // import BackButton from "./components/BackButton";
 
 class App extends React.Component {
-    componentDidMount() {
+    componentDidMount = async () => {
         document.title = 'St BeeFives'
+        try {
+            // the url needs the post id from the props
+            let url = '/local/implementations';
+            let res = await fetch(url
+                , {
+                    method: 'get', // we're making a GET request
+
+                    withCredentials: true, // we're using authorisation with a token in local storage
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token'),
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            let result = await res.json(); // we know the result will be json
+            this.setState({imp: {name: "local", id: 1}, impList: result._embedded.implementationList }); // we store the json for the post in the state
+
+        } catch (e) {
+            console.log("error: " + e);
+        }
     }
     constructor(props) {
         super(props);
@@ -39,27 +64,32 @@ class App extends React.Component {
         this.setState({token: localStorage.getItem('token')});
     }
 
+    changeImp = (imp) => {
+        this.setState({imp: imp});
+    }
+
     /**
      *
      * @returns {JSX.Element}
      */
     render() {
         // Whether user is logged in or logged out
-        const {token} = this.state;
+        const {token, impList, imp} = this.state;
         return (
-
             <Router>
                 <div className="App">
                     {/* Pass the state onto Nav bar about state of user login /*/}
-                    <NavigationBar isLoggedIn={token} logout={this.logout}/>
+                    <NavigationBar imps={impList} currImp={imp} changeImp={this.changeImp} isLoggedIn={token} logout={this.logout}/>
                     {/*<BackButton/>*/}
                     <div className="columns">
                         <Switch>
+                            <Route exact path="/user/:userURL"/>
                             <Route path="/:impID/:something" component={ForumList}/>
                         </Switch>
                         <Switch>
                             <Route exact path="/:impID/forums"/>
                             <Route exact path="/:impID/new"/>
+                            <Route exact path="/user/:userURL"/>
                             <Route path="/:impID/:forumID" component={SubforumList}/>  {/*SubForumList gets forum ID from this.props.match.params.forumID */}
                         </Switch>
                         <Switch>
@@ -68,9 +98,15 @@ class App extends React.Component {
                             <Route exact path="/register" component={Register}/> {/*registration page*/}
                             <Route exact path="/usercomments" component={AccountComments}/>
                             <Route exact path="/userposts" component={AccountPosts}/>
+
+                            {/*<Route exact path="/user/:id/comments" component={AccountComments}/>*/}
+                            {/*<Route exact path="/user/:id/posts" component={AccountPosts}/>*/}
+
+                            {/*<Route exact path="/userposts" component={AccountPosts}/>*/}
                             {/*these should all contain some sort of identifier for the instance, but that is not implemented yet*/}
                             <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
-                            {/*<Route exact path="/account" component={() => <Account user={this.user_id}}/>}/>*/}
+                            <Route exact path="/user/:userURL" component={UserAccount}/>
+                            {/*<Route exact path="/user/:impID/:userId" component={UserAccount}/>*/}
 
                             <Route exact path="/:impID" component={props => <Home {...props} user={this.state.user}/>}/> {/*default homepage*/}
 
@@ -78,6 +114,7 @@ class App extends React.Component {
                             <Route exact path="/:impID/new" component={CreateForum}/> {/*page to create a new forum*/}
                             <Route exact path="/:impID/:forumID"/> {/*could have forum info here*/}
 
+                            <Route exact path="/:impID/:forumID/chat" component={Chat}/> {/*could have forum info here*/}
                             <Route exact path="/:impID/:forumID/new" component={CreateSubforum}/> {/*page to create a new subforum in the forum*/}
                             <Route exact path="/:impID/:forumID/:subforumID" component={PostList}/> {/*page for a specific subforum*/}
 
