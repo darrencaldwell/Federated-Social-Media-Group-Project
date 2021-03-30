@@ -10,7 +10,7 @@ class Make extends React.Component {
         this.changeBody = this.changeBody.bind(this); // bind this so it can override onChange
         const url = ("/api/comments/" + this.props.match.params.commentID);
         this.state = {
-            buttonText: 'Create Comment',
+            buttonText: 'Submit',
             bodyText: "", // body starts as empty
             url: url
         };
@@ -85,7 +85,7 @@ class Make extends React.Component {
             <Container>
                 <BackButton url={backURL}/>
                 <Form className="createComment">
-                    <Form.Label>Create Comment</Form.Label>
+                    <Form.Label>Edit Comment</Form.Label>
                     <FormGroup controlId="create-title">
                         {/*Clicking in this box removes the placeholder, typing in it calls the change function to update state*/}
                         <Form.Control onChange={this.changeBody} as="textarea" rows={3} value={this.state.bodyText}/>
