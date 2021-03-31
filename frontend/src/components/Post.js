@@ -6,7 +6,7 @@ import BackButton from './BackButton';
 // import '../styling/Post.css';
 import '../styling/container-pages.css';
 import {Card, Container, Spinner} from "react-bootstrap";
-import {Link} from 'react-router-dom';
+//import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
 
