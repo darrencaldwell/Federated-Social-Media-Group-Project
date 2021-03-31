@@ -1,8 +1,8 @@
 import React from "react";
 import {Button, Card, Container, Nav} from "react-bootstrap";
 import {Link, Redirect} from "react-router-dom";
-import DisplayPicture from "../components/account/DisplayPicture";
-import axios from 'axios'
+//import DisplayPicture from "../components/account/DisplayPicture";
+//import axios from 'axios'
 
 class UserAccount extends React.Component {
 

@@ -1,5 +1,6 @@
 
 import React, {Component} from 'react';
+import '../styling/container-pages.css';
 
 // returns the time between a given time and now
 // props: createdTime, modifiedTime (to determine if we need to show modified time)
@@ -68,9 +69,9 @@ class TimeSince extends Component {
             date_string = getTimeSince(diff)
         }
         return (
-            <React.Fragment>
-            {date_string}
-            </React.Fragment>
+            <div>
+                {date_string}
+            </div>
         )
     }
 }

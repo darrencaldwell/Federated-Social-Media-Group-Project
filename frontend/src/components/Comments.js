@@ -22,8 +22,10 @@ class Comment extends Component {
 
     constructor(props) {
         super(props);
+        this.delete = this.delete.bind(this); // bind this so it can override onClick
         this.state = {
             loading: true, // Set to true if loading
+            parentID: this.props.comment._links.parentComment.href.substring(this.props.comment._links.parentComment.href.lastIndexOf('/') + 1)
         }
     }
 
@@ -61,6 +63,25 @@ class Comment extends Component {
         }
     }
 
+    delete() {
+        // this is the HTML request
+        fetch("/api/comments/" + this.props.comment.id, {
+            method: "DELETE",
+            withCredentials: true,
+            credentials: 'include',
+            headers: {
+                'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                'Content-Type': 'application/json',
+                'redirect': this.props.impID
+            }
+
+        }).then(responseJson => { // log the response for debugging
+            console.log(responseJson);
+        }).catch(error => this.setState({ // catch any error
+            message: "Error posting post: " + error
+        }));
+    }
+
     render() {
         if (this.state.loading) {
             return (
@@ -68,38 +89,50 @@ class Comment extends Component {
             )
         }
             return (
-                <Card border="dark">
+                
+                <Card border="dark small-separator">
                         <Card.Body>
-                            <div className="post-comment-voting-container">
-                                <Voting className="voting-post"
-                                    upvotes={this.props.comment.upvotes} 
-                                    downvotes={this.props.comment.downvotes} 
-                                    _userVotes={this.props.comment._userVotes}
-                                    type="comments"
-                                    postID={this.props.comment.id}
-                                    impID={this.props.impID}
-                                ></Voting>
-                                <div className="voting-adj">
+                            <div className="comment-columns">
+                                <div className="post-comment-voting-container">
+                                    <Voting className="voting-post"
+                                        upvotes={this.props.comment.upvotes} 
+                                        downvotes={this.props.comment.downvotes} 
+                                        _userVotes={this.props.comment._userVotes}
+                                        type="comments"
+                                        postID={this.props.comment.id}
+                                        impID={this.props.impID}
+                                    ></Voting>
+                                    <div className="voting-adj">
                                         <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture} name={this.props.comment.username}/> 
                                             {"  "} {this.props.comment.username} 
-                                    <Card.Subtitle className="text-muted mt-1">
-                                        <TimeSince createdTime={this.props.comment.createdTime}/>
-                                    </Card.Subtitle>
-                                    <Card.Subtitle className="text-muted mt-1">
-                                         <TimeSince createdTime={this.props.comment.createdTime} modifiedTime={this.props.comment.modifiedTime}/>
-                                    </Card.Subtitle>
+                                        <Card.Subtitle className="text-muted mt-1 time-since">
+                                            <TimeSince createdTime={this.props.comment.createdTime}/>
+                                        </Card.Subtitle>
+                                        <Card.Subtitle className="text-muted mt-1 time-since">
+                                             <TimeSince createdTime={this.props.comment.createdTime} modifiedTime={this.props.comment.modifiedTime}/>
+                                        </Card.Subtitle>
+                                    </div>
+                                </div>
+                                <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
+                                <div className="buttons">
+                                <div className="comment-columns">
+                                    <a className="button edit-button" href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</a>
+                                    <a className="button delete-button" onClick={() => this.delete()} href={this.props.posturl}>🗑</a>
+                                </div>
+                                <a className="button reply-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
                                 </div>
                             </div>
-                            <Card.Text className="mt-3">{this.props.comment.commentContent}</Card.Text>
-                            <Card.Link as={Link} to={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply to {this.props.comment.username}</Card.Link>
                         </Card.Body>
-                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} impID={this.props.impID} posturl={this.props.posturl} level={this.props.level + 1} commentID={this.props.comment.id}/>
+                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} 
+                              impID={this.props.impID} posturl={this.props.posturl} 
+                              level={this.props.level + 1} commentID={this.props.comment.id} parentID={this.state.parentID}/>
+                    
                 </Card>
         )
     }
 }
 
-// props: url, posturl, impID, level, commentID
+// props: url, posturl, impID, level, commentID, parentID
 export default class Comments extends Component {
     constructor(props) {
         super(props);
@@ -145,7 +178,7 @@ export default class Comments extends Component {
         }
     }
 
-    render() {
+    render() {        
         if (this.state.expanded) {  // provide a link to return to the post
             return (
                 <Container>
@@ -156,7 +189,7 @@ export default class Comments extends Component {
         } else if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
             return (
                 <Container>
-                    <Button className="button" as={Link} to={this.props.posturl + "/" + this.props.commentID}>Expand</Button>
+                    <a className="button expand-button" href={this.props.posturl + "/" + this.props.parentID}>Expand</a>
                 </Container>
             )
         } else {
