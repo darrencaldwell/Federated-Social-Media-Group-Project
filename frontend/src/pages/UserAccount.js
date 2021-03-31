@@ -8,10 +8,6 @@ class UserAccount extends React.Component {
 
     constructor(props) {
         super(props);
-        console.log('made it to user account')
-        console.log('props ye',props)
-        // console.log('constructor props->',this.props.match.params.userId)
-        // console.log('constructor props field id->',props.user.userId)
         this.state = {
             uploadedPicture: false,
             userInfo: []
@@ -25,8 +21,6 @@ class UserAccount extends React.Component {
             let user_id = /[^/]*$/.exec(atob(this.props.match.params.userURL))[0];
             let url = "/api/users/" + user_id
 
-            console.log('user id', user_id)
-            console.log('url', url)
             let res = await fetch(url
                 , {
                     method: 'get',
@@ -38,16 +32,10 @@ class UserAccount extends React.Component {
                         'redirect-url': atob(this.props.match.params.userURL)
                     }
                 })
-            console.log('here')
-            console.log('res', res)
             const result = await res.json()
             this.setState({userInfo: result}); // we store the json for the post in the state
-            console.log('in cdm u info', this.state.userInfo)
-            console.log('here 2')
-                console.log('result', result)
 
         } catch (e) {
-            alert("something went wrong")
             console.log(e)
         }
 
@@ -57,7 +45,6 @@ class UserAccount extends React.Component {
     render() {
         const date = new Date(this.state.userInfo.createdTime * 1000)
         const forums_url = "/1/forums"
-        console.log('user info', this.state.userInfo)
 
         if (this.state.userInfo.id === localStorage.getItem('userId')) {
             return <Redirect to={'/account'}/>

@@ -96,20 +96,8 @@ export class Post extends Component {
                             ></Voting>
                             <div className="voting-adj">
                             <Card.Title>{this.state.post.postTitle}</Card.Title>
-                                {/*<Route exact path="/user/:id" component={() => <UserAccount user={this.state.post_author}/>}/>*/}
                             <Card.Subtitle className="text-muted">
-                                {/*<Account user_id={this.state.post_author.userId}/>*/}
-                                {/*{console.log('info on post author',this.state.post_author)}*/}
-                                {/*{console.log('before linking to /user/'+this.state.post_author.userId)}*/}
-                                {/*{console.log('user link', this.state.post_author._links.self.href)}*/}
-
-                                {/*<Route name="" path="/users/:id" handler={User} />*/}
-                                {/*<UserAccount user={this.state.post_author}/>*/}
-                                {/*Post made by: <Link to={{pathname:"/users/" + this.state.post_author.userId, props:{user: this.state.post_author}}}>{this.state.post_author.user}</Link>*/}
-                                {/*<Route exact path="/user/:id" component={() => <UserAccount user={this.state.post_author}/>}/>*/}
-                                {/*Post made by: <Card.Link to={'/user/' + this.state.post_author} user={this.state.post_author}>{this.state.post_author}</Card.Link>*/}
                                 <Card.Link href={'/user/' + parsed_user_link}>{this.state.post.username}</Card.Link>
-                                {/*Post made by: <Card.Link href={"/user/" + this.state.post_author.userId}>{this.state.post_author.username}</Card.Link> on TIME*/}
                             </Card.Subtitle>
                             </div>
                             </div>
