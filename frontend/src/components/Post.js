@@ -99,7 +99,6 @@ export class Post extends Component {
                                             : subforumURL;
         const url = this.state.expanded ? ('/api/comments/' + this.props.match.params.commentID + '/comments')
                                         : ('/api/posts/' + this.props.match.params.postID + '/comments');
-        console.log('post', this.state.post)
         const parsed_user_link = btoa(this.state.post._links.user.href)
 
         return (
@@ -135,7 +134,10 @@ export class Post extends Component {
                                 </Card.Body>
                                 <div className="post-buttons">
                                     <a className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</a>
-                                    <a className="button delete-button" onClick={() => this.delete()} href={subforumURL} >🗑</a>
+                                    <a className='button delete-button' onClick={() => {
+                                        if (window.confirm('Are you sure you wish to delete this post?')) this.delete()
+                                    }}
+                                       href={subforumURL}>🗑</a>
                                 </div>
                             </div>
                         </Card.Body>

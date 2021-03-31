@@ -1,4 +1,4 @@
-import {React, Component } from 'react'
+import {React, Component} from 'react'
 import {Link} from 'react-router-dom'
 import {Card, Container, Button} from "react-bootstrap";
 import Avatar, {Cache} from 'react-avatar';
@@ -84,50 +84,56 @@ class Comment extends Component {
 
     render() {
         if (this.state.loading) {
-            return (
-                null
-            )
+            return null
         }
-            return (
-                
-                <Card border="dark small-separator">
-                        <Card.Body>
-                            <div className="comment-columns">
-                                <div className="post-comment-voting-container">
-                                    <Voting className="voting-post"
-                                        upvotes={this.props.comment.upvotes} 
-                                        downvotes={this.props.comment.downvotes} 
-                                        _userVotes={this.props.comment._userVotes}
-                                        type="comments"
-                                        postID={this.props.comment.id}
-                                        impID={this.props.impID}
-                                    ></Voting>
-                                    <div className="voting-adj">
-                                        <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture} name={this.props.comment.username}/> 
-                                            {"  "} {this.props.comment.username} 
-                                        <Card.Subtitle className="text-muted mt-1 time-since">
-                                            <TimeSince createdTime={this.props.comment.createdTime}/>
-                                        </Card.Subtitle>
-                                        <Card.Subtitle className="text-muted mt-1 time-since">
-                                             <TimeSince createdTime={this.props.comment.createdTime} modifiedTime={this.props.comment.modifiedTime}/>
-                                        </Card.Subtitle>
-                                    </div>
-                                </div>
-                                <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
-                                <div className="buttons">
-                                <div className="comment-columns">
-                                    <a className="button edit-button" href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</a>
-                                    <a className="button delete-button" onClick={() => this.delete()} href={this.props.posturl}>🗑</a>
-                                </div>
-                                <a className="button reply-button" href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
-                                </div>
+        return (
+            <Card border="dark small-separator">
+                <Card.Body>
+                    <div className="comment-columns">
+                        <div className="post-comment-voting-container">
+                            <Voting className="voting-post"
+                                    upvotes={this.props.comment.upvotes}
+                                    downvotes={this.props.comment.downvotes}
+                                    _userVotes={this.props.comment._userVotes}
+                                    type="comments"
+                                    postID={this.props.comment.id}
+                                    impID={this.props.impID}
+                            ></Voting>
+                            <div className="voting-adj">
+                                <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture}
+                                        name={this.props.comment.username}/>
+                                {"  "} {this.props.comment.username}
+                                <Card.Subtitle className="text-muted mt-1 time-since">
+                                    <TimeSince createdTime={this.props.comment.createdTime}/>
+                                </Card.Subtitle>
+                                <Card.Subtitle className="text-muted mt-1 time-since">
+                                    <TimeSince createdTime={this.props.comment.createdTime}
+                                               modifiedTime={this.props.comment.modifiedTime}/>
+
+                                </Card.Subtitle>
                             </div>
-                        </Card.Body>
-                    <Comments url={"/api/comments/" + this.props.comment.id + "/comments"} 
-                              impID={this.props.impID} posturl={this.props.posturl} 
-                              level={this.props.level + 1} commentID={this.props.comment.id} parentID={this.state.parentID}/>
-                    
-                </Card>
+                        </div>
+                        <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
+                        <div className="buttons">
+                            <div className="comment-columns">
+                                <a className="button edit-button"
+                                   href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</a>
+                                <a className='button delete-button' onClick={() => {
+                                    if (window.confirm('Are you sure you wish to delete this comment?')) this.delete()
+                                }}
+                                   href={this.props.posturl}>🗑</a>
+                            </div>
+                            <a className="button reply-button"
+                               href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
+                        </div>
+                    </div>
+                </Card.Body>
+                <Comments url={"/api/comments/" + this.props.comment.id + "/comments"}
+                          impID={this.props.impID} posturl={this.props.posturl}
+                          level={this.props.level + 1} commentID={this.props.comment.id}
+                          parentID={this.state.parentID}/>
+
+            </Card>
         )
     }
 }
@@ -138,7 +144,7 @@ export default class Comments extends Component {
         super(props);
         const root = (typeof this.props.level == 'undefined'); // it's a root comment if the comment ID is undefined
         const level = root ? (0)
-                         : (this.props.level);
+            : (this.props.level);
         this.state = {
             level: level,
             commentList: [] // the list of comments will be stored here
@@ -171,19 +177,20 @@ export default class Comments extends Component {
             );
 
             let result = await res.json(); // we know the result will be json
-            this.setState({commentList: result._embedded.commentList }); // we store the json for the list of comments in the state
+            this.setState({commentList: result._embedded.commentList}); // we store the json for the list of comments in the state
 
         } catch (e) {
             console.log(e);
         }
     }
 
-    render() {        
+    render() {
         if (this.state.expanded) {  // provide a link to return to the post
             return (
                 <Container>
                     <Button className="button" as={Link} to={this.props.posturl}>Return</Button>
-                    <Comments url={this.props.url} impID={this.props.impID} expanded={false} posturl={this.props.posturl}/>
+                    <Comments url={this.props.url} impID={this.props.impID} expanded={false}
+                              posturl={this.props.posturl}/>
                 </Container>
             )
         } else if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
@@ -195,15 +202,16 @@ export default class Comments extends Component {
         } else {
 
             // if there are comments, display them
-            return(
+            return (
                 <Container>
                     {/*map is used to apply this html for each comment in the list */}
                     {this.state.commentList.map((comment) => (
                         // the Comment element above is used for this, which takes the comment json
-                        <Comment key={comment.id} comment={comment} impID={this.props.impID} level={this.state.level} posturl={this.props.posturl}/>
+                        <Comment key={comment.id} comment={comment} impID={this.props.impID} level={this.state.level}
+                                 posturl={this.props.posturl}/>
                     ))}
                 </Container>
             )
-        } 
+        }
     }
 }
