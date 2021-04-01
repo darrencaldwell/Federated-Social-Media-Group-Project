@@ -39,12 +39,18 @@ pub struct ClientMessage {
 #[derive(Serialize)]
 struct JoinMessage {
     pub message_type: routes::MessageType,
-    pub user_list: Vec<String>
+    pub user_list: Vec<Entry>,
+}
+
+#[derive(Serialize)]
+struct Entry {
+    user_id: String,
+    user_name: String,
 }
 
 pub struct ChatServer {
     sessions: HashMap<String, Recipient<Message>>,
-    rooms: HashMap<String, HashSet<String>>,
+    rooms: HashMap<String, HashMap<String, String>>,
     rng: ThreadRng,
     visitor_count: Arc<AtomicUsize>,
 }
@@ -61,7 +67,7 @@ impl ChatServer {
 
     fn send_message(&self, room: &str, message: &str, skip_id: String) {
         if let Some(sessions) = self.rooms.get(room) {
-            for id in sessions {
+            for (id, name) in sessions {
                 if *id != skip_id {
                     if let Some(addr) = self.sessions.get(id) {
                         let _ = addr.do_send(Message(message.to_owned()));
@@ -74,7 +80,10 @@ impl ChatServer {
     fn greet(&self, id: &str, room: &str) {
         if let Some(addr) = self.sessions.get(id) {
             if let Some(user_list) = self.rooms.get(room) {
-                let user_list: Vec<String> = user_list.clone().into_iter().collect();
+                let user_list: Vec<Entry> = user_list
+                        .iter()
+                        .map(|(id, name)| Entry { user_id: id.clone(), user_name: name.clone() })
+                        .collect();
                 let msg = JoinMessage {
                     message_type: routes::MessageType::UserList,
                     user_list,
@@ -99,8 +108,8 @@ impl Handler<Connect> for ChatServer {
 
         self.rooms
             .entry(msg.room.clone())
-            .or_insert_with(HashSet::new)
-            .insert(msg.id.clone());
+            .or_insert_with(HashMap::new)
+            .insert(msg.id.clone(), msg.user_name.clone());
 
         let join_msg = routes::Message {
             message_type: routes::MessageType::Connect,
@@ -123,7 +132,7 @@ impl Handler<Disconnect> for ChatServer {
 
         if self.sessions.remove(&msg.id).is_some() {
             for (name, sessions) in &mut self.rooms {
-                if sessions.remove(&msg.id) {
+                if sessions.remove(&msg.id).is_some() {
                     rooms.push(name.to_owned());
                 }
             }
