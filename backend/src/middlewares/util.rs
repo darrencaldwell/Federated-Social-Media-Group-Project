@@ -19,10 +19,10 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
 
     // create signature-input header
     // need sig1=(x, y, z); keyId=x
-    let header_string = "sig1=(*request-target, date, user-id); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=RSASSA-PSS-SHA512";
+    let header_string = "sig1=(*request-target, current-date, user-id); keyId=https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/key; alg=RSASSA-PSS-SHA512";
     res_headers.insert(HeaderName::from_static("signature-input"), HeaderValue::from_static(header_string));
-    let date = Date(SystemTime::now().into());
-    res_headers.insert(HeaderName::from_static("date"), HeaderValue::from_str(&date.to_string())?);
+    let current_date = Date(SystemTime::now().into());
+    res_headers.insert(HeaderName::from_static("current-date"), HeaderValue::from_str(&current_date.to_string())?);
 
     // Only case where we sign a signature with no id is when sending an error resposne
     let user;
@@ -36,10 +36,10 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
     // sign
     // TODO: check if we want to not just create our own host header, instead of using the
     // others host
-    let string_to_sign = format!("*request-target: {} {}\ndate: {}\nuser-id: {}",
+    let string_to_sign = format!("*request-target: {} {}\ncurrent-date: {}\nuser-id: {}",
     req_method.to_lowercase(),
     req_path,
-    date.to_string(),
+    current_date.to_string(),
     user);
 
     let mut signer = Signer::new(MessageDigest::sha512(), &private_key)?;
