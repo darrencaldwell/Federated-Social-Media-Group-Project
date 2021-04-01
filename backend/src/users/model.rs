@@ -1,12 +1,13 @@
 use anyhow::Result;
 use serde::{Serialize, Deserialize};
 use bcrypt::hash;
-use sqlx::{Row, FromRow, MySqlPool};
+use sqlx::{Row, Done, FromRow, MySqlPool};
 use crate::comments::{Comments, Comment, CommentList, gen_links as gen_comment_links, SelfLink, Link as CommentLink};
 use crate::posts::{Post, PostList, Embedded as PostEmbedded, generate_post_links};
 use super::super::voting::parse_mariadb;
 use chrono::{DateTime, Utc};
 use bigdecimal::ToPrimitive;
+use crate::request_errors::RequestError;
 
 /// Represents an entire user
 #[derive(Serialize, FromRow)]
@@ -35,6 +36,7 @@ pub struct LocalUser {
     pub first_name: String,
     pub last_name: String,
     pub email: String,
+    pub description: String,
     #[serde(rename = "_links")]
     pub links: UserLinks,
     pub date_joined: i64,
@@ -111,6 +113,36 @@ pub struct LoginResponse {
 /// Enumeration of all login errors
 pub enum LoginError {
     InvalidHash,
+}
+
+/// Represents a request to modify a user
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserPatchRequest {
+    pub description: String,
+}
+
+/// Modifies an existing user bio
+pub async fn patch_user_bio(user_id: String, user: UserPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
+
+    let bio_modified = sqlx::query!(
+        r#"
+        UPDATE users
+        SET description = ?
+        WHERE user_id = ?
+        "#,
+        user.description,
+        user_id
+    )
+        .execute(pool)
+        .await?
+        .rows_affected();
+
+    if bio_modified == 0 {
+        Err(RequestError::NotFound(format!("user_id: {} not found", user_id)))
+    } else {
+        Ok(())
+    }
 }
 
 /// Generates links to point to user and users endpoint
@@ -305,7 +337,7 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
 pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser> {
     let rec = sqlx::query!(
         r#"
-        SELECT username, first_name, last_name, user_id, email, date_joined, 
+        SELECT username, first_name, last_name, description, user_id, email, date_joined, 
             CASE WHEN profile_picture IS NOT NULL THEN 
                 CONCAT('https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/',user_id,'/profilepicture')
                 ELSE 'https://ksr-ugc.imgix.net/assets/011/966/553/23c6dcdf71e75a951f9a7067164852e5_original.png?ixlib=rb-2.1.0&crop=faces&w=1552&h=873&fit=crop&v=1463719973&auto=format&frame=1&q=92&s=acb4111ef541f9f9488608adbb991fab'
@@ -321,6 +353,7 @@ pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser>
         local_user_id: user_id,
         first_name: rec.first_name.unwrap(),
         last_name: rec.last_name.unwrap(),
+        description: rec.description.unwrap(),
         email: rec.email.unwrap(),
         date_joined: rec.date_joined.timestamp(),
         profile_image_url: rec.profile_picture.unwrap(),
@@ -359,6 +392,7 @@ pub async fn register(username: String, password: String, first_name: String, la
         email,
         date_joined: date_joined_ts,
         profile_image_url: "https://ksr-ugc.imgix.net/assets/011/966/553/23c6dcdf71e75a951f9a7067164852e5_original.png?ixlib=rb-2.1.0&crop=faces&w=1552&h=873&fit=crop&v=1463719973&auto=format&frame=1&q=92&s=acb4111ef541f9f9488608adbb991fab".to_string(),
+        description: "".to_string()
     };
 
     Ok(local_user)

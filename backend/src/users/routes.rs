@@ -1,12 +1,31 @@
 use super::model;
 use crate::auth;
-use actix_web::{get, post, web, HttpResponse, Responder, Error, http::StatusCode, dev::HttpResponseBuilder};
+use actix_web::{get, post, patch, web, HttpResponse, Responder, Error, http::StatusCode, dev::HttpResponseBuilder};
 use sqlx::MySqlPool;
 use crate::id_extractor::UserId;
 use crate::implementation_id_extractor::ImplementationId;
 use actix_multipart as mp;
 use futures_util::stream::StreamExt;
 use log::info;
+use crate::request_errors::RequestError;
+
+#[patch("/local/users/{id}")]
+async fn patch_user_bio(
+    web::Path(id): web::Path<String>,
+    pool: web::Data<MySqlPool>,
+    user: web::Json<model::UserPatchRequest>
+) -> impl Responder {
+    match model::patch_user_bio(id,user.into_inner(), &pool).await {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => {
+            info!("ROUTE ERROR: patch_user_bio: {}", e.to_string());
+            match e {
+                RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+                RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+            }
+        }
+    }
+}
 
 #[post("/local/users/{id}/profilepicture")]
 async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>, web::Path(id): web::Path<String>) -> Result<HttpResponse, Error> {
@@ -16,7 +35,7 @@ async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>,
 
         if !field.content_type().to_string().starts_with("image/") {
             return Ok(HttpResponse::BadRequest()
-                .body("Profile picutre must be image format."))
+                .body("Profile picutre must be image format."));
         }
 
         let mut vec: Vec<u8> = Vec::new();
@@ -39,6 +58,7 @@ async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>,
     }
     Ok(HttpResponse::Ok().into())
 }
+
 #[get("/api/users/{id}/profilepicture")]
 async fn get_profile_picture(pool: web::Data<MySqlPool>, web::Path(id): web::Path<String>) -> Result<HttpResponse, Error> {
     let img = sqlx::query!(
@@ -174,6 +194,7 @@ async fn get_user_comments(
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
+    cfg.service(patch_user_bio);
     cfg.service(get_users);
     cfg.service(get_user);
     cfg.service(get_account);
