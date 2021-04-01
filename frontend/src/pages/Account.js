@@ -1,9 +1,8 @@
 import React from "react";
-import {Button, Card, Container, Nav, Form, Col, FormGroup} from "react-bootstrap";
+import {Button, Card, Container, Nav, Form, FormGroup} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
 import axios from 'axios'
-import {Comment} from "@material-ui/icons";
 
 class Account extends React.Component {
 
