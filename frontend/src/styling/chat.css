@@ -1,12 +1,20 @@
-.recievedMessage {
+.rec {
     background-color: #bfdffc;
-    border: 1px solid #a5d3fb;
-    margin: 10px 10px;
+    border-radius: 0px!important;
+    border: 1px solid #383838!important;
+    border-top: 0px!important;
     width: 100%;
-    padding: 5px;
 }
 
-.sentMessage {
+.rec-body {
+    padding: 0.2rem!important;
+}
+
+.rec-title {
+    padding: 0rem!important;
+}
+
+.sent {
     background-color: #FFFFF;
     border: 1px solid #a5d3fb;
     margin: 10px 10px;
