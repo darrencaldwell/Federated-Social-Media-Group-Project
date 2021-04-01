@@ -20,6 +20,7 @@ pub enum MessageType {
     Message,
     Whisper,
     Server,
+    UserList,
 }
 
 #[derive(Serialize)]

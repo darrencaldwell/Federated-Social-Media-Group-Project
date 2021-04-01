@@ -4,6 +4,8 @@ use crate::chat::routes;
 
 use actix::prelude::*;
 
+use serde::Serialize;
+
 use rand::{Rng, prelude::ThreadRng};
 
 #[derive(Message)]
@@ -34,6 +36,12 @@ pub struct ClientMessage {
     pub room: String,
 }
 
+#[derive(Serialize)]
+struct JoinMessage {
+    pub message_type: routes::MessageType,
+    pub user_list: Vec<String>
+}
+
 pub struct ChatServer {
     sessions: HashMap<String, Recipient<Message>>,
     rooms: HashMap<String, HashSet<String>>,
@@ -62,6 +70,19 @@ impl ChatServer {
             }
         }
     }
+
+    fn greet(&self, id: &str, room: &str) {
+        if let Some(addr) = self.sessions.get(id) {
+            if let Some(user_list) = self.rooms.get(room) {
+                let user_list: Vec<String> = user_list.clone().into_iter().collect();
+                let msg = JoinMessage {
+                    message_type: routes::MessageType::UserList,
+                    user_list,
+                };
+                let _ = addr.do_send(Message(serde_json::to_string(&msg).unwrap()));
+            }
+        }
+    }
 }
 
 impl Actor for ChatServer {
@@ -73,6 +94,8 @@ impl Handler<Connect> for ChatServer {
 
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) -> Self::Result {
         self.sessions.insert(msg.id.clone(), msg.addr);
+
+        self.greet(&msg.id, &msg.room);
 
         self.rooms
             .entry(msg.room.clone())
@@ -87,7 +110,6 @@ impl Handler<Connect> for ChatServer {
         };
 
         let join_msg = serde_json::to_string(&join_msg).unwrap();
-
         let count = self.visitor_count.fetch_add(1, Ordering::SeqCst);
         self.send_message(&msg.room, &join_msg, msg.id);
     }
