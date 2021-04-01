@@ -116,6 +116,13 @@ class Comment extends Component {
                         <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
                         <div className="buttons">
                             <div className="comment-columns">
+                                {/*<Button variant="outline-secondary"*/}
+                                {/*   href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>Edit</Button>{" "}*/}
+                                {/*<Button variant="outline-danger" onClick={() => {*/}
+                                {/*    if (window.confirm('Are you sure you wish to delete this comment?')) this.delete()*/}
+                                {/*}}*/}
+                                {/*   href={this.props.posturl}>🗑</Button>*/}
+
                                 <a className="button edit-button"
                                    href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</a>
                                 <a className='button delete-button' onClick={() => {
@@ -123,6 +130,8 @@ class Comment extends Component {
                                 }}
                                    href={this.props.posturl}>🗑</a>
                             </div>
+                            {/*<Button variant="info"*/}
+                            {/*   href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</Button>*/}
                             <a className="button reply-button"
                                href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
                         </div>
