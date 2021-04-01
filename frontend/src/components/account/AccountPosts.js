@@ -17,9 +17,6 @@ class AccountPosts extends React.Component {
                 this.setState({
                     postList: res.data._embedded.postList
                 })
-                console.log(this.state.postList)
-                // console.log(this.state.commentList[0]._links)
-                // console.log(this.state.commentList[0]._links.post)
             }).catch(err => {
             alert("something went wrong")
         })
@@ -27,7 +24,6 @@ class AccountPosts extends React.Component {
 
     render() {
         const start_url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/1/"
-        // console.log(this.state.postList)
         if (this.state.postList.length === 0) {
             return (
                 <Container>
@@ -44,7 +40,6 @@ class AccountPosts extends React.Component {
                 <Container>
                     <Card.Title>Your Posts</Card.Title>
                     {this.state.postList.map((post) => (
-                        // {const forum_Id = post._links.self.href.pop()}
                         <Card>
                             <Card.Body>
                                 <Card.Title>{post.postTitle}</Card.Title>

@@ -17,10 +17,6 @@ class AccountComments extends React.Component {
                 this.setState({
                     commentList: res.data._embedded.commentList
                 })
-                // will remove once modified time feature is done
-                // console.log(this.state.commentList)
-                // console.log(this.state.commentList[0]._links)
-                // console.log(this.state.commentList[0]._links.post)
             }).catch(err => {
             alert("something went wrong")
         })
@@ -28,8 +24,6 @@ class AccountComments extends React.Component {
 
 
     render() {
-        // console.log(this.state.commentList[0]._links.post)
-
         if (this.state.commentList.length === 0) {
             return (
                 <Container>

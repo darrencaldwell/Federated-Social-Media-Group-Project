@@ -1,15 +1,14 @@
 import React from "react";
-import {Button, Card, Container, Nav} from "react-bootstrap";
+import {Button, Card, Container, Nav, Form, Col, FormGroup} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
 import axios from 'axios'
+import {Comment} from "@material-ui/icons";
 
 class Account extends React.Component {
 
     constructor(props) {
         super(props);
-
-        // console.log('constructor props',props)
         this.state = {
             uploadedPicture: false,
             userInfo: []
@@ -18,7 +17,6 @@ class Account extends React.Component {
 
 
     componentDidMount = async () => {
-        // console.log('did mount props', this.props)
         axios.get('local/users/' + localStorage.getItem('userId'))
             .then(res => {
                 this.setState({
@@ -29,21 +27,47 @@ class Account extends React.Component {
         })
     }
 
+    // send patch req to backend to update the bio
+    editBio = e => {
+        const data = {
+            description: this.description
+        }
+
+        axios.patch('local/users/' + localStorage.getItem('userId'), data)
+            .then(res => {
+                this.setState({
+                    description: this.description
+                })
+                alert("Successfully updated bio!")
+            }).catch(err => {
+                if (err.response) {
+                    alert(err.response.message())
+                }
+            }
+        )
+
+    }
+
 
     render() {
         const date = new Date(this.state.userInfo.dateJoined * 1000)
         const forums_url = "/1/forums"
-
         return (
             <Container>
                 <Card.Title>Your Account</Card.Title>
                 <DisplayPicture uploadedPicture={false}/>
                 <Container className="bio">
-                    <Card.Title>Your Bio</Card.Title>
-                    <Card>
-                        <Card.Text>This is where the bio would go</Card.Text>
-                    </Card>
+                    <Form onSubmit={this.editBio}>
+                        <FormGroup controlId="bio">
+                            <Form.Label>Your Bio</Form.Label>
+                            <Form.Control type="text" placeholder={this.state.userInfo.description}
+                                          onChange={e => this.description = e.target.value}/>
+                        </FormGroup>
+
+                        <Button variant="light" type="submit">Update Bio</Button>
+                    </Form>
                 </Container>
+
 
                 <Nav fill variant="tabs" defaultActiveKey="/">
                     <Nav.Item>
@@ -54,9 +78,6 @@ class Account extends React.Component {
                     </Nav.Item>
                     <Nav.Item>
                         <Nav.Link as={Link} to='/usercomments'>Your Comments</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link as={Link} to='/'>Your Roles</Nav.Link>
                     </Nav.Item>
                 </Nav>
                 <Card>

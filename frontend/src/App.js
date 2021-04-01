@@ -14,6 +14,8 @@ import PostList from "./components/PostList";
 import SubforumList from "./components/SubforumList";
 import CreateComment from "./components/CreateComment";
 import Account from "./pages/Account";
+import AccountComments from "./components/account/AccountComments";
+import AccountPosts from "./components/account/AccountPosts";
 import EditPost from "./components/EditPost";
 import EditComment from "./components/EditComment";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
@@ -94,7 +96,13 @@ class App extends React.Component {
                             <Route exact path="/" component={() => <Home user={this.state.user}/>}/> {/*default homepage*/}
                             <Route exact path="/login" component={() => <Login login={this.login}/>}/> {/*login page*/}
                             <Route exact path="/register" component={Register}/> {/*registration page*/}
+                            <Route exact path="/usercomments" component={AccountComments}/> {/* Comments done by a given user */}
+                            <Route exact path="/userposts" component={AccountPosts}/> {/* Posts done by a given user*/}
 
+                            {/*<Route exact path="/user/:id/comments" component={AccountComments}/>*/}
+                            {/*<Route exact path="/user/:id/posts" component={AccountPosts}/>*/}
+
+                            {/*<Route exact path="/userposts" component={AccountPosts}/>*/}
                             {/*these should all contain some sort of identifier for the instance, but that is not implemented yet*/}
                             <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
                             <Route exact path="/user/:userURL" component={UserAccount}/>
