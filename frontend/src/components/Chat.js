@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Card, Container, Row, Col} from 'react-bootstrap';
+import {Card, Container, Row, Col, Form} from 'react-bootstrap';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
 // import CreatePost from './CreatePost.js';
 // import '../styling/Post.css';
@@ -110,16 +110,12 @@ export class Chat extends Component {
         if (!ws || ws.readystate === WebSocket.CLOSED) this.connect();
     };
 
-    sendMessage = () => {
-        if (this.state.message != null && this.state.message.length !== 0) {
+    sendMessage = (e) => {
+        if (e.keyCode === 13 && this.state.message != null && this.state.message.length !== 0) {
             this.state.ws.send(this.state.message);
-            let message = {
-                message_type: "Message",
-                user_id: "asd",
-                user_name: "self",
-                content: this.state.message,
-            };
-            this.state.messages.push(new Message(message, "self", new Date().toLocaleTimeString()))
+            let time = new Date().toLocaleTimeString();
+            let temp = new Message(true, this.state.message, "You Sent", "You sent", time);
+            this.state.messages.push(temp)
             let that = this;
             that.state.message = "";
             this.setState(that);
@@ -134,7 +130,14 @@ export class Chat extends Component {
 
     renderMessage = (message) => {
         if (message.isSelf) {
-            return <div class="sent"> {message.message} </div>
+            return (
+                <Card className="sent">
+                    <Card.Body className="sent-body">
+                        <Card.Title className="sent-title">{message.username}</Card.Title>
+                        <Card.Text>{message.message}</Card.Text>
+                    </Card.Body>
+                </Card>
+            );
         } else {
             return (
                 <Card className="rec">
@@ -161,18 +164,19 @@ export class Chat extends Component {
             <Container>
                 <Row>
                 <Col xs={9}>
-                    <Row xs={10}>
+                    <Row>
+                        <Container className="messages">
                         {this.state.messages.map(this.renderMessage)}
+                        </Container>
                     </Row>
-                    <Row xs={2} class="input">
-                        <input class="textbox" type="text" id="message" onChange={this.onChange} value={this.state.message}/>
-                        <input class="button" type="button" onClick={this.sendMessage} value="send"/>
+                    <Row className="input">
+                        <Form.Control placeholder="Send a message" class="textbox" type="text" onKeyDown={(e) => this.sendMessage(e)} onChange={this.onChange} value={this.state.message}/>
                     </Row>
                 </Col>
                 <Col xs={3}>
                     <div>
                         <h1>User List:</h1>
-                        <body>{this.renderUserList()}</body>
+                        <body class="list">{this.renderUserList()}</body>
                     </div>
                 </Col>
                 </Row>
