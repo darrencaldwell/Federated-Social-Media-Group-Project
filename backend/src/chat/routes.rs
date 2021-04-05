@@ -117,9 +117,33 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsChatSession {
                 if m.starts_with('/') {
                     let v: Vec<&str> = m.splitn(2, ' ').collect();
                     match v[0] {
-                        "/help" => ctx.text("List of commands: /help".to_string()),
-                        "/ping" => ctx.text("pong".to_string()),
-                        _ => ctx.text("Not a valid command.".to_string()),
+                        "/help" => {
+                            let msg = Message {
+                                message_type: MessageType::Server,
+                                user_id: self.id.clone(),
+                                user_name: self.name.clone(),
+                                content: Some("List of commands: /help".to_string())
+                            };
+                            ctx.text(serde_json::to_string(&msg).unwrap());
+                        },
+                        "/ping" => {
+                            let msg = Message {
+                                message_type: MessageType::Server,
+                                user_id: self.id.clone(),
+                                user_name: self.name.clone(),
+                                content: Some("pong".to_string())
+                            };
+                            ctx.text(serde_json::to_string(&msg).unwrap());
+                        },
+                        _ => {
+                            let msg = Message {
+                                message_type: MessageType::Server,
+                                user_id: self.id.clone(),
+                                user_name: self.name.clone(),
+                                content: Some("Not a valid command, type /help".to_string())
+                            };
+                            ctx.text(serde_json::to_string(&msg).unwrap());
+                        },
                     }
                 } else {
                     let msg = Message {

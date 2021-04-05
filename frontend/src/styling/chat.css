@@ -31,6 +31,18 @@
     padding: 0rem!important;
 }
 
+.server {
+    background-color: #bfdffc;
+    border-radius: 0px!important;
+    border: 1px solid #383838!important;
+    border-top: 0px!important;
+}
+
+.server-body {
+    padding: 0.2rem!important;
+    text-align: center;
+}
+
 .input {
     margin: 10px 10px;
     padding: 1rem;

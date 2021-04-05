@@ -6,8 +6,8 @@ import {Card, Container, Row, Col, Form} from 'react-bootstrap';
 import '../styling/chat.css';
 
 class Message {
-    constructor(isSelf, message, userId, username, timestamp) {
-        this.isSelf = isSelf;
+    constructor(type, message, userId, username, timestamp) {
+        this.type = type;
         this.message = message;
         this.userId = userId;
         this.username = username;
@@ -56,16 +56,12 @@ export class Chat extends Component {
             case "Disconnect":
                 that.userList.delete(message.user_id);
                 break;
-            case "Message":
-                let time = new Date().toLocaleTimeString();
-                let temp = new Message(false, message.content, message.user_id, message.user_name, time);
-                that.messages.push(temp);
-                break;
             case "Whisper":
                 break;
-            case "Server":
-                break;
             default:
+                let time = new Date().toLocaleTimeString();
+                let temp = new Message(message.message_type, message.content, message.user_id, message.user_name, time);
+                that.messages.push(temp);
         }
 
         this.setState(that);
@@ -114,7 +110,7 @@ export class Chat extends Component {
         if (e.keyCode === 13 && this.state.message != null && this.state.message.length !== 0) {
             this.state.ws.send(this.state.message);
             let time = new Date().toLocaleTimeString();
-            let temp = new Message(true, this.state.message, "You Sent", "You sent", time);
+            let temp = new Message("Self", this.state.message, "You Sent", "You sent", time);
             this.state.messages.push(temp)
             let that = this;
             that.state.message = "";
@@ -129,7 +125,8 @@ export class Chat extends Component {
     };
 
     renderMessage = (message) => {
-        if (message.isSelf) {
+        switch (message.type) {
+        case "Self":
             return (
                 <Card className="sent">
                     <Card.Body className="sent-body">
@@ -138,7 +135,7 @@ export class Chat extends Component {
                     </Card.Body>
                 </Card>
             );
-        } else {
+        case "Message":
             return (
                 <Card className="rec">
                     <Card.Body className="rec-body">
@@ -147,6 +144,16 @@ export class Chat extends Component {
                     </Card.Body>
                 </Card>
             );
+        case "Server":
+            return (
+                <Card className="server">
+                    <Card.Body className="server-body">
+                        <Card.Text>{message.message}</Card.Text>
+                    </Card.Body>
+                </Card>
+            );
+        default:
+            return "";
         }
     };
 
