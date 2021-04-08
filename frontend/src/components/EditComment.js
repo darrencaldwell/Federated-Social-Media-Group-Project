@@ -20,7 +20,7 @@ class Make extends React.Component {
     componentDidMount = async () => {
         try {
             // the url to make the request to is given by the parent
-            let url = this.props.url;
+            let url = this.state.url;
             let res = await fetch(url
                 , {
                     method: 'get', // we're making a GET request
