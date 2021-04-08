@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {Button, ButtonGroup} from "react-bootstrap";
 import up_hollow from './../images/up_hollow.png'
 import up_solid from './../images/up_solid.png'
 import down_hollow from './../images/down_hollow.png'
@@ -62,6 +63,9 @@ export class Voting extends Component {
 
     getUpvoteImg = () => this.state.is_upvote ? up_solid : up_hollow
     getDownvoteImg = () => this.state.is_downvote ? down_solid : down_hollow
+    
+    getUpstyle = () => this.state.is_upvote ? "solid" : "hollow"
+    getDownstyle = () => this.state.is_downvote ? "solid" : "hollow"
 
     upvote = () => {
       if (this.state.is_downvote) { // then undo users downvote
@@ -117,17 +121,27 @@ render() {
     }
     const upImage = this.getUpvoteImg();
     const downImage = this.getDownvoteImg();
+
+    const upStyle = this.getUpstyle();
+    const downStyle = this.getDownstyle();
     
     return (
-      <div className="voting-container">
-        {<button className="vote_t" onClick={this.upvote}>
-          <img src={upImage} alt="up arrow" width="20" height="30"></img>
-        </button>}
+      <ButtonGroup vertical className="voting-container">
+        <Button bsPrefix={"vote_t " + upStyle} variant='clear' onClick={this.upvote}>🠭</Button>
         <div className="middle">{this.state.count}</div>
-        {<button className="vote_b" onClick={this.downvote}>
-          <img src={downImage} alt="down arrow" width="20" height="30"></img>
-        </button>}
-      </div>
+        <Button bsPrefix={"vote_b " + downStyle} variant='clear' onClick={this.upvote}>🠯</Button>
+      </ButtonGroup>
+
+
+      // <div className="voting-container">
+      //   {<button className="vote_t" onClick={this.upvote}>
+      //     <img src={upImage} alt="up arrow" width="20" height="30"></img>
+      //   </button>}
+      //   <div className="middle">{this.state.count}</div>
+      //   {<button className="vote_b" onClick={this.downvote}>
+      //     <img src={downImage} alt="down arrow" width="20" height="30"></img>
+      //   </button>}
+      // </div>
     );
   }
 }

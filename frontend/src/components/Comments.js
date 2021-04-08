@@ -1,6 +1,6 @@
 import {React, Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Card, Container, Button} from "react-bootstrap";
+import {Card, Container, Button, ButtonGroup} from "react-bootstrap";
 import Avatar, {Cache} from 'react-avatar';
 
 import Voting from './Voting'
@@ -114,8 +114,8 @@ class Comment extends Component {
                             </div>
                         </div>
                         <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
-                        <div className="buttons">
-                            <div className="comment-columns">
+                        <ButtonGroup vertical className="buttons">
+                            <ButtonGroup>
                                 {/*<Button variant="outline-secondary"*/}
                                 {/*   href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>Edit</Button>{" "}*/}
                                 {/*<Button variant="outline-danger" onClick={() => {*/}
@@ -123,18 +123,17 @@ class Comment extends Component {
                                 {/*}}*/}
                                 {/*   href={this.props.posturl}>🗑</Button>*/}
 
-                                <a className="button edit-button"
-                                   href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</a>
-                                <a className='button delete-button' onClick={() => {
-                                    if (window.confirm('Are you sure you wish to delete this comment?')) this.delete()
-                                }}
-                                   href={this.props.posturl}>🗑</a>
-                            </div>
+                                <Button className="button edit-button"
+                                   href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</Button>
+                                <Button className='button delete-button' onClick={() => {
+                                    if (window.confirm('Are you sure you wish to delete this comment?\n THIS CANNOT BE UNDONE!')) this.delete()}}
+                                   href={this.props.posturl}>🗑</Button>
+                            </ButtonGroup>
                             {/*<Button variant="info"*/}
                             {/*   href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</Button>*/}
                             <a className="button reply-button"
                                href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
-                        </div>
+                        </ButtonGroup>
                     </div>
                 </Card.Body>
                 <Comments url={"/api/comments/" + this.props.comment.id + "/comments"}

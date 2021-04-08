@@ -1,20 +1,44 @@
-button.vote_t    {
+.vote_t    {
     border:0;
     background:transparent;
     outline: none !important;
     grid-row: 1;
     font-style: bold;
-    font-size: 36px;
+    font-size: 64px!important;
+    margin-bottom: 6px!important;
+    padding: 0px!important;
+    line-height: 0.9;
 }
-button.vote_b {
+.vote_b {
     border:0;
-    background:transparent;
+    background: transparent;
     outline: none !important;
     grid-row: 3;
+    font-style: bold;
+    font-size: 64px!important;
+    margin-top: 0px!important;
+    padding: 0px!important;
+    line-height: 0.9;
+}
+.hollow {
+    color: white!important;
+	-webkit-text-stroke-width: 1.5px;
+    -webkit-text-stroke-color: #bbbbbb;
+}
+.hollow:hover {
+    color: #bbbbbb!important;
+}
+.solid {
+    color: #7289DA!important;
+}
+.solid:hover {
+    color: #2c2f33!important;
 }
 div.middle {
     grid-row: 2;
     text-align: center;
+    display: block;
+    margin: auto;
 }
 
 div.voting {
@@ -23,13 +47,14 @@ div.voting {
 .voting-container {
     display: grid;
     grid-template-rows: auto auto auto;
-    padding-right: 10px;
+    padding-right: 10px!important;
+    padding: 0px;
   }
 
 .post-comment-voting-container {
     width: 18%!important;
     padding: 2px;
-    padding-right: 8px;
+    padding-right: 8px!important;
     display: grid;
     grid-template-columns: 1fr 99fr;
     border-right: 1px solid;

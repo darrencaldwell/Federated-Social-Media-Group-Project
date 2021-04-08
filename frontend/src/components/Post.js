@@ -5,7 +5,7 @@ import Comments from './Comments';
 import BackButton from './BackButton';
 // import '../styling/Post.css';
 import '../styling/container-pages.css';
-import {Card, Container, Spinner, Button} from "react-bootstrap";
+import {Card, Container, Spinner, Button, ButtonGroup} from "react-bootstrap";
 //import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
@@ -132,19 +132,19 @@ export class Post extends Component {
                                     <Card.Title className="post-title">{this.state.post.postTitle}</Card.Title>
                                     <Card.Text className="post-body">{this.state.post.postContents}</Card.Text>
                                 </Card.Body>
-                                <div className="post-buttons">
-                                    <Button variant="outline-secondary" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>Edit</Button>
-                                    {' '}
-                                    <Button variant="outline-danger" onClick={() => {
-                                        if (window.confirm('Are you sure you wish to delete this post?')) this.delete()
-                                    }}
+                                {/* <div className="post-buttons"> */}
+                                <ButtonGroup vertical className="post-buttons">
+                                    <Button className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</Button>
+                                    <Button className="button delete-button" onClick={() => {
+                                        if (window.confirm('Are you sure you wish to delete this post?\n THIS CANNOT BE UNDONE!')) this.delete()}}
                                        href={subforumURL}>🗑</Button>
                                     {/*<a className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</a>*/}
                                     {/*<a className='button delete-button' onClick={() => {*/}
                                     {/*    if (window.confirm('Are you sure you wish to delete this post?')) this.delete()*/}
                                     {/*}}*/}
                                     {/*   href={subforumURL}>🗑</a>*/}
-                                </div>
+                                </ButtonGroup>
+                                {/* </div> */}
                             </div>
                         </Card.Body>
                     </Card>
