@@ -11,7 +11,7 @@ class AccountPosts extends React.Component {
         }
     }
 
-    componentDidMount() {
+    componentDidMount = async() =>{
         axios.get('api/users/' + localStorage.getItem('userId') + '/posts')
             .then(res => {
                 this.setState({
@@ -45,6 +45,7 @@ class AccountPosts extends React.Component {
                                 <Card.Title>{post.postTitle}</Card.Title>
                                 <Card.Subtitle>Post Id: {post.id}</Card.Subtitle>
                                 <Card.Text>{post.postContents}</Card.Text>
+                                {console.log('post stuff', post)}
                                 {console.log('PATH TO POSTS',start_url +
                                     JSON.stringify(parseInt(post._links.forum.href.split("/").pop())) + '/' +
                                     JSON.stringify(parseInt(post._links.subforum.href.split("/").pop())) + '/' +
