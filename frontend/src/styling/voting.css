@@ -6,6 +6,7 @@
     font-style: bold;
     font-size: 64px!important;
     margin-bottom: 6px!important;
+    text-decoration: none!important;
     padding: 0px!important;
     line-height: 0.9;
 }
@@ -17,6 +18,7 @@
     font-style: bold;
     font-size: 64px!important;
     margin-top: 0px!important;
+    text-decoration: none!important;
     padding: 0px!important;
     line-height: 0.9;
 }
@@ -25,14 +27,16 @@
 	-webkit-text-stroke-width: 1.5px;
     -webkit-text-stroke-color: #bbbbbb;
 }
-.hollow:hover {
+.hollow:hover, .hollow:active, .hollow:visited {
     color: #bbbbbb!important;
+    text-decoration: none!important;
 }
 .solid {
     color: #7289DA!important;
 }
-.solid:hover {
+.solid:hover, .solid:active, .solid:visited  {
     color: #2c2f33!important;
+    text-decoration: none!important;
 }
 div.middle {
     grid-row: 2;

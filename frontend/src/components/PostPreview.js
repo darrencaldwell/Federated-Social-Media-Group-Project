@@ -13,7 +13,8 @@ export class PostPreview extends Component {
     render() {
         return (
             <Card border="dark" className="mt-3 post" >
-                <CardActionArea href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
+                <CardActionArea style={{ textDecoration: 'none' }} 
+                                href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
                     <Card.Body>
                         <div className="post-columns">
                             <div className="post-comment-voting-container">

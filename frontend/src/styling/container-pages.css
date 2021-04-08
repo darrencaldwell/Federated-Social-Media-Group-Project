@@ -100,3 +100,22 @@ a.button {
 .post-container{height:93%; width: 70%; overflow-y:scroll;}
 .post:hover{background-color: lightgray;}
 .post-wrapper{width: 70%; overflow-y: scroll;}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: darkgray;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
