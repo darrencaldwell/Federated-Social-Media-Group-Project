@@ -6,9 +6,21 @@ import BackButton from './BackButton';
 // import '../styling/Post.css';
 import '../styling/container-pages.css';
 import {Card, Container, Spinner, Button, ButtonGroup} from "react-bootstrap";
+import CardActionArea from '@material-ui/core/CardActionArea';
+import Avatar, {Cache} from 'react-avatar';
 //import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
+
+// for react avatar
+const cache = new Cache({
+
+    // Keep cached source failures for up to 7 days
+    sourceTTL: 7 * 24 * 3600 * 1000,
+
+    // Keep a maximum of 0 entries in the source cache (we don't care about remembering broken links!)
+    sourceSize: 0
+});
 
 // props: match.params.impID, match.params.postID, match.params.subforumID, match.params.forumID, match.params.commentID
 export class Post extends Component {
@@ -119,12 +131,16 @@ export class Post extends Component {
                                         impID={this.props.match.params.impID}
                                     ></Voting>
                                     <div className="voting-adj">
+                                        <CardActionArea href={'/user/' + parsed_user_link}>
+                                            <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture}
+                                                name={this.state.post.username}/>
+                                            {"  "} {this.state.post.username}
+                                        </CardActionArea>
                                         <Card.Subtitle className="text-muted mt-1 time-since">
-                                            Post made by {this.state.post.username}, <TimeSince createdTime={this.state.post.createdTime}/>
+                                            <TimeSince createdTime={this.props.post.createdTime}/>
                                         </Card.Subtitle>
                                         <Card.Subtitle className="text-muted mt-1 time-since">
                                             <TimeSince createdTime={this.state.post.createdTime} modifiedTime={this.state.post.modifiedTime}/>
-                                            <Card.Link href={'/user/' + parsed_user_link}>{this.state.post.username}</Card.Link>
                                         </Card.Subtitle>
                                     </div>
                                 </div>

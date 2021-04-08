@@ -1,6 +1,7 @@
 import {React, Component} from 'react'
 import {Link} from 'react-router-dom'
 import {Card, Container, Button, ButtonGroup} from "react-bootstrap";
+import CardActionArea from '@material-ui/core/CardActionArea';
 import Avatar, {Cache} from 'react-avatar';
 
 import Voting from './Voting'
@@ -86,6 +87,9 @@ class Comment extends Component {
         if (this.state.loading) {
             return null
         }
+
+        const parsed_user_link = btoa(this.props.comment._links.user.href)
+
         return (
             <Card border="dark small-separator">
                 <Card.Body>
@@ -100,16 +104,17 @@ class Comment extends Component {
                                     impID={this.props.impID}
                             ></Voting>
                             <div className="voting-adj">
-                                <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture}
+                                <CardActionArea href={'/user/' + parsed_user_link}>
+                                    <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture}
                                         name={this.props.comment.username}/>
-                                {"  "} {this.props.comment.username}
+                                    {"  "} {this.props.comment.username}
+                                </CardActionArea>
                                 <Card.Subtitle className="text-muted mt-1 time-since">
                                     <TimeSince createdTime={this.props.comment.createdTime}/>
                                 </Card.Subtitle>
                                 <Card.Subtitle className="text-muted mt-1 time-since">
                                     <TimeSince createdTime={this.props.comment.createdTime}
                                                modifiedTime={this.props.comment.modifiedTime}/>
-
                                 </Card.Subtitle>
                             </div>
                         </div>
@@ -152,7 +157,7 @@ export default class Comments extends Component {
         super(props);
         const root = (typeof this.props.level == 'undefined'); // it's a root comment if the comment ID is undefined
         const level = root ? (0)
-            : (this.props.level);
+                           : (this.props.level);
         this.state = {
             level: level,
             commentList: [] // the list of comments will be stored here

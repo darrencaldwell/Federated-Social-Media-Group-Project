@@ -1,16 +1,33 @@
 import React, {Component} from 'react';
 import {Card} from "react-bootstrap";
 import CardActionArea from '@material-ui/core/CardActionArea';
+import Avatar, {Cache} from 'react-avatar';
 //import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
 // import '../styling/individualPost.css';
 import '../styling/container-pages.css';
 
+// for react avatar
+const cache = new Cache({
+
+    // Keep cached source failures for up to 7 days
+    sourceTTL: 7 * 24 * 3600 * 1000,
+
+    // Keep a maximum of 0 entries in the source cache (we don't care about remembering broken links!)
+    sourceSize: 0
+});
+
 // props: post, impID, forumID, subforumID
 export class PostPreview extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {}
+    }
 
     render() {
+        const parsed_user_link = btoa(this.props.post._links.user.href)
+
         return (
             <Card border="dark" className="mt-3 post" >
                 <CardActionArea style={{ textDecoration: 'none' }} 
@@ -27,8 +44,13 @@ export class PostPreview extends Component {
                                 ></Voting>
                                 {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}
                                 <div className="voting-adj">
+                                    <CardActionArea href={'/user/' + parsed_user_link}>
+                                        <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture}
+                                            name={this.props.post.username}/>
+                                        {"  "} {this.props.post.username}
+                                    </CardActionArea>
                                     <Card.Subtitle className="text-muted mt-1 time-since">
-                                        Post made by {this.props.post.username} <TimeSince createdTime={this.props.post.createdTime}/>
+                                        <TimeSince createdTime={this.props.post.createdTime}/>
                                     </Card.Subtitle>
                                     <Card.Subtitle className="text-muted mt-1 time-since">
                                         <TimeSince createdTime={this.props.post.createdTime} modifiedTime={this.props.post.modifiedTime}/>

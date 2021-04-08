@@ -43,6 +43,8 @@ div.middle {
     text-align: center;
     display: block;
     margin: auto;
+    font-size: 18px;
+    font-style: bold;
 }
 
 div.voting {
@@ -56,7 +58,7 @@ div.voting {
   }
 
 .post-comment-voting-container {
-    width: 18%!important;
+    width: 19%!important;
     padding: 2px;
     padding-right: 8px!important;
     display: grid;
@@ -71,4 +73,7 @@ div.voting {
 .voting-adj {
     grid-column: 2;
     align-self: center;
+    width: 60%!important;
+    word-wrap: break-word;
+    text-align: center;
 }
