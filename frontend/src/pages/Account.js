@@ -22,12 +22,12 @@ class Account extends React.Component {
                     userInfo: res.data
                 })
             }).catch(err => {
-            alert("something went wrong")
+            // alert("something went wrong")
         })
     }
 
     // send patch req to backend to update the bio
-    editBio = e => {
+    editBio = async () => {
         const data = {
             description: this.description
         }
@@ -51,6 +51,12 @@ class Account extends React.Component {
     render() {
         const date = new Date(this.state.userInfo.dateJoined * 1000)
         const forums_url = "/1/forums"
+        let desc = "Type your bio here..";
+        console.log('info',this.state.userInfo)
+        if (this.state.userInfo.description !== null) {
+            desc = this.state.userInfo.description
+        }
+
         return (
             <Container>
                 <Card.Title>Your Account</Card.Title>
@@ -59,7 +65,7 @@ class Account extends React.Component {
                     <Form onSubmit={this.editBio}>
                         <FormGroup controlId="bio">
                             <Form.Label>Your Bio</Form.Label>
-                            <Form.Control type="text" placeholder={this.state.userInfo.description}
+                            <Form.Control type="text" placeholder={desc}
                                           onChange={e => this.description = e.target.value}/>
                         </FormGroup>
 
