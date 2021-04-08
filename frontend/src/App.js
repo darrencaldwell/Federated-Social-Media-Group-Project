@@ -93,7 +93,7 @@ class App extends React.Component {
                             <Route path="/:impID/:forumID" component={SubforumList}/>  {/*SubForumList gets forum ID from this.props.match.params.forumID */}
                         </Switch>
                         <Switch>
-                            <Route exact path="/" component={() => <Home user={this.state.user}/>}/> {/*default homepage*/}
+                            <Route exact path="/" component={() => <Home user={this.state.user} currImp={this.state.imp}/>}/> {/*default homepage*/}
                             <Route exact path="/login" component={() => <Login login={this.login}/>}/> {/*login page*/}
                             <Route exact path="/register" component={Register}/> {/*registration page*/}
                             <Route exact path="/usercomments" component={AccountComments}/> {/* Comments done by a given user */}

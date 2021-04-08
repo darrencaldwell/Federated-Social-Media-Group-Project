@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom'
 import {Card, Container, Button, ButtonGroup} from "react-bootstrap";
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Avatar, {Cache} from 'react-avatar';
-
+import ReactMarkdown from 'react-markdown';
 import Voting from './Voting'
 import TimeSince from './TimeSince';
 import '../styling/container-pages.css';
@@ -118,7 +118,7 @@ class Comment extends Component {
                                 </Card.Subtitle>
                             </div>
                         </div>
-                        <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
+                        <ReactMarkdown className="mt-3 comment-body">{this.props.comment.commentContent}</ReactMarkdown>
                         <ButtonGroup vertical className="buttons">
                             <ButtonGroup>
                                 {/*<Button variant="outline-secondary"*/}

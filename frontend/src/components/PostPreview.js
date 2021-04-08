@@ -7,6 +7,7 @@ import Voting from './Voting';
 import TimeSince from './TimeSince';
 // import '../styling/individualPost.css';
 import '../styling/container-pages.css';
+import ReactMarkdown from 'react-markdown';
 
 // for react avatar
 const cache = new Cache({
@@ -59,7 +60,7 @@ export class PostPreview extends Component {
                             </div>
                             <Card.Body className="post-text">
                                 <Card.Title className="post-title"> {this.props.post.postTitle}</Card.Title>
-                                <Card.Text className="post-body">{this.props.post.postContents}</Card.Text>     {/*Use the body from the prop as the body */}
+                                <ReactMarkdown className="post-body">{this.props.post.postContents}</ReactMarkdown>     {/*Use the body from the prop as the body */}
                             </Card.Body>
                         </div>
                     </Card.Body>

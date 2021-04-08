@@ -76,14 +76,15 @@ class Home extends Component {
                     </p> */}
                     <Card>
                         <Card.Body>
-                            {"You are currently in implementation: " + this.state.impName}
+                            {"You are currently in implementation: " + this.props.currImp.name}
                         </Card.Body>
                     </Card>
                     <Link to={'/account'}><Button variant='light' as="input" type="button" value="Go to your account"/>{' '}</Link>
                     <Link to={'/' + this.state.impID + '/forums'}><Button variant='light' as="input" type="button" value="Go to forums"/>{' '}</Link>
                     <Card>
                         <Card.Body>
-                            choose a different implementation:
+                            We now support CommonMark Markdown in the bodies of posts and comments! See the spec here: 
+                            <a href="https://commonmark.org"> https://commonmark.org/</a>
                         </Card.Body>
                     </Card>
                 </Container>
@@ -96,8 +97,8 @@ class Home extends Component {
                 <Jumbotron>
                     <h1 className="display-3">Welcome</h1>
                     <p className="lead">
-                        The home page currently doesn't contain anything useful but hopefully
-                        it will in the future.
+                        We now support CommonMark Markdown in the bodies of posts and comments! See the spec here: 
+                        <a href="https://commonmark.org"> https://commonmark.org/</a>
                     </p>
                     <Link to={'/login'}><Button variant='light' as="input" type="button"
                                                 value="Go to login page"/>{' '}</Link>

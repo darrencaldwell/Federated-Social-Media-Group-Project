@@ -11,6 +11,7 @@ import Avatar, {Cache} from 'react-avatar';
 //import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
+import ReactMarkdown from 'react-markdown';
 
 // for react avatar
 const cache = new Cache({
@@ -137,7 +138,7 @@ export class Post extends Component {
                                             {"  "} {this.state.post.username}
                                         </CardActionArea>
                                         <Card.Subtitle className="text-muted mt-1 time-since">
-                                            <TimeSince createdTime={this.props.post.createdTime}/>
+                                            <TimeSince createdTime={this.state.post.createdTime}/>
                                         </Card.Subtitle>
                                         <Card.Subtitle className="text-muted mt-1 time-since">
                                             <TimeSince createdTime={this.state.post.createdTime} modifiedTime={this.state.post.modifiedTime}/>
@@ -146,7 +147,7 @@ export class Post extends Component {
                                 </div>
                                 <Card.Body className="post-text">
                                     <Card.Title className="post-title">{this.state.post.postTitle}</Card.Title>
-                                    <Card.Text className="post-body">{this.state.post.postContents}</Card.Text>
+                                    <ReactMarkdown className="post-body">{this.state.post.postContents}</ReactMarkdown>
                                 </Card.Body>
                                 {/* <div className="post-buttons"> */}
                                 <ButtonGroup vertical className="post-buttons">

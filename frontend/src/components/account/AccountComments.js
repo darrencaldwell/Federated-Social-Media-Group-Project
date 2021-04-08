@@ -6,6 +6,7 @@ import Avatar, {Cache} from 'react-avatar';
 import Voting from '../Voting'
 import TimeSince from '../TimeSince';
 import '../../styling/container-pages.css';
+import ReactMarkdown from 'react-markdown';
 
 // for react avatar
 const cache = new Cache({
@@ -82,7 +83,7 @@ class AccountComments extends Component {
                                         </Card.Subtitle>
                                     </div>
                                 </div>
-                                <Card.Text className="mt-3 comment-body">{comment.commentContent}</Card.Text>
+                                <ReactMarkdown className="mt-3 comment-body">{comment.commentContent}</ReactMarkdown>
                                 <ButtonGroup vertical className="buttons">
                                     <ButtonGroup>        
                                         <Button className="button edit-button"
