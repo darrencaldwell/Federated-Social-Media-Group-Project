@@ -129,7 +129,7 @@ render() {
       <ButtonGroup vertical className="voting-container">
         <Button bsPrefix={"vote_t " + upStyle} variant='clear' onClick={this.upvote}>🠭</Button>
         <div className="middle">{this.state.count}</div>
-        <Button bsPrefix={"vote_b " + downStyle} variant='clear' onClick={this.upvote}>🠯</Button>
+        <Button bsPrefix={"vote_b " + downStyle} variant='clear' onClick={this.downvote}>🠯</Button>
       </ButtonGroup>
 
 
