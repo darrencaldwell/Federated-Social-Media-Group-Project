@@ -238,7 +238,8 @@ pub async fn get_user_comments(user_id: String, pool: &MySqlPool) -> Result<Comm
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.user_id = ?"#, &user_id)
+        WHERE comments.user_id = ?
+        GROUP BY comments.comment_id"#, &user_id)
         .fetch_all(pool)
         .await?;
 
@@ -296,12 +297,14 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
         LEFT JOIN users u ON
             p.user_id = u.user_id AND p.implementation_id = u.implementation_id
         WHERE p.user_id = ?
+        GROUP BY p.post_id
         ORDER BY created_time
         "#,
         &user_id
     )
         .fetch_all(pool)
         .await?;
+
 
     for rec in recs {
         let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
