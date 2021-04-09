@@ -5,7 +5,7 @@ import Comments from './Comments';
 import BackButton from './BackButton';
 // import '../styling/Post.css';
 import '../styling/container-pages.css';
-import {Card, Container, Spinner, Button} from "react-bootstrap";
+import {Card, Container, Spinner, ButtonGroup, DropdownButton, Dropdown} from "react-bootstrap";
 //import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
@@ -133,12 +133,24 @@ export class Post extends Component {
                                     <Card.Text className="post-body">{this.state.post.postContents}</Card.Text>
                                 </Card.Body>
                                 <div className="post-buttons">
-                                    <Button variant="outline-secondary" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>Edit</Button>
-                                    {' '}
-                                    <Button variant="outline-danger" onClick={() => {
-                                        if (window.confirm('Are you sure you wish to delete this post?')) this.delete()
-                                    }}
-                                       href={subforumURL}>🗑</Button>
+
+                                    <DropdownButton as={ButtonGroup}
+                                                    key={'Secondary'}
+                                                    id={`dropdown-variants-Secondary`}
+                                                    variant={'secondary'}
+                                                    title="...">
+                                        <Dropdown.Item href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>Edit Post</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => {
+                                            if (window.confirm('Are you sure you wish to delete this post?')) this.delete()
+                                        }}
+                                                       href={subforumURL}>Delete Post</Dropdown.Item>
+                                    </DropdownButton>
+                                    {/*<Button variant="outline-secondary" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>Edit</Button>*/}
+                                    {/*{' '}*/}
+                                    {/*<Button variant="outline-danger" onClick={() => {*/}
+                                    {/*    if (window.confirm('Are you sure you wish to delete this post?')) this.delete()*/}
+                                    {/*}}*/}
+                                    {/*   href={subforumURL}>🗑</Button>*/}
                                     {/*<a className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</a>*/}
                                     {/*<a className='button delete-button' onClick={() => {*/}
                                     {/*    if (window.confirm('Are you sure you wish to delete this post?')) this.delete()*/}

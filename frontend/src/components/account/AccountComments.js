@@ -49,18 +49,30 @@ class AccountComments extends React.Component {
                                 <Card.Subtitle>Comment Id: {comment.id} Post Id: {comment.postId}</Card.Subtitle>
                                 <Card.Text>{comment.commentContent}</Card.Text>
                                 {console.log('comment stuff', comment)}
-                                {console.log('PATH TO COMMENTS', start_url +
+                                {/*{console.log('PATH TO COMMENTS', start_url +*/}
+                                {/*    JSON.stringify(parseInt(comment._links.forum.href.split("/").pop())) + '/' +*/}
+                                {/*    JSON.stringify(parseInt(comment._links.subforum.href.split("/").pop())) + '/' +*/}
+                                {/*    JSON.stringify(parseInt(comment._links.post.href.split("/").pop())) + '/' +*/}
+                                {/*    JSON.stringify(parseInt(comment._links.self.href.split("/").pop()*/}
+                                {/*)))}*/}
+
+                                {/*<Card.Link href={start_url +*/}
+                                {/*JSON.stringify(parseInt(comment._links.forum.href.split("/").pop())) + '/' +*/}
+                                {/*JSON.stringify(parseInt(comment._links.subforum.href.split("/").pop())) + '/' +*/}
+                                {/*JSON.stringify(parseInt(comment._links.post.href.split("/").pop())) + '/' +*/}
+                                {/*JSON.stringify(parseInt(comment._links.self.href.split("/").pop()*/}
+                                {/*))}>Take me to comment {comment.id}</Card.Link>*/}
+
+                                {console.log('post stuff', comment)}
+                                {console.log('PATH TO POSTS',start_url +
                                     JSON.stringify(parseInt(comment._links.forum.href.split("/").pop())) + '/' +
                                     JSON.stringify(parseInt(comment._links.subforum.href.split("/").pop())) + '/' +
-                                    JSON.stringify(parseInt(comment._links.post.href.split("/").pop())) + '/' +
-                                    JSON.stringify(parseInt(comment._links.self.href.split("/").pop()
-                                )))}
-
+                                    JSON.stringify(parseInt(comment._links.post.href.split("/").pop()
+                                    )))}
                                 <Card.Link href={start_url +
                                 JSON.stringify(parseInt(comment._links.forum.href.split("/").pop())) + '/' +
                                 JSON.stringify(parseInt(comment._links.subforum.href.split("/").pop())) + '/' +
-                                JSON.stringify(parseInt(comment._links.post.href.split("/").pop())) + '/' +
-                                JSON.stringify(parseInt(comment._links.self.href.split("/").pop()
+                                JSON.stringify(parseInt(comment._links.post.href.split("/").pop()
                                 ))}>Take me to the comment {comment.id}</Card.Link>
                             </Card.Body>
                         </Card>
