@@ -56,7 +56,10 @@ export default class ForumList extends Component {
                 <Container className="forumlist">
                 {/*Use the map function to apply the html to all forums in the list */}
                 {this.state.forumList.map((forum) => (
-                        <ForumCard key={forum.id} link={`/${this.props.match.params.impID}/${forum.id}`} forumName={forum.forumName}/>
+                        <ForumCard key={forum.id} 
+                        link={`/${this.props.match.params.impID}/${forum.id}`} 
+                        forumID={forum.id}
+                        name={forum.forumName}/>
                     ))}
                 </Container>
                 

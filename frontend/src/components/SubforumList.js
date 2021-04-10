@@ -86,8 +86,11 @@ export default class SubforumList extends Component {
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}
                     {this.state.subforumList.map((subforum) => (
-                        <ForumCard key={subforum.id} link={`/${this.props.match.params.impID}/${this.props.match.params.forumID}/${subforum.id}`} forumName={subforum.subforumName}/>
-
+                        <ForumCard key={subforum.id} 
+                        link={`/${this.props.match.params.impID}/${this.props.match.params.forumID}/${subforum.id}`} 
+                        name={subforum.subforumName}
+                        forumID={this.props.match.params.forumID}
+                        subforumID={subforum.id}/>
                     ))}
                 </Container>
                 <Button as={Link} className="button" to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/new"}>

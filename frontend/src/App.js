@@ -22,6 +22,8 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styling/container-pages.css';
 import UserAccount from "./pages/UserAccount";
 // import BackButton from "./components/BackButton";
+import EditPerms from './components/permissions/EditPerms';
+
 
 class App extends React.Component {
     componentDidMount = async () => {
@@ -83,10 +85,12 @@ class App extends React.Component {
                     {/*<BackButton/>*/}
                     <div className="columns">
                         <Switch>
+                            <Route exact path="/editperms/:type/:id"></Route>
                             <Route exact path="/user/:userURL"/>
                             <Route path="/:impID/:something" component={ForumList}/>
                         </Switch>
                         <Switch>
+                            <Route exact path="/editperms/:type/:id"></Route>
                             <Route exact path="/:impID/forums"/>
                             <Route exact path="/:impID/new"/>
                             <Route exact path="/user/:userURL"/>
@@ -107,6 +111,8 @@ class App extends React.Component {
                             <Route exact path="/account" component={Account}/> {/*your account, should be replaced with /user/:id*/}
                             <Route exact path="/user/:userURL" component={UserAccount}/>
                             {/*<Route exact path="/user/:impID/:userId" component={UserAccount}/>*/}
+
+                            <Route exact path="/editperms/:type/:id" component={EditPerms}></Route>
 
                             <Route exact path="/:impID" component={props => <Home {...props} user={this.state.user}/>}/> {/*default homepage*/}
 

@@ -9,13 +9,14 @@ We want a card similiar to our existing card used in forums and subforums, but t
 drop down menu for deletion, role changing, subscription
 */
 
-// props: link, forumName 
+// props: link, name, forumID, subforumID, isSubscribed, isModerator, isCreator
 export class ForumCard extends Component {
 
     constructor(props) {
         super(props)
-        console.log(props)
         this.state = {
+            // if we have a subforum id then this is a dropdown for a subforum
+            type: (this.props.subforumID === undefined) ? "forum" : "subforum"
         }
     }
 
@@ -28,14 +29,22 @@ export class ForumCard extends Component {
                             <Dropdown>  
                                 <Dropdown.Toggle as={CustomToggle} variant="success" id="dropdown-basic"/>
                                 <Dropdown.Menu>
-                                    <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+                                    {!this.props.isSubscribed && <Dropdown.Item href="#/action-1">Subscribe</Dropdown.Item>}
+
+                                    {this.props.isSubscribed && <Dropdown.Item href="#/action-1">UnSubcribe</Dropdown.Item>}
+
+                                    {(!this.props.isModerator || this.props.isCreatoor) && 
+                                    <Dropdown.Item as={Link} 
+                                    to={`/editperms/${this.state.type}/${this.props.subforumID ? this.props.subforumID : this.props.forumID}`}>
+                                        Edit Permissions
+                                        </Dropdown.Item>}
+
+                                    {this.props.isCreator && <Dropdown.Item href="#/action-3">Delete</Dropdown.Item>}
                                 </Dropdown.Menu>
                             </Dropdown>
                         </Container>
                         <Card.Text className="forum-body">
-                                {this.props.forumName}
+                                {this.props.name}
                         </Card.Text>                    
                     </Card.Body>
                 </Card.Link> 
