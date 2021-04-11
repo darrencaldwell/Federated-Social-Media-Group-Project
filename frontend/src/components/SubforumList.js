@@ -96,7 +96,6 @@ export default class SubforumList extends Component {
         if(typeof this.props.match.params.subforumID !== "undefined" && 
            (typeof oldProps.match.params.subforumID === "undefined" || 
             this.props.match.params.subforumID !== oldProps.match.params.subforumID)) {
-               alert("updated");
             this.setState({currSubforumID : this.props.match.params.subforumID});
         }
     }
