@@ -35,7 +35,8 @@ export class ForumCard extends Component {
 
                                     {(!this.props.isModerator || this.props.isCreatoor) && 
                                     <Dropdown.Item as={Link} 
-                                    to={`/editperms/${this.state.type}/${this.props.subforumID ? this.props.subforumID : this.props.forumID}`}>
+                                    to={`/editperms/${this.state.type}/${this.props.subforumID ? this.props.subforumID : this.props.forumID}/
+                                        ${this.props.name}`}>
                                         Edit Permissions
                                         </Dropdown.Item>}
 

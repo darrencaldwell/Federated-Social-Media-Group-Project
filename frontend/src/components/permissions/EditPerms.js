@@ -4,6 +4,7 @@ import AssignRoles from './AssignRoles';
 import ModifyRoles from './ModifyRoles';
 
 
+// props: type, name
 class EditPerms extends React.Component {
 
     constructor(props) {
@@ -36,7 +37,7 @@ class EditPerms extends React.Component {
         return (
             <Container className="pt-4">
                     <h1>
-                        Editing permissions for {this.props.match.params.type}
+                        Editing permissions for {this.props.match.params.type}: {this.props.match.params.name}
                     </h1>
                     <Button className="mr-3" variant="primary" onClick={this.assign_roles}>Assign Roles</Button>
                     <Button variant="primary" onClick={this.modify_roles}>Modify Roles</Button>
