@@ -38,7 +38,7 @@ class Register extends React.Component {
                     alert("Successfully registered!")
                 }).catch(err => {
                     if (err.response) {
-                        alert("Username already taken")
+                        alert("Incorrect details")
                     }
                 }
             )

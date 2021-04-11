@@ -17,8 +17,10 @@ class AccountPosts extends React.Component {
                 this.setState({
                     postList: res.data._embedded.postList
                 })
+                console.log('posts', this.state.postList)
             }).catch(err => {
-            alert("something went wrong")
+                console.log(err)
+            // alert("something went wrong")
         })
     }
 

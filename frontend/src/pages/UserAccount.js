@@ -34,6 +34,7 @@ class UserAccount extends React.Component {
                 })
             const result = await res.json()
             this.setState({userInfo: result}); // we store the json for the post in the state
+            console.log(this.state.userInfo)
 
         } catch (e) {
             console.log(e)
@@ -54,12 +55,7 @@ class UserAccount extends React.Component {
             <Container>
                 <Card.Title>Account for {this.state.userInfo.username}</Card.Title>
                 {/*<DisplayPicture uploadedPicture={false}/>*/}
-                <Container className="bio">
-                    <Card.Title>Their Bio</Card.Title>
-                    <Card>
-                        <Card.Text>This is where the bio would go</Card.Text>
-                    </Card>
-                </Container>
+
 
                 {/*<Nav fill variant="tabs" defaultActiveKey="/">*/}
                 {/*    <Nav.Item>*/}
