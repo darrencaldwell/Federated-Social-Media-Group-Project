@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Card} from "react-bootstrap";
+import {Card, Button, ButtonGroup} from "react-bootstrap";
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Avatar, {Cache} from 'react-avatar';
 //import {Link} from 'react-router-dom';
@@ -23,7 +23,35 @@ const cache = new Cache({
 export class PostPreview extends Component {
     constructor(props) {
         super(props);
+        this.delete = this.delete.bind(this);
         this.state = {}
+    }
+
+    delete(e) {
+        e.preventDefault()
+        
+        if (window.confirm('Are you sure you wish to delete this comment?\n THIS CANNOT BE UNDONE!')) {
+            // this is the HTML request
+            fetch("/api/posts/" + this.props.post.id, {
+                method: "DELETE",
+                withCredentials: true,
+                credentials: 'include',
+                headers: {
+                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                    'Content-Type': 'application/json',
+                    'redirect': this.props.impID
+                }
+
+            }).then(responseJson => { // log the response for debugging
+                console.log(responseJson);
+                if (responseJson.status === 200) {
+                    alert("Successfully deleted post.");
+                    window.location.href = "/" + this.props.impID + "/" + this.props.forumID + "/" + this.props.subforumID + "/";
+                }
+            }).catch(error => this.setState({ // catch any error
+                message: "Error deleting post: " + error
+            }));
+        }
     }
 
     render() {
@@ -59,11 +87,21 @@ export class PostPreview extends Component {
                             
                         <CardActionArea style={{ textDecoration: 'none' }} 
                                         href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
-                            <Card.Body className="post-text">
+                            <Card.Body className="comment-body">
                                 <Card.Title className="post-title"> {this.props.post.postTitle}</Card.Title>
                                 <ReactMarkdown className="post-body">{this.props.post.postContents}</ReactMarkdown>     {/*Use the body from the prop as the body */}
                             </Card.Body>
                         </CardActionArea>
+
+                        <ButtonGroup vertical className="buttons">
+                            <ButtonGroup>
+                                <Button className="button edit-button"
+                                   href={"/" + this.props.impID + "/" + this.props.forumID + "/" + this.props.subforumID + "/" + this.props.post.id + "/edit"}>🖉</Button>
+                                <Button className='button delete-button' onClick={this.delete} href="#">🗑</Button>
+                            </ButtonGroup>
+                            <a className="button reply-button"
+                               href={"/" + this.props.impID + "/" + this.props.forumID + "/" + this.props.subforumID + "/" + this.props.post.id + "/new"}>Comment</a>
+                        </ButtonGroup>
                     </div>
                 </Card.Body>
             </Card>

@@ -73,7 +73,7 @@ class Make extends React.Component {
 
             }).then(responseJson => { // log the response for debugging
                 console.log(responseJson);
-                if (responseJson.status == 200) {
+                if (responseJson.status === 200) {
                     alert("Successfully edited the comment");
                     window.location.href = this.state.backURL;
                 }

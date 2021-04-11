@@ -42,7 +42,10 @@ div.middle {
     grid-row: 2;
     text-align: center;
     display: block;
-    margin: auto;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: auto;
     font-size: 18px;
     font-style: bold;
 }
@@ -58,7 +61,7 @@ div.voting {
   }
 
 .post-comment-voting-container {
-    width: 19%!important;
+    width: 20%!important;
     padding: 2px;
     padding-right: 8px!important;
     display: grid;
@@ -66,14 +69,23 @@ div.voting {
     border-right: 1px solid;
 }
 
+.post-voting {
+    width: 20%!important;
+    padding: 2px;
+    padding-right: 8px!important;
+    display: grid;
+    border-right: 1px solid;
+}
+
 .voting {
+    width: 20%!important;
     grid-column: 1;
 }
 
 .voting-adj {
     grid-column: 2;
     align-self: center;
-    width: 60%!important;
+    width: 80%!important;
     word-wrap: break-word;
     text-align: center;
 }

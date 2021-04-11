@@ -2,6 +2,7 @@ import React from "react";
 import Fab from '@material-ui/core/Fab';
 import {Link} from 'react-router-dom';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import '../styling/container-pages.css'
 
 // props: url
 class BackButton extends React.Component {
@@ -11,10 +12,12 @@ class BackButton extends React.Component {
 
     render() {
         return (
-            <Fab as={Link} href={this.props.url} className="icon-left">
-                {/*onClick={this.context.router.history.goBack}*/}
-                    <ArrowBackIcon />
-            </Fab>
+            <div className="back">
+                <Fab as={Link} href={this.props.url} className="icon-left">
+                    {/*onClick={this.context.router.history.goBack}*/}
+                        <ArrowBackIcon />
+                </Fab>
+            </div>
         )
     }
 }

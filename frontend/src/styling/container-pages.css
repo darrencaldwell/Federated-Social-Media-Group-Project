@@ -1,5 +1,5 @@
 .columns{display:flex; flex-direction:row;position: absolute;
-    top: 60px; /* Header Height */
+    top: 55px; /* Header Height */
     bottom: 0px; /* Footer Height */
     width: 100%;}
 
@@ -7,6 +7,29 @@
 
 .separator{padding: 8px!important}
 .small-separator{padding: 4px!important}
+
+.back{
+  /* margin: 0px!important;
+  position: absolute!important;
+  left: 31.5%!important;
+  top: 1.5%!important;
+  z-index: 99!important;
+  display: run-in; */
+  float: left;
+  margin: 15px!important;
+  width: 56px!important
+}
+
+.edit-box{
+  float:left;
+  width: 95%!important;
+}
+
+.create-edit-page{
+  width: 70%!important;
+  display: flex;
+  flex-direction: horizontal;
+}
 
 .expand-button{padding-top: 19px!important; height: 60px!important}
 
@@ -21,13 +44,13 @@
   color: #ffffff;
 }
 .edit-button{width: 50%; height: 70px!important;}
-.comment-body{margin: 10px!important; width: 80%!important; font-size: 18px!important}
+.comment-body{margin: 10px!important; width: 65%!important; font-size: 18px!important}
 
 .post-columns{display:flex; flex-direction:row; width: 100%;}
 .create-comment-button{width: 15%!important; height: 100px!important}
 .post-body{margin-left: 10px!important; font-size: 22px!important; }
 .post-title{font-size: 32px!important; margin-left: 10px!important; margin-top: 0px!important}
-.post-text{width: 68%!important}
+.post-text{width: 70%!important}
 
 .forumlist{height: 93%; overflow-y:scroll; padding: 5%}
 .forum-container {
@@ -37,22 +60,33 @@
     background-color: grey;
 }
 
-.forum {
-    width: 100%;
-    background-color: whitesmoke!important;
-    margin-bottom: 5px;
-    border: 0px!important;
+.forum{
+  width: 100%;
+  margin-bottom: 5px;
+  border: 0px!important;
 }
-.forum:hover {
-    width: 100%;
+
+.other {
+    background-color: whitesmoke!important;
+    color: black;
+    font-size: 18px;
+}
+.other:hover {
     background-color: lightgray!important;
-    margin-bottom: 5px;
-    border: 0px!important;
+}
+
+.current {
+    background-color: #555555!important;
+    color: white!important;
+    font-weight: bold;
+    font-size: 20px;
+}
+.current:hover {
+    background-color: #3c3c3c!important;
 }
 
 .forum-body {
     text-align: center;
-    color: #000000;
 }
 
 a.button {
@@ -101,9 +135,14 @@ a.button {
 .forum-info{font-weight: bold!important; font-size: 26px!important; text-align: center; color: lightslategrey;}
 .forum-info:hover{color: lightgray!important}
 
+.MuiCardActionArea-root:hover {
+  background-color: lightgrey!important;
+  text-decoration: none!important;
+}
+
 .postlist{height:93%; overflow-y:scroll;}
 .post-container{height:93%; width: 70%; overflow-y:scroll;}
-.post:hover{background-color: lightgray;}
+.post:hover{background-color: #eeeeee;}
 .post-wrapper{width: 70%; overflow-y: scroll;}
 
 ::-webkit-scrollbar {

@@ -64,23 +64,31 @@ class Comment extends Component {
         }
     }
 
-    delete() {
-        // this is the HTML request
-        fetch("/api/comments/" + this.props.comment.id, {
-            method: "DELETE",
-            withCredentials: true,
-            credentials: 'include',
-            headers: {
-                'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
-                'Content-Type': 'application/json',
-                'redirect': this.props.impID
-            }
+    delete(e) {
+        e.preventDefault();
 
-        }).then(responseJson => { // log the response for debugging
-            console.log(responseJson);
-        }).catch(error => this.setState({ // catch any error
-            message: "Error posting post: " + error
-        }));
+        if (window.confirm('Are you sure you wish to delete this comment?\n THIS CANNOT BE UNDONE!')) {
+            // this is the HTML request
+            fetch("/api/comments/" + this.props.comment.id, {
+                method: "DELETE",
+                withCredentials: true,
+                credentials: 'include',
+                headers: {
+                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                    'Content-Type': 'application/json',
+                    'redirect': this.props.impID
+                }
+
+            }).then(responseJson => { // log the response for debugging
+                console.log(responseJson);
+                if (responseJson.status === 200) {
+                    alert("Successfully deleted comment.");
+                    window.location.href = this.props.posturl;
+                }
+            }).catch(error => this.setState({ // catch any error
+                message: "Error posting post: " + error
+            }));
+        }
     }
 
     render() {
@@ -130,9 +138,7 @@ class Comment extends Component {
 
                                 <Button className="button edit-button"
                                    href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</Button>
-                                <Button className='button delete-button' onClick={() => {
-                                    if (window.confirm('Are you sure you wish to delete this comment?\n THIS CANNOT BE UNDONE!')) this.delete()}}
-                                   href={this.props.posturl}>🗑</Button>
+                                <Button className='button delete-button' onClick={this.delete} href="#">🗑</Button>
                             </ButtonGroup>
                             {/*<Button variant="info"*/}
                             {/*   href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</Button>*/}

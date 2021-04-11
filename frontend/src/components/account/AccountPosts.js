@@ -24,7 +24,7 @@ class AccountPosts extends React.Component {
     }
 
     render() {
-        const start_url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/1/"
+        // const start_url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/1/"
         if (this.state.postList.length === 0) {
             return (
                 <Container>

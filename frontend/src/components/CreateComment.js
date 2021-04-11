@@ -47,8 +47,8 @@ class Make extends React.Component {
 
             }).then(responseJson => { // log the response for debugging
                 console.log(responseJson);
-                if (responseJson.status == 200) {
-                    alert("Successfully commented on post");
+                if (responseJson.status === 200) {
+                    alert("Successfully created comment");
                     window.location.href = this.state.backURL;
                 }
             }).catch(error => this.setState({ // catch any error
@@ -63,8 +63,11 @@ class Make extends React.Component {
 
     render() {
         return (
+            <div className="create-edit-page">
+            <BackButton url={this.state.backURL}/>
+            {/* <div className="edit-box"> */}
             <Container>
-                <BackButton url={this.state.backURL}/>
+                <div className="separator"/>
                 <Form className="createComment">
                     <Form.Label>Create Comment</Form.Label>
                     <FormGroup controlId="create-title">
@@ -80,6 +83,8 @@ class Make extends React.Component {
                     </Card>
                 </Form>
             </Container>
+            {/* </div> */}
+            </div>
         );
     }
 }

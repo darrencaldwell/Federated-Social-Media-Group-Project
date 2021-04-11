@@ -3,6 +3,22 @@ import {Card, Container, Button} from "react-bootstrap";
 import {Link} from 'react-router-dom';
 import '../styling/container-pages.css';
 
+function SubforumCard({currID, subforum, impID, forumID}) {
+    const styling = (subforum.id === currID) ? "current"
+                                            : "other";
+    
+    return (
+        <Card className={"forum " + styling} >  {/*each forum is displayed as a card with className forum */}
+            <Card.Link as={Link} to={'/' + impID + '/' + forumID + '/' + subforum.id}>
+                <Card.Body className={"forum-body " + styling}>
+                    {/*The card consists of the name of the subforum, which links to the subforum itself */}
+                        {subforum.subforumName} + {subforum.id} + {currID}
+                </Card.Body>                    
+            </Card.Link> 
+        </Card>
+    )
+}
+
 // props: match.params.impID, match.params.forumID
 export default class SubforumList extends Component {
 
@@ -12,7 +28,9 @@ export default class SubforumList extends Component {
             subforumList: [], // the list of subforums will be stored here, once loaded
             forum: {},
             forumName: {},
-            forumLink: {}
+            forumLink: {},
+            currSubforumID: (typeof this.props.match.params.subforumID == "undefined") ? -1
+                                                                                       : this.props.match.params.subforumID,
         }
     }
 
@@ -69,9 +87,17 @@ export default class SubforumList extends Component {
     }
 
     componentDidUpdate = (oldProps) => {
-        if (this.props.match.params.forumID !== oldProps.match.params.forumID
-            || this.props.match.params.impID !== oldProps.match.params.impID) {
+        if (this.props.match.params.forumID !== oldProps.match.params.forumID ||
+            this.props.match.params.impID !== oldProps.match.params.impID) {
+
             this.fetchSubforums();
+        }
+
+        if(typeof this.props.match.params.subforumID !== "undefined" && 
+           (typeof oldProps.match.params.subforumID === "undefined" || 
+            this.props.match.params.subforumID !== oldProps.match.params.subforumID)) {
+               alert("updated");
+            this.setState({currSubforumID : this.props.match.params.subforumID});
         }
     }
 
@@ -85,17 +111,10 @@ export default class SubforumList extends Component {
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}
                     {this.state.subforumList.map((subforum) => (
-                        <Card key={subforum.id} className="forum" >  {/*each forum is displayed as a card with className forum */}
-                            <Card.Link as={Link} to={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + subforum.id}>
-                                <Card.Body className="forum-body">
-                                {/*The card consists of the name of the forum, which links to the forum itself */}
-                                    {subforum.subforumName}
-                                </Card.Body>
-                            </Card.Link>
-                        </Card>
+                        <SubforumCard key={subforum.id} currID={this.state.currSubforumID} subforum={subforum} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID}/>
                     ))}
                 </Container>
-                <Button as={Link} className="button" to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/new"}>
+                <Button as={Link} bsPrefix="button" to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/new"}>
                     New Subforum
                 </Button>
             </div>)

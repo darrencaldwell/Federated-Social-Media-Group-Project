@@ -39,7 +39,7 @@ class Make extends React.Component {
                 })
             }).then(responseJson => {
                 console.log(responseJson);
-                if (responseJson.status == 200) {
+                if (responseJson.status === 200) {
                     alert("Successfully created the forum");
                     window.location.href = this.state.backURL;
                 }

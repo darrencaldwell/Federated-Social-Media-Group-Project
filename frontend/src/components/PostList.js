@@ -50,8 +50,10 @@ class PostList extends Component {
         this.getPosts();
     }
 
+    // url is not a prop!
     componentDidUpdate = (oldProps) => {
-        if ( this.props.url !== oldProps.url) {
+        if ( this.props.match.params.forumID !== oldProps.match.params.forumID ||
+             this.props.match.params.subforumID !== oldProps.match.params.subforumID) {
             this.getPosts();
         }
     }
@@ -78,8 +80,9 @@ class PostList extends Component {
                             // the PostPreview element is used for this, which takes the post id and the post json
                             <PostPreview key={post.id} post={post} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID} subforumID={this.props.match.params.subforumID}/>
                         ))}
+                        <div className="separator"/>
                     </Container>
-                    <Button className="button" as={Link} to={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + this.props.match.params.subforumID + '/new'}>
+                    <Button bsPrefix="button" as={Link} to={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID + '/' + this.props.match.params.subforumID + '/new'}>
                         New Post
                     </Button>
                 </div>)

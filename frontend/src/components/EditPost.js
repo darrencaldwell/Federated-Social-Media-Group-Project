@@ -72,7 +72,7 @@ class EditPost extends React.Component {
                 })
             }).then(responseJson => {
                 console.log(responseJson);
-                if (responseJson.status == 200) {
+                if (responseJson.status === 200) {
                     alert("Successfully edited the post");
                     window.location.href = this.state.backURL;
                 }

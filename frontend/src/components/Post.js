@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
 import Comments from './Comments';
 // import CreatePost from './CreatePost.js';
-import BackButton from './BackButton';
 // import '../styling/Post.css';
 import '../styling/container-pages.css';
 import {Card, Container, Spinner, Button, ButtonGroup} from "react-bootstrap";
@@ -35,6 +34,7 @@ export class Post extends Component {
             loading: true, // Set to true if loading
             post: {}, // the post is stored here once loaded
             post_author: {},
+            subforumURL: "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID
         }
     }
 
@@ -75,23 +75,30 @@ export class Post extends Component {
         }
     }
 
-    delete() {
-        // this is the HTML request
-        fetch("/api/posts/" + this.props.match.params.postID, {
-            method: "DELETE",
-            withCredentials: true,
-            credentials: 'include',
-            headers: {
-                'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
-                'Content-Type': 'application/json',
-                'redirect': this.props.impID
-            }
+    delete(e) { 
+        e.preventDefault();
+        if (window.confirm('Are you sure you wish to delete this post?\n THIS CANNOT BE UNDONE!')) {
+            // this is the HTML request
+            fetch("/api/posts/" + this.props.match.params.postID, {
+                method: "DELETE",
+                withCredentials: true,
+                credentials: 'include',
+                headers: {
+                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                    'Content-Type': 'application/json',
+                    'redirect': this.props.impID
+                }
 
-        }).then(responseJson => { // log the response for debugging
-            console.log(responseJson);
-        }).catch(error => this.setState({ // catch any error
-            message: "Error posting post: " + error
-        }));
+            }).then(responseJson => { // log the response for debugging
+                console.log(responseJson);
+                if (responseJson.status === 200) {
+                    alert("Successfully deleted post.");
+                    window.location.href = this.state.subforumURL;
+                }
+            }).catch(error => this.setState({ // catch any error
+                message: "Error deleting post: " + error
+            }));
+        }
     }
 
     render() {
@@ -106,10 +113,7 @@ export class Post extends Component {
                 </Spinner>
             )
         }
-
-        const subforumURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID;
-        const backURL = this.state.expanded ? "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID
-                                            : subforumURL;
+        
         const url = this.state.expanded ? ('/api/comments/' + this.props.match.params.commentID + '/comments')
                                         : ('/api/posts/' + this.props.match.params.postID + '/comments');
         const parsed_user_link = btoa(this.state.post._links.user.href)
@@ -117,12 +121,12 @@ export class Post extends Component {
         return (
             <div className="post-wrapper">
             <Container className="post-container">
-                <BackButton url={backURL}/>
+            <div className="separator"/>
                 {/* <div className="mt-3"> */}
                     <Card border="dark">
                         <Card.Body>
                             <div className="post-columns">
-                                <div className="post-comment-voting-container post-voting">
+                                <div className="post-voting">
                                     <Voting className="voting"
                                         upvotes={this.state.post.upvotes} 
                                         downvotes={this.state.post.downvotes} 
@@ -152,9 +156,7 @@ export class Post extends Component {
                                 {/* <div className="post-buttons"> */}
                                 <ButtonGroup vertical className="post-buttons">
                                     <Button className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</Button>
-                                    <Button className="button delete-button" onClick={() => {
-                                        if (window.confirm('Are you sure you wish to delete this post?\n THIS CANNOT BE UNDONE!')) this.delete()}}
-                                       href={subforumURL}>🗑</Button>
+                                    <Button className="button delete-button" onClick={this.delete} href={this.state.subforumURL}>🗑</Button>
                                     {/*<a className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</a>*/}
                                     {/*<a className='button delete-button' onClick={() => {*/}
                                     {/*    if (window.confirm('Are you sure you wish to delete this post?')) this.delete()*/}

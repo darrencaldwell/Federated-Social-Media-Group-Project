@@ -84,7 +84,7 @@ class Home extends Component {
                     <Card>
                         <Card.Body>
                             We now support CommonMark Markdown in the bodies of posts and comments! See the spec here: 
-                            <a href="https://commonmark.org" target="_blank"> https://commonmark.org/</a>
+                            <a href="https://commonmark.org" target="_blank" rel="noreferrer"> https://commonmark.org/</a>
                         </Card.Body>
                     </Card>
                 </Container>
@@ -98,7 +98,7 @@ class Home extends Component {
                     <h1 className="display-3">Welcome</h1>
                     <p className="lead">
                         We now support CommonMark Markdown in the bodies of posts and comments! See the spec here: 
-                        <a href="https://commonmark.org" target="_blank"> https://commonmark.org/</a>
+                        <a href="https://commonmark.org" target="_blank" rel="noreferrer"> https://commonmark.org/</a>
                     </p>
                     <Link to={'/login'}><Button variant='light' as="input" type="button"
                                                 value="Go to login page"/>{' '}</Link>

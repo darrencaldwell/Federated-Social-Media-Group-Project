@@ -84,13 +84,18 @@ class App extends React.Component {
                     <div className="columns">
                         <Switch>
                             <Route exact path="/user/:userURL"/>
-                            <Route path="/:impID/:something" component={ForumList}/>
+                            <Route exact path="/:impID/forums" component={ForumList}/>
+                            <Route exact path="/:impID/new" component={ForumList}/>
+                            <Route path="/:impID/:forumID" component={ForumList}/>
                         </Switch>
                         <Switch>
                             <Route exact path="/:impID/forums"/>
                             <Route exact path="/:impID/new"/>
                             <Route exact path="/user/:userURL"/>
-                            <Route path="/:impID/:forumID" component={SubforumList}/>  {/*SubForumList gets forum ID from this.props.match.params.forumID */}
+                            <Route exact path="/:impID/:forumID" component={SubforumList}/>  {/*SubForumList gets forum ID from this.props.match.params.forumID */}
+                            <Route exact path="/:impID/:forumID/new" component={SubforumList}/> 
+                            <Route exact path="/:impID/:forumID/chat" component={SubforumList}/> 
+                            <Route path="/:impID/:forumID/:subforumID" component={SubforumList}/> 
                         </Switch>
                         <Switch>
                             <Route exact path="/" component={() => <Home user={this.state.user} currImp={this.state.imp}/>}/> {/*default homepage*/}
