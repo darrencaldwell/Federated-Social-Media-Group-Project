@@ -8,13 +8,13 @@ class Home extends Component {
 
     constructor(props) {
         super(props);
-        const root = (typeof this.props.match == 'undefined'); // it's a root comment if match is undefined
-        const impID = root ? ('1') // 1 is the local id
-                         : (this.props.match.params.impID);
         this.state = {
-            impID: impID,
+            impID: (typeof this.props.match == 'undefined') ? ('1') // defaults to 1, the local id, if there's no impID in the url
+                                                            : (this.props.match.params.impID),
             impList : [],
-            impName : {}
+            impName : {},
+            impText : (typeof this.props.currImp == "undefined") ? "Please choose an implementation" // handles the case where currImp is undefined, such as when the site is loading
+                                                                 : "You are currently in implementation: " + this.props.currImp.name
         }
     }
 
@@ -76,7 +76,7 @@ class Home extends Component {
                     </p> */}
                     <Card>
                         <Card.Body>
-                            {"You are currently in implementation: " + this.props.currImp.name}
+                            {this.state.impText}
                         </Card.Body>
                     </Card>
                     <Link to={'/account'}><Button variant='light' as="input" type="button" value="Go to your account"/>{' '}</Link>
@@ -84,7 +84,7 @@ class Home extends Component {
                     <Card>
                         <Card.Body>
                             We now support CommonMark Markdown in the bodies of posts and comments! See the spec here: 
-                            <a href="https://commonmark.org"> https://commonmark.org/</a>
+                            <a href="https://commonmark.org" target="_blank"> https://commonmark.org/</a>
                         </Card.Body>
                     </Card>
                 </Container>
@@ -98,7 +98,7 @@ class Home extends Component {
                     <h1 className="display-3">Welcome</h1>
                     <p className="lead">
                         We now support CommonMark Markdown in the bodies of posts and comments! See the spec here: 
-                        <a href="https://commonmark.org"> https://commonmark.org/</a>
+                        <a href="https://commonmark.org" target="_blank"> https://commonmark.org/</a>
                     </p>
                     <Link to={'/login'}><Button variant='light' as="input" type="button"
                                                 value="Go to login page"/>{' '}</Link>

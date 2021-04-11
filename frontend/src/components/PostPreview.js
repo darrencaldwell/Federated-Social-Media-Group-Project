@@ -31,40 +31,41 @@ export class PostPreview extends Component {
 
         return (
             <Card border="dark" className="mt-3 post" >
-                <CardActionArea style={{ textDecoration: 'none' }} 
-                                href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
-                    <Card.Body>
-                        <div className="post-columns">
-                            <div className="post-comment-voting-container">
-                                <Voting className="voting" upvotes={this.props.post.upvotes} 
-                                    downvotes={this.props.post.downvotes} 
-                                    _userVotes={this.props.post._userVotes}
-                                    type="posts"
-                                    postID={this.props.post.id}
-                                    impID={this.props.impID}
-                                ></Voting>
-                                {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}
-                                <div className="voting-adj">
-                                    <CardActionArea href={'/user/' + parsed_user_link}>
-                                        <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture}
-                                            name={this.props.post.username}/>
-                                        {"  "} {this.props.post.username}
-                                    </CardActionArea>
-                                    <Card.Subtitle className="text-muted mt-1 time-since">
-                                        <TimeSince createdTime={this.props.post.createdTime}/>
-                                    </Card.Subtitle>
-                                    <Card.Subtitle className="text-muted mt-1 time-since">
-                                        <TimeSince createdTime={this.props.post.createdTime} modifiedTime={this.props.post.modifiedTime}/>
-                                    </Card.Subtitle>
-                                </div>
+                <Card.Body>
+                    <div className="post-columns">
+                        <div className="post-comment-voting-container">
+                            <Voting className="voting" upvotes={this.props.post.upvotes} 
+                                downvotes={this.props.post.downvotes} 
+                                _userVotes={this.props.post._userVotes}
+                                type="posts"
+                                postID={this.props.post.id}
+                                impID={this.props.impID}
+                            ></Voting>
+                            {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}
+                            <div className="voting-adj">
+                                <CardActionArea href={'/user/' + parsed_user_link}>
+                                    <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture}
+                                        name={this.props.post.username}/>
+                                    {"  "} {this.props.post.username}
+                                </CardActionArea>
+                                <Card.Subtitle className="text-muted mt-1 time-since">
+                                    <TimeSince createdTime={this.props.post.createdTime}/>
+                                </Card.Subtitle>
+                                <Card.Subtitle className="text-muted mt-1 time-since">
+                                    <TimeSince createdTime={this.props.post.createdTime} modifiedTime={this.props.post.modifiedTime}/>
+                                </Card.Subtitle>
                             </div>
+                        </div>
+                            
+                        <CardActionArea style={{ textDecoration: 'none' }} 
+                                        href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
                             <Card.Body className="post-text">
                                 <Card.Title className="post-title"> {this.props.post.postTitle}</Card.Title>
                                 <ReactMarkdown className="post-body">{this.props.post.postContents}</ReactMarkdown>     {/*Use the body from the prop as the body */}
                             </Card.Body>
-                        </div>
-                    </Card.Body>
-                </CardActionArea>
+                        </CardActionArea>
+                    </div>
+                </Card.Body>
             </Card>
         )
     }

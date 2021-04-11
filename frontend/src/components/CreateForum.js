@@ -14,13 +14,14 @@ class Make extends React.Component {
             buttonText: 'Create Forum',
             defaultTitle: defaultTitle, // the default title needs to be preserved
             titleText: defaultTitle, // the title starts as the default
-            url : '/api/forums'
+            url : '/api/forums',
+            backURL: "/" + this.props.match.params.impID + "/forums"
         };
     }
 
     submit() {
         // if no text has been entered, it will return to default before the button is pressed
-        if (this.state.titleText === this.state.defaultTitle) {
+        if (this.state.titleText === this.state.defaultTitle || this.state.titleText === "") {
             alert('Please enter a title');
         } else {
             // the HTML request
@@ -38,6 +39,10 @@ class Make extends React.Component {
                 })
             }).then(responseJson => {
                 console.log(responseJson);
+                if (responseJson.status == 200) {
+                    alert("Successfully created the forum");
+                    window.location.href = this.state.backURL;
+                }
             }).catch(error => this.setState({
                 message: "Error posting post: " + error
             }));
@@ -54,7 +59,7 @@ class Make extends React.Component {
     render() {
         return (
             <Container>
-                <BackButton url={"/" + this.props.match.params.impID + "/forums"}/>
+                <BackButton url={this.state.backURL}/>
                 <Form className="createForum">
                     <FormGroup controlId="create-title">
                         {/*These are the input forms for title and body, with placeholder text. They call the above change methods when you type in them.*/}

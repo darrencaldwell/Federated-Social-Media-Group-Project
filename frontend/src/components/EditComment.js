@@ -1,7 +1,8 @@
 import React from 'react';
-import {Button, Container, Form, FormGroup} from 'react-bootstrap'
+import {Button, Container, Form, FormGroup, Card} from 'react-bootstrap'
 import BackButton from "./BackButton";
 import '../styling/create-post.css'
+import ReactMarkdown from 'react-markdown';
 
 //props: match.params.impID, match.params.postID, match.params.commentID
 class Make extends React.Component {
@@ -12,7 +13,11 @@ class Make extends React.Component {
         this.state = {
             buttonText: 'Submit',
             bodyText: "", // body starts as empty
-            url: url
+            url: url,
+            backURL : "/" + this.props.match.params.impID + 
+                      "/" + this.props.match.params.forumID + 
+                      "/" + this.props.match.params.subforumID + 
+                      "/" + this.props.match.params.postID,
         };
     }
 
@@ -45,7 +50,7 @@ class Make extends React.Component {
 
     submit() {
         // if no text has been entered, it will return to default before the button is pressed
-        if (this.state.bodyText === this.state.defaultBody) {
+        if (this.state.bodyText === "") {
             alert('Please enter a body');
         } else {
             // this is the HTML request
@@ -68,6 +73,10 @@ class Make extends React.Component {
 
             }).then(responseJson => { // log the response for debugging
                 console.log(responseJson);
+                if (responseJson.status == 200) {
+                    alert("Successfully edited the comment");
+                    window.location.href = this.state.backURL;
+                }
             }).catch(error => this.setState({ // catch any error
                 message: "Error posting post: " + error
             }));
@@ -79,11 +88,9 @@ class Make extends React.Component {
     }
 
     render() {
-        const backURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID;
-
         return (
             <Container>
-                <BackButton url={backURL}/>
+                <BackButton url={this.state.backURL}/>
                 <Form className="createComment">
                     <Form.Label>Edit Comment</Form.Label>
                     <FormGroup controlId="create-title">
@@ -91,6 +98,12 @@ class Make extends React.Component {
                         <Form.Control onChange={this.changeBody} as="textarea" rows={3} value={this.state.bodyText}/>
                     </FormGroup>
                     <Button variant="light" onClick={() => this.submit()}>{this.state.buttonText}</Button> {/*Clicking this button calls the submit method*/}
+                </Form>
+                <Form className="preview">
+                    <Form.Label>Preview:</Form.Label>
+                    <Card>
+                        <ReactMarkdown className="mt-3 comment-body">{this.state.bodyText}</ReactMarkdown>
+                    </Card>
                 </Form>
             </Container>
         );

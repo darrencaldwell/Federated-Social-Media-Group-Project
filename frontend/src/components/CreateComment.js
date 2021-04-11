@@ -1,7 +1,8 @@
 import React from 'react';
-import {Button, Container, Form, FormGroup} from 'react-bootstrap'
+import {Button, Container, Form, FormGroup, Card} from 'react-bootstrap'
 import BackButton from "./BackButton";
 import '../styling/create-post.css'
+import ReactMarkdown from 'react-markdown';
 
 //props: match.params.impID, match.params.postID, match.params.commentID
 class Make extends React.Component {
@@ -16,13 +17,14 @@ class Make extends React.Component {
             buttonText: 'Create Comment',
             defaultBody: defaultBody, // default body needs to be preserved
             bodyText: defaultBody, // body starts as default
-            url: url
+            url: url,
+            backURL: "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID
         };
     }
 
     submit() {
         // if no text has been entered, it will return to default before the button is pressed
-        if (this.state.bodyText === this.state.defaultBody) {
+        if (this.state.bodyText === this.state.defaultBody || this.state.bodyText === "") {
             alert('Please enter a body');
         } else {
             // this is the HTML request
@@ -45,6 +47,10 @@ class Make extends React.Component {
 
             }).then(responseJson => { // log the response for debugging
                 console.log(responseJson);
+                if (responseJson.status == 200) {
+                    alert("Successfully commented on post");
+                    window.location.href = this.state.backURL;
+                }
             }).catch(error => this.setState({ // catch any error
                 message: "Error posting post: " + error
             }));
@@ -56,11 +62,9 @@ class Make extends React.Component {
     }
 
     render() {
-        const backURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID;
-
         return (
             <Container>
-                <BackButton url={backURL}/>
+                <BackButton url={this.state.backURL}/>
                 <Form className="createComment">
                     <Form.Label>Create Comment</Form.Label>
                     <FormGroup controlId="create-title">
@@ -68,6 +72,12 @@ class Make extends React.Component {
                         <Form.Control onChange={this.changeBody} as="textarea" rows={3} placeholder={this.state.defaultBody}/>
                     </FormGroup>
                     <Button variant="light" onClick={() => this.submit()}>{this.state.buttonText}</Button> {/*Clicking this button calls the submit method*/}
+                </Form>
+                <Form className="preview">
+                    <Form.Label>Preview:</Form.Label>
+                    <Card>
+                        <ReactMarkdown className="mt-3 comment-body">{this.state.bodyText}</ReactMarkdown>
+                    </Card>
                 </Form>
             </Container>
         );

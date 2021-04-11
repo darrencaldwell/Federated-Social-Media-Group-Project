@@ -108,7 +108,7 @@ class App extends React.Component {
                             <Route exact path="/user/:userURL" component={UserAccount}/>
                             {/*<Route exact path="/user/:impID/:userId" component={UserAccount}/>*/}
 
-                            <Route exact path="/:impID" component={props => <Home {...props} user={this.state.user}/>}/> {/*default homepage*/}
+                            <Route exact path="/:impID" component={props => <Home {...props} user={this.state.user} currImp={this.state.imp}/>}/> {/*default homepage*/}
 
                             {/*<Route exact path="/:impID/forums" component={() => <Home user={this.state.user}/>}/> {/*shows the list of forums (for our server)*/}
                             <Route exact path="/:impID/new" component={CreateForum}/> {/*page to create a new forum*/}

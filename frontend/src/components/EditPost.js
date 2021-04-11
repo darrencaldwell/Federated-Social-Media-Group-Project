@@ -1,7 +1,8 @@
 import React from 'react';
-import {Button, Container, Form, FormGroup} from 'react-bootstrap'
+import {Button, Container, Form, FormGroup, Card} from 'react-bootstrap'
 import BackButton from './BackButton';
 import '../styling/create-post.css'
+import ReactMarkdown from 'react-markdown';
 
 //props: match.params.impID, match.params.subforumID
 class EditPost extends React.Component {
@@ -15,6 +16,7 @@ class EditPost extends React.Component {
             titleText: "", // the title starts empty, before the post gets loaded
             bodyText: "", // the body starts empty, before the post gets loaded
             url: '/api/posts/' + this.props.match.params.postID,
+            backURL: "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID
         };
     }
 
@@ -49,7 +51,7 @@ class EditPost extends React.Component {
 
     submit() {
         // if no text has been entered, it will return to default before the button is pressed
-        if ((this.state.titleText === this.state.defaultTitle) || this.state.bodyText === this.state.defaultBody) {
+        if ((this.state.titleText === "") || this.state.bodyText === "") {
             alert('Please enter a title and body');
         } else {
             // the HTML request
@@ -70,6 +72,10 @@ class EditPost extends React.Component {
                 })
             }).then(responseJson => {
                 console.log(responseJson);
+                if (responseJson.status == 200) {
+                    alert("Successfully edited the post");
+                    window.location.href = this.state.backURL;
+                }
             }).catch(error => this.setState({
                 message: "Error posting post: " + error
             }));
@@ -88,11 +94,9 @@ class EditPost extends React.Component {
     }
 
     render() {
-        const backURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID;
-
         return (
             <Container>
-                <BackButton url={backURL}/>
+                <BackButton url={this.state.backURL}/>
                 <Form className="createPost">
                     <Form.Label>Edit Post</Form.Label>
                     <FormGroup controlId="create-title">
@@ -101,6 +105,15 @@ class EditPost extends React.Component {
                         <Form.Control onChange={this.changeBody} as="textarea" rows={3} value={this.state.bodyText}/>
                     </FormGroup>
                     <Button variant="light" onClick={() => this.submit()}>{this.state.buttonText}</Button> {/*this button calls the submit function on click*/}
+                </Form>
+                <Form className="preview">
+                    <Form.Label>Preview:</Form.Label>
+                    <Card>
+                        <Card.Body className="post-text">
+                            <Card.Title className="post-title"> {this.state.titleText}</Card.Title>
+                            <ReactMarkdown className="post-body">{this.state.bodyText}</ReactMarkdown>     {/*Use the body from the prop as the body */}
+                        </Card.Body>
+                    </Card>
                 </Form>
             </Container>
         );
