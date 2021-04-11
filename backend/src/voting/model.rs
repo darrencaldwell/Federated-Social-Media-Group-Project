@@ -39,10 +39,19 @@ pub fn parse_mariadb(json_string: String) -> Vec<UserVote> {
             user_votes
         },
         Err(_) => {
-            let tmp = json_string.replace("{\"_userVotes\": \"{", "{\"_userVotes\": [{");
-            let mut tmp2 = tmp.replace("\\","");
-            tmp2.replace_range(tmp2.len()-3..tmp2.len(), "}]}");
-            serde_json::from_str(&tmp2).unwrap()
+            log::info!("old_string: {:?}",&json_string);
+            if json_string.starts_with("{\"_userVotes\": \"[") {
+                // replace \"[ , ]\"
+                let tmp = json_string.replace("\"[", "[");
+                let tmp = tmp.replace("]\"", "]");
+                let tmp = tmp.replace("\\","");
+                serde_json::from_str::<DbUserVotes>(&tmp).unwrap()
+            } else {
+                let tmp = json_string.replace("{\"_userVotes\": \"{", "{\"_userVotes\": [{");
+                let mut tmp2 = tmp.replace("\\","");
+                tmp2.replace_range(tmp2.len()-3..tmp2.len(), "}]}");
+                serde_json::from_str(&tmp2).unwrap()
+            }
         },
     };
     // a small hack to remove any null results, would take much more code to write a custom
