@@ -27,7 +27,8 @@ class Account extends React.Component {
     }
 
     // send patch req to backend to update the user details
-    editBio = async () => {
+    editBio = async (event) => {
+        event.preventDefault();
         const data = {
             username: this.state.userInfo.username,
             description: this.description
@@ -49,7 +50,8 @@ class Account extends React.Component {
 
     }
 
-    editUname = async () => {
+    editUname = async (event) => {
+        event.preventDefault();
         const data = {
             username: this.username,
             description: this.state.userInfo.description
@@ -61,7 +63,8 @@ class Account extends React.Component {
                     username: this.username,
                     description: this.state.userInfo.description
                 })
-                alert("Successfully updated bio!")
+                localStorage.setItem('username', this.username);
+                alert("Successfully updated username!")
             }).catch(err => {
                 if (err.response) {
                     alert(err.response.message())
