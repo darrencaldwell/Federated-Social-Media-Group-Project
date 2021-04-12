@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Card, Container, Button} from "react-bootstrap";
 import {Link} from 'react-router-dom';
-import ForumCard from './ForumCard';
+import AdminDropDown from './AdminDropDown';
 import '../styling/container-pages.css';
 
 function ForumCard({currID, forum, impID}) {
@@ -12,8 +12,9 @@ function ForumCard({currID, forum, impID}) {
         <Card className={"forum " + styling} >  {/*each forum is displayed as a card with className forum */}
             <Card.Link as={Link} to={'/' + impID + '/' + forum.id}>
                 <Card.Body className={"forum-body " + styling}>
+                    <AdminDropDown permsLink={`/editperms/forum/${forum.id}`}/>
                     {/*The card consists of the name of the forum, which links to the forum itself */}
-                        {forum.forumName}
+                    {forum.forumName}
                 </Card.Body>                    
             </Card.Link> 
         </Card>
@@ -81,11 +82,12 @@ export default class ForumList extends Component {
                 <Container className="forumlist">
                 {/*Use the map function to apply the html to all forums in the list */}
                 {this.state.forumList.map((forum) => ( 
-                    // <ForumCard key={forum.id} currID={this.state.currForumID} forum={forum} impID={this.props.match.params.impID}/>  //each forum is displayed as a card with className forum 
-                        <ForumCard key={forum.id} 
-                        link={`/${this.props.match.params.impID}/${forum.id}`} 
-                        forumID={forum.id}
-                        name={forum.forumName}/>
+                    <ForumCard key={forum.id} currID={this.state.currForumID} forum={forum} impID={this.props.match.params.impID
+                                }/>  //each forum is displayed as a card with className forum 
+                        // <ForumCard key={forum.id} 
+                        // link={`/${this.props.match.params.impID}/${forum.id}`} 
+                        // forumID={forum.id}
+                        // name={forum.forumName}/>
                     ))}
                 </Container>
                 

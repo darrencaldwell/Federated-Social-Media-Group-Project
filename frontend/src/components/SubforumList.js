@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Card, Container, Button} from "react-bootstrap";
 import {Link} from 'react-router-dom';
-import ForumCard from './ForumCard';
+import AdminDropDown from './AdminDropDown';
 import '../styling/container-pages.css';
 
 function SubforumCard({currID, subforum, impID, forumID}) {
@@ -12,8 +12,9 @@ function SubforumCard({currID, subforum, impID, forumID}) {
         <Card className={"forum " + styling} >  {/*each forum is displayed as a card with className forum */}
             <Card.Link as={Link} to={'/' + impID + '/' + forumID + '/' + subforum.id}>
                 <Card.Body className={"forum-body " + styling}>
+                    <AdminDropDown permsLink={`/editperms/subforum/${subforum.id}`}/>
                     {/*The card consists of the name of the subforum, which links to the subforum itself */}
-                        {subforum.subforumName} + {subforum.id} + {currID}
+                    {subforum.subforumName} + {subforum.id} + {currID}
                 </Card.Body>                    
             </Card.Link> 
         </Card>
@@ -111,12 +112,12 @@ export default class SubforumList extends Component {
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}
                     {this.state.subforumList.map((subforum) => (
-                        // <SubforumCard key={subforum.id} currID={this.state.currSubforumID} subforum={subforum} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID}/>
-                        <ForumCard key={subforum.id} 
-                        link={`/${this.props.match.params.impID}/${this.props.match.params.forumID}/${subforum.id}`} 
-                        name={subforum.subforumName}
-                        forumID={this.props.match.params.forumID}
-                        subforumID={subforum.id}/>
+                        <SubforumCard key={subforum.id} currID={this.state.currSubforumID} subforum={subforum} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID}/>
+                        // <ForumCard key={subforum.id} 
+                        // link={`/${this.props.match.params.impID}/${this.props.match.params.forumID}/${subforum.id}`} 
+                        // name={subforum.subforumName}
+                        // forumID={this.props.match.params.forumID}
+                        // subforumID={subforum.id}/>
                     ))}
                 </Container>
                 <Button as={Link} bsPrefix="button" to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/new"}>
