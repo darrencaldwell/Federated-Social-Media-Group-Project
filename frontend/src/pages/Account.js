@@ -1,8 +1,9 @@
 import React from "react";
-import {Button, Card, Container, Nav, Form, FormGroup, ListGroup} from "react-bootstrap";
+import {Button, Card, Container, Nav, Form, FormGroup, ListGroup, InputGroup} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
 import axios from 'axios'
+import FormControl from "@material-ui/core/FormControl";
 
 class Account extends React.Component {
 
@@ -110,20 +111,22 @@ class Account extends React.Component {
                 </Nav>
                 <Card>
                     <Card.Body>
-                        {/*<Card.Text>*/}
-                        {/*    Username: {localStorage.getItem('username')}*/}
-                        {/*    <Button variant="info">Edit Username</Button>*/}
-                        {/*</Card.Text>*/}
                         <Form.Label>Username</Form.Label>
                         <Form onSubmit={this.editUname}>
-                            <FormGroup controlId="uname">
+                            <InputGroup controlId="uname">
                                 <Form.Control type="text" placeholder={this.state.userInfo.username}
                                               onChange={e => this.username = e.target.value}/>
-                                <Button variant="light" type="submit">Update Username</Button>
-                            </FormGroup>
+
+                                {/*<Button variant="light" type="submit">Update Username</Button>*/}
+                                <InputGroup.Append>
+                                    <Button variant="light" type="submit">Update Username</Button>
+                                </InputGroup.Append>
+                            </InputGroup>
+
 
                             {/*<Button variant="light" type="submit">Update Username</Button>*/}
                         </Form>
+
                         {' '}
                         <ListGroup>
                              <ListGroup.Item>First name: {this.state.userInfo.firstName}</ListGroup.Item>
