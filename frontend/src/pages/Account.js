@@ -3,7 +3,6 @@ import {Button, Card, Container, Nav, Form, FormGroup, ListGroup, InputGroup} fr
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
 import axios from 'axios'
-import FormControl from "@material-ui/core/FormControl";
 
 class Account extends React.Component {
 
