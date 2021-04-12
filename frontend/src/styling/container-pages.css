@@ -113,6 +113,10 @@ a.button {
       text-decoration: none;
       color: #ffffff;
   }
+
+  .admin-dropdown {
+    float: right;
+  }
   
   a.button:hover {
     background-color: #2c2f33;

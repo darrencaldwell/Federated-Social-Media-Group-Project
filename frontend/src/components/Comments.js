@@ -129,20 +129,11 @@ class Comment extends Component {
                         <ReactMarkdown className="mt-3 comment-body">{this.props.comment.commentContent}</ReactMarkdown>
                         <ButtonGroup vertical className="buttons">
                             <ButtonGroup>
-                                {/*<Button variant="outline-secondary"*/}
-                                {/*   href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>Edit</Button>{" "}*/}
-                                {/*<Button variant="outline-danger" onClick={() => {*/}
-                                {/*    if (window.confirm('Are you sure you wish to delete this comment?')) this.delete()*/}
-                                {/*}}*/}
-                                {/*   href={this.props.posturl}>🗑</Button>*/}
-
-                                <Button className="button edit-button"
+                                <Button className="button edit-button" title="Edit"
                                    href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</Button>
-                                <Button className='button delete-button' onClick={this.delete} href="#">🗑</Button>
+                                <Button className='button delete-button' title="Delete" onClick={this.delete} href="#">🗑</Button>
                             </ButtonGroup>
-                            {/*<Button variant="info"*/}
-                            {/*   href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</Button>*/}
-                            <a className="button reply-button"
+                            <a className="button reply-button" title="Reply"
                                href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
                         </ButtonGroup>
                     </div>

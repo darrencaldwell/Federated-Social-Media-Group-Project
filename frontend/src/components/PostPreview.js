@@ -95,11 +95,11 @@ export class PostPreview extends Component {
 
                         <ButtonGroup vertical className="buttons">
                             <ButtonGroup>
-                                <Button className="button edit-button"
+                                <Button className="button edit-button" title="Edit"
                                    href={"/" + this.props.impID + "/" + this.props.forumID + "/" + this.props.subforumID + "/" + this.props.post.id + "/edit"}>🖉</Button>
-                                <Button className='button delete-button' onClick={this.delete} href="#">🗑</Button>
+                                <Button className='button delete-button' title="Delete" onClick={this.delete} href="#">🗑</Button>
                             </ButtonGroup>
-                            <a className="button reply-button"
+                            <a className="button reply-button" title="Comment"
                                href={"/" + this.props.impID + "/" + this.props.forumID + "/" + this.props.subforumID + "/" + this.props.post.id + "/new"}>Comment</a>
                         </ButtonGroup>
                     </div>

@@ -85,14 +85,14 @@ class App extends React.Component {
                     {/*<BackButton/>*/}
                     <div className="columns">
                         <Switch>
-                            <Route exact path="/editperms/:type/:id/:name"></Route>
+                            <Route path="/editperms"/>
                             <Route exact path="/user/:userURL"/>
                             <Route exact path="/:impID/forums" component={ForumList}/>
                             <Route exact path="/:impID/new" component={ForumList}/>
                             <Route path="/:impID/:forumID" component={ForumList}/>
                         </Switch>
                         <Switch>
-                            <Route exact path="/editperms/:type/:id/:name"></Route>
+                            <Route path="/editperms"/>
                             <Route exact path="/:impID/forums"/>
                             <Route exact path="/:impID/new"/>
                             <Route exact path="/user/:userURL"/>

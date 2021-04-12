@@ -11,8 +11,8 @@ function SubforumCard({currID, subforum, impID, forumID}) {
     return (
         <Card className={"forum " + styling} >  {/*each forum is displayed as a card with className forum */}
             <Card.Link as={Link} to={'/' + impID + '/' + forumID + '/' + subforum.id}>
-                <Card.Body className={"forum-body " + styling}>
-                    <AdminDropDown permsLink={`/editperms/subforum/${subforum.id}`}/>
+                <Card.Body className={"forum-body pb-3 pt-0 " + styling}>
+                    <AdminDropDown permsLink={`/editperms/subforum/${subforum.id}/${subforum.subforumName}`}/>
                     {/*The card consists of the name of the subforum, which links to the subforum itself */}
                     {subforum.subforumName} + {subforum.id} + {currID}
                 </Card.Body>                    

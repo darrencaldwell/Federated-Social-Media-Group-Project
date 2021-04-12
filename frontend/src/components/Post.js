@@ -155,8 +155,8 @@ export class Post extends Component {
                                 </Card.Body>
                                 {/* <div className="post-buttons"> */}
                                 <ButtonGroup vertical className="post-buttons">
-                                    <Button className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</Button>
-                                    <Button className="button delete-button" onClick={this.delete} href={this.state.subforumURL}>🗑</Button>
+                                    <Button className="button edit-button" title="Edit" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</Button>
+                                    <Button className="button delete-button" title="Delete" onClick={this.delete} href={this.state.subforumURL}>🗑</Button>
                                     {/*<a className="button edit-button" href={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID + "/edit"}>🖉</a>*/}
                                     {/*<a className='button delete-button' onClick={() => {*/}
                                     {/*    if (window.confirm('Are you sure you wish to delete this post?')) this.delete()*/}
