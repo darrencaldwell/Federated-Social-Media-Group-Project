@@ -10,12 +10,12 @@ use log::info;
 use crate::request_errors::RequestError;
 
 #[patch("/local/users/{id}")]
-async fn patch_user_bio(
+async fn patch_user(
     web::Path(id): web::Path<String>,
     pool: web::Data<MySqlPool>,
     user: web::Json<model::UserPatchRequest>
 ) -> impl Responder {
-    match model::patch_user_bio(id,user.into_inner(), &pool).await {
+    match model::patch_user(id, user.into_inner(), &pool).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(e) => {
             info!("ROUTE ERROR: patch_user_bio: {}", e.to_string());
@@ -26,6 +26,24 @@ async fn patch_user_bio(
         }
     }
 }
+
+// #[patch("/local/users/{id}")]
+// async fn patch_user_uname(
+//     web::Path(id): web::Path<String>,
+//     pool: web::Data<MySqlPool>,
+//     user: web::Json<model::UserUnamePatchRequest>
+// ) -> impl Responder {
+//     match model::patch_user_uname(id,user.into_inner(), &pool).await {
+//         Ok(_) => HttpResponse::Ok().finish(),
+//         Err(e) => {
+//             info!("ROUTE ERROR: patch_user_uname: {}", e.to_string());
+//             match e {
+//                 RequestError::NotFound(f) => HttpResponse::NotFound().body(f),
+//                 RequestError::SqlxError(f) => HttpResponse::InternalServerError().body(f.to_string()),
+//             }
+//         }
+//     }
+// }
 
 #[post("/local/users/{id}/profilepicture")]
 async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>, web::Path(id): web::Path<String>) -> Result<HttpResponse, Error> {
@@ -194,7 +212,8 @@ async fn get_user_comments(
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
-    cfg.service(patch_user_bio);
+    cfg.service(patch_user);
+    // cfg.service(patch_user_uname);
     cfg.service(get_users);
     cfg.service(get_user);
     cfg.service(get_account);

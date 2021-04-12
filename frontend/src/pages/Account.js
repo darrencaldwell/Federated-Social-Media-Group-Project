@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Container, Nav, Form, FormGroup} from "react-bootstrap";
+import {Button, Card, Container, Nav, Form, FormGroup, ListGroup} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
 import axios from 'axios'
@@ -26,16 +26,40 @@ class Account extends React.Component {
         })
     }
 
-    // send patch req to backend to update the bio
+    // send patch req to backend to update the user details
     editBio = async () => {
         const data = {
+            username: this.state.userInfo.username,
             description: this.description
         }
 
         axios.patch('local/users/' + localStorage.getItem('userId'), data)
             .then(res => {
                 this.setState({
+                    username: this.state.userInfo.username,
                     description: this.description
+                })
+                alert("Successfully updated!")
+            }).catch(err => {
+                if (err.response) {
+                    alert(err.response.message())
+                }
+            }
+        )
+
+    }
+
+    editUname = async () => {
+        const data = {
+            username: this.username,
+            description: this.state.userInfo.description
+        }
+
+        axios.patch('local/users/' + localStorage.getItem('userId'), data)
+            .then(res => {
+                this.setState({
+                    username: this.username,
+                    description: this.state.userInfo.description
                 })
                 alert("Successfully updated bio!")
             }).catch(err => {
@@ -44,7 +68,6 @@ class Account extends React.Component {
                 }
             }
         )
-
     }
 
 
@@ -87,24 +110,43 @@ class Account extends React.Component {
                 </Nav>
                 <Card>
                     <Card.Body>
-                        <Card.Text>
-                            Username: {localStorage.getItem('username')}
-                        </Card.Text>
-                        <Card.Text>
-                            First name: {this.state.userInfo.firstName}
-                        </Card.Text>
-                        <Card.Text>
-                            Last name: {this.state.userInfo.lastName}
-                        </Card.Text>
-                        <Card.Text>
-                            User id: {localStorage.getItem('userId')}
-                        </Card.Text>
-                        <Card.Text>
-                            Email: {this.state.userInfo.email}
-                        </Card.Text>
-                        <Card.Text>
-                            Joined: {date.toLocaleString()}
-                        </Card.Text>
+                        {/*<Card.Text>*/}
+                        {/*    Username: {localStorage.getItem('username')}*/}
+                        {/*    <Button variant="info">Edit Username</Button>*/}
+                        {/*</Card.Text>*/}
+                        <Form.Label>Username</Form.Label>
+                        <Form onSubmit={this.editUname}>
+                            <FormGroup controlId="uname">
+                                <Form.Control type="text" placeholder={this.state.userInfo.username}
+                                              onChange={e => this.username = e.target.value}/>
+                                <Button variant="light" type="submit">Update Username</Button>
+                            </FormGroup>
+
+                            {/*<Button variant="light" type="submit">Update Username</Button>*/}
+                        </Form>
+                        {' '}
+                        <ListGroup>
+                             <ListGroup.Item>First name: {this.state.userInfo.firstName}</ListGroup.Item>
+                             <ListGroup.Item>Last name: {this.state.userInfo.lastName}</ListGroup.Item>
+                             <ListGroup.Item>User id: {this.state.userInfo.user_id}</ListGroup.Item>
+                             <ListGroup.Item>Email: {this.state.userInfo.email}</ListGroup.Item>
+                             <ListGroup.Item>Date joined: {date.toLocaleString()}</ListGroup.Item>
+                        </ListGroup>
+                        {/*<Card.Text>*/}
+                        {/*    First name: {this.state.userInfo.firstName}*/}
+                        {/*</Card.Text>*/}
+                        {/*<Card.Text>*/}
+                        {/*    Last name: {this.state.userInfo.lastName}*/}
+                        {/*</Card.Text>*/}
+                        {/*<Card.Text>*/}
+                        {/*    User id: {localStorage.getItem('userId')}*/}
+                        {/*</Card.Text>*/}
+                        {/*<Card.Text>*/}
+                        {/*    Email: {this.state.userInfo.email}*/}
+                        {/*</Card.Text>*/}
+                        {/*<Card.Text>*/}
+                        {/*    Joined: {date.toLocaleString()}*/}
+                        {/*</Card.Text>*/}
                         <Nav fill variant="tabs" defaultActiveKey="/">
                             <Nav.Item>
                                 {/*<Link as={Link} variant-"light" to='/'>Return home</.Link>*/}

@@ -115,23 +115,31 @@ pub enum LoginError {
     InvalidHash,
 }
 
-/// Represents a request to modify a user
+/// Represents a request to modify a users bio
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserPatchRequest {
     pub description: String,
+    pub username: String
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserPasswordPatchRequest {
+    pub password: String,
 }
 
 /// Modifies an existing user bio
-pub async fn patch_user_bio(user_id: String, user: UserPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
+pub async fn patch_user(user_id: String, user: UserPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
 
     let bio_modified = sqlx::query!(
         r#"
         UPDATE users
-        SET description = ?
+        SET description = ?, username = ?
         WHERE user_id = ?
         "#,
         user.description,
+        user.username,
         user_id
     )
         .execute(pool)
@@ -139,6 +147,29 @@ pub async fn patch_user_bio(user_id: String, user: UserPatchRequest, pool: &MySq
         .rows_affected();
 
     if bio_modified == 0 {
+        Err(RequestError::NotFound(format!("user_id: {} not found", user_id)))
+    } else {
+        Ok(())
+    }
+}
+
+// /// Modifies an existing user username
+pub async fn patch_user_password(user_id: String, user: UserPasswordPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
+
+    let uname_modified = sqlx::query!(
+        r#"
+        UPDATE users
+        SET username = ?
+        WHERE user_id = ?
+        "#,
+        user.username,
+        user_id
+    )
+        .execute(pool)
+        .await?
+        .rows_affected();
+
+    if uname_modified == 0 {
         Err(RequestError::NotFound(format!("user_id: {} not found", user_id)))
     } else {
         Ok(())
