@@ -44,7 +44,7 @@ class UserAccount extends React.Component {
 
 
     render() {
-        const date = new Date(this.state.userInfo.createdTime * 1000)
+        const date = new Date(this.state.userInfo.createdTime)
         const forums_url = "/1/forums"
 
         if (this.state.userInfo.id === localStorage.getItem('userId')) {

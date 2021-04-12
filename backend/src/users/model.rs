@@ -172,7 +172,7 @@ pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
 
     Ok(User {
         username: result.username.unwrap(),
-        created_time: result.date_joined.timestamp(),
+        created_time: result.date_joined.timestamp_millis(),
         profile_image_url: result.profile_picture.unwrap(),
         links: gen_links(&user_id),
         user_id,
@@ -200,7 +200,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
             User {
                 username: rec.username.unwrap(),
                 description: rec.description,
-                created_time: rec.date_joined.timestamp(),
+                created_time: rec.date_joined.timestamp_millis(),
                 profile_image_url: rec.profile_picture.unwrap(),
                 links: gen_links(&user_id),
                 user_id: user_id.to_string(),
@@ -249,8 +249,8 @@ pub async fn get_user_comments(user_id: String, pool: &MySqlPool) -> Result<Comm
         .map(|rec| {
             let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
-                created_time: rec.created_time.unwrap().timestamp(),
-                modified_time: rec.modified_time.unwrap().timestamp(),
+                created_time: rec.created_time.unwrap().timestamp_millis(),
+                modified_time: rec.modified_time.unwrap().timestamp_millis(),
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
@@ -315,8 +315,8 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
             post_title: rec.post_title,
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
-            created_time: rec.created_time.unwrap().timestamp(),
-            modified_time: rec.modified_time.unwrap().timestamp(),
+            created_time: rec.created_time.unwrap().timestamp_millis(),
+            modified_time: rec.modified_time.unwrap().timestamp_millis(),
             downvotes: rec.downvotes.to_u64().unwrap(),
             upvotes: rec.upvotes.to_u64().unwrap(),
             user_votes,
@@ -360,7 +360,7 @@ pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser>
         last_name: rec.last_name.unwrap(),
         description: rec.description.unwrap(),
         email: rec.email.unwrap(),
-        date_joined: rec.date_joined.timestamp(),
+        date_joined: rec.date_joined.timestamp_millis(),
         profile_image_url: rec.profile_picture.unwrap(),
     })
 }
@@ -386,7 +386,7 @@ pub async fn register(username: String, password: String, first_name: String, la
     tx.commit().await?;
     let user_id: String = rec.get(0);
     let date_joined: DateTime<Utc> = rec.get(1);
-    let date_joined_ts = date_joined.timestamp();
+    let date_joined_ts = date_joined.timestamp_millis();
 
     let local_user = LocalUser {
         links: gen_links(&user_id),

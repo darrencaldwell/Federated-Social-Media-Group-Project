@@ -72,7 +72,7 @@ class Account extends React.Component {
 
 
     render() {
-        const date = new Date(this.state.userInfo.dateJoined * 1000)
+        const date = new Date(this.state.userInfo.dateJoined)
         const forums_url = "/1/forums"
         let desc = "Type your bio here..";
         console.log('info',this.state.userInfo)
