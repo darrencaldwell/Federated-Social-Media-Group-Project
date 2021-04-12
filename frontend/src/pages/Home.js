@@ -96,7 +96,8 @@ class Home extends Component {
                 <Jumbotron>
                     <h1 className="display-3">Welcome</h1>
                     <p className="lead">
-                        Please log in to use our features.
+                        The home page currently doesn't contain anything useful but hopefully
+                        it will in the future.
                     </p>
                     <Link to={'/login'}><Button variant='light' as="input" type="button"
                                                 value="Go to login page"/>{' '}</Link>

@@ -153,23 +153,23 @@ pub async fn patch_user(user_id: String, user: UserPatchRequest, pool: &MySqlPoo
     }
 }
 
-// /// Modifies an existing user password
+// /// Modifies an existing user username
 pub async fn patch_user_password(user_id: String, user: UserPasswordPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
-    let password_hash: String = hash(user.password, 10)?;
 
-    let pw_modified = sqlx::query!(
+    let uname_modified = sqlx::query!(
         r#"
         UPDATE users
-        SET password = password_hash
+        SET username = ?
         WHERE user_id = ?
         "#,
+        user.username,
         user_id
     )
         .execute(pool)
         .await?
         .rows_affected();
 
-    if pw_modified == 0 {
+    if uname_modified == 0 {
         Err(RequestError::NotFound(format!("user_id: {} not found", user_id)))
     } else {
         Ok(())
