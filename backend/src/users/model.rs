@@ -123,12 +123,6 @@ pub struct UserPatchRequest {
     pub username: String
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct UserPasswordPatchRequest {
-    pub password: String,
-}
-
 /// Modifies an existing user bio
 pub async fn patch_user(user_id: String, user: UserPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
 
@@ -147,29 +141,6 @@ pub async fn patch_user(user_id: String, user: UserPatchRequest, pool: &MySqlPoo
         .rows_affected();
 
     if bio_modified == 0 {
-        Err(RequestError::NotFound(format!("user_id: {} not found", user_id)))
-    } else {
-        Ok(())
-    }
-}
-
-// /// Modifies an existing user password
-pub async fn patch_user_password(user_id: String, user: UserPasswordPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
-    let password_hash: String = hash(user.password, 10)?;
-
-    let pw_modified = sqlx::query!(
-        r#"
-        UPDATE users
-        SET password = password_hash
-        WHERE user_id = ?
-        "#,
-        user_id
-    )
-        .execute(pool)
-        .await?
-        .rows_affected();
-
-    if pw_modified == 0 {
         Err(RequestError::NotFound(format!("user_id: {} not found", user_id)))
     } else {
         Ok(())
