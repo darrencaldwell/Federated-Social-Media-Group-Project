@@ -142,6 +142,7 @@ a.button {
 
 .postlist{height:93%; overflow-y:scroll;}
 .post-container{height:93%; width: 70%; overflow-y:scroll;}
+<<<<<<< HEAD
 .post:hover{background-color: #eeeeee;}
 .post-wrapper{width: 70%; overflow-y: scroll;}
 
@@ -163,3 +164,7 @@ a.button {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+=======
+.post:hover{background-color: lightgray;}
+.post-wrapper{width: 70%; overflow-y: scroll;}
+>>>>>>> remotes/origin/forum_subforum_permissions

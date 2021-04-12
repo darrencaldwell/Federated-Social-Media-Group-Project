@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Card, Container, Button} from "react-bootstrap";
 import {Link} from 'react-router-dom';
+import ForumCard from './ForumCard';
 import '../styling/container-pages.css';
 
 function SubforumCard({currID, subforum, impID, forumID}) {
@@ -110,7 +111,12 @@ export default class SubforumList extends Component {
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}
                     {this.state.subforumList.map((subforum) => (
-                        <SubforumCard key={subforum.id} currID={this.state.currSubforumID} subforum={subforum} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID}/>
+                        // <SubforumCard key={subforum.id} currID={this.state.currSubforumID} subforum={subforum} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID}/>
+                        <ForumCard key={subforum.id} 
+                        link={`/${this.props.match.params.impID}/${this.props.match.params.forumID}/${subforum.id}`} 
+                        name={subforum.subforumName}
+                        forumID={this.props.match.params.forumID}
+                        subforumID={subforum.id}/>
                     ))}
                 </Container>
                 <Button as={Link} bsPrefix="button" to={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/new"}>

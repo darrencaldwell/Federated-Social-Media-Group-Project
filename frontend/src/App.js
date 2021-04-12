@@ -22,6 +22,8 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import './styling/container-pages.css';
 import UserAccount from "./pages/UserAccount";
 // import BackButton from "./components/BackButton";
+import EditPerms from './components/permissions/EditPerms';
+
 
 class App extends React.Component {
     componentDidMount = async () => {
@@ -83,12 +85,14 @@ class App extends React.Component {
                     {/*<BackButton/>*/}
                     <div className="columns">
                         <Switch>
+                            <Route exact path="/editperms/:type/:id/:name"></Route>
                             <Route exact path="/user/:userURL"/>
                             <Route exact path="/:impID/forums" component={ForumList}/>
                             <Route exact path="/:impID/new" component={ForumList}/>
                             <Route path="/:impID/:forumID" component={ForumList}/>
                         </Switch>
                         <Switch>
+                            <Route exact path="/editperms/:type/:id/:name"></Route>
                             <Route exact path="/:impID/forums"/>
                             <Route exact path="/:impID/new"/>
                             <Route exact path="/user/:userURL"/>
@@ -114,6 +118,7 @@ class App extends React.Component {
                             {/*<Route exact path="/user/:impID/:userId" component={UserAccount}/>*/}
 
                             <Route exact path="/:impID" component={props => <Home {...props} user={this.state.user} currImp={this.state.imp}/>}/> {/*default homepage*/}
+                            <Route exact path="/editperms/:type/:id/:name" component={EditPerms}></Route>
 
                             {/*<Route exact path="/:impID/forums" component={() => <Home user={this.state.user}/>}/> {/*shows the list of forums (for our server)*/}
                             <Route exact path="/:impID/new" component={CreateForum}/> {/*page to create a new forum*/}

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Card, Container, Button} from "react-bootstrap";
 import {Link} from 'react-router-dom';
+import ForumCard from './ForumCard';
 import '../styling/container-pages.css';
 
 function ForumCard({currID, forum, impID}) {
@@ -80,7 +81,11 @@ export default class ForumList extends Component {
                 <Container className="forumlist">
                 {/*Use the map function to apply the html to all forums in the list */}
                 {this.state.forumList.map((forum) => ( 
-                    <ForumCard key={forum.id} currID={this.state.currForumID} forum={forum} impID={this.props.match.params.impID}/>  //each forum is displayed as a card with className forum 
+                    // <ForumCard key={forum.id} currID={this.state.currForumID} forum={forum} impID={this.props.match.params.impID}/>  //each forum is displayed as a card with className forum 
+                        <ForumCard key={forum.id} 
+                        link={`/${this.props.match.params.impID}/${forum.id}`} 
+                        forumID={forum.id}
+                        name={forum.forumName}/>
                     ))}
                 </Container>
                 
