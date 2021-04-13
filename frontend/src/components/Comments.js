@@ -207,7 +207,7 @@ export default class Comments extends Component {
     }
 
     render() {
-        if (this.state.expanded) {  // provide a link to return to the post
+        if (this.state.expanded) {  // provide a link to return to the post. Might not need this anymore as back button now goes back to post when expanded.
             return (
                 <Container>
                     <Button className="button" as={Link} to={this.props.posturl}>Return</Button>

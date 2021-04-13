@@ -25,6 +25,7 @@ class Login extends React.Component {
                 localStorage.setItem('token', res.data.token);
                 localStorage.setItem('userId', res.data.userId);
                 localStorage.setItem('username', res.data.username);
+                localStorage.setItem('expr', res.data.exp);
                 this.setState({
                     loggedIn: true
                 })

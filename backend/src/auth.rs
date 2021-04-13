@@ -32,3 +32,10 @@ pub fn decode_jwt(token: &str) -> Result<String> {
                     .map(|data| data.claims.user_id)?;
     Ok(user_id)
 }
+
+pub fn decode_jwt_expr(token: &str) -> Result<i64> {
+    let key = DecodingKey::from_secret("change_me".as_bytes());
+    let expr_date = decode::<Claim>(token, &key, &Validation::default())
+                    .map(|data| data.claims.exp)?;
+    Ok(expr_date)
+}

@@ -106,10 +106,16 @@ async fn login(post: web::Json<model::UserLoginRequest>, pool: web::Data<MySqlPo
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
+    let exp = match auth::decode_jwt_expr(&token) {
+        Ok(exp) => exp,
+        Err(_) => return HttpResponse::Forbidden().body(""),
+    };
+
     let res = model::LoginResponse {
         user_id,
         username,
         token,
+        exp,
     };
 
     HttpResponse::Ok().json(res)
