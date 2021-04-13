@@ -280,7 +280,7 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
         r#"
         SELECT
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!", u.username, p.created_time, p.modified_time,
-            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
+            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!", p.post_type,
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
             JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
@@ -311,6 +311,7 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
     for rec in recs {
         let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
         posts.push(Post {
+            post_type: rec.post_type,
             id: rec.post_id,
             post_title: rec.post_title,
             post_contents: rec.post_contents,
