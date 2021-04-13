@@ -359,8 +359,7 @@ pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser>
         local_user_id: user_id,
         first_name: rec.first_name.unwrap(),
         last_name: rec.last_name.unwrap(),
-        #[allow(clippy::or_fun_call)]
-        description: rec.description.unwrap_or("Enter a bio!".to_string()),
+        description: rec.description.unwrap_or_else(|| "Enter a bio!".to_string()),
         email: rec.email.unwrap(),
         date_joined: rec.date_joined.timestamp_millis(),
         profile_image_url: rec.profile_picture.unwrap(),
