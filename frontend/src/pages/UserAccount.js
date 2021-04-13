@@ -1,8 +1,7 @@
 import React from "react";
 import {Button, Card, Container, Nav} from "react-bootstrap";
 import {Link, Redirect} from "react-router-dom";
-//import DisplayPicture from "../components/account/DisplayPicture";
-//import axios from 'axios'
+
 
 class UserAccount extends React.Component {
 
@@ -55,22 +54,6 @@ class UserAccount extends React.Component {
             <Container>
                 <Card.Title>Account for {this.state.userInfo.username}</Card.Title>
                 {/*<DisplayPicture uploadedPicture={false}/>*/}
-
-
-                {/*<Nav fill variant="tabs" defaultActiveKey="/">*/}
-                {/*    <Nav.Item>*/}
-                {/*        <Nav.Link as={Link} to='/'>About Us</Nav.Link>*/}
-                {/*    </Nav.Item>*/}
-                {/*    <Nav.Item>*/}
-                {/*        <Nav.Link as={Link} to='/userposts'>//users name Posts</Nav.Link>*/}
-                {/*    </Nav.Item>*/}
-                {/*    <Nav.Item>*/}
-                {/*        <Nav.Link as={Link} to='/usercomments'>//users Comments</Nav.Link>*/}
-                {/*    </Nav.Item>*/}
-                {/*    <Nav.Item>*/}
-                {/*        <Nav.Link as={Link} to='/'>//users Roles</Nav.Link>*/}
-                {/*    </Nav.Item>*/}
-                {/*</Nav>*/}
                 <Card>
                     <Card.Body>
                         <Card.Text>
