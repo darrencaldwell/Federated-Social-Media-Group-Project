@@ -69,9 +69,12 @@ export default class SubforumList extends Component {
     }
 
     componentDidUpdate = (oldProps) => {
-        if (this.props.match.params.forumID !== oldProps.match.params.forumID
-            || this.props.match.params.impID !== oldProps.match.params.impI
-            || this.props.match.params.subforumID !== oldProps.match.params.subforumID) {
+        //if (this.props.match.params.forumID !== oldProps.match.params.forumID
+        //    || this.props.match.params.impID !== oldProps.match.params.impI
+        //    || this.props.match.params.subforumID !== oldProps.match.params.subforumID) {
+        //    this.fetchSubforums();
+        //}
+        if (this.props.url !== oldProps.url) {
             this.fetchSubforums();
         }
     }
