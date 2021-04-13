@@ -22,7 +22,9 @@ class Account extends React.Component {
                     userInfo: res.data
                 })
             }).catch(err => {
-            // alert("something went wrong")
+            if (err.response) {
+                alert(err.response.message())
+            }
         })
     }
 
@@ -40,7 +42,7 @@ class Account extends React.Component {
                     username: this.state.userInfo.username,
                     description: this.description
                 })
-                alert("Successfully updated!")
+                alert("Successfully updated bio!")
             }).catch(err => {
                 if (err.response) {
                     alert(err.response.message())
@@ -102,9 +104,6 @@ class Account extends React.Component {
 
                 <Nav fill variant="tabs" defaultActiveKey="/">
                     <Nav.Item>
-                        <Nav.Link as={Link} to='/'>About Us</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
                         <Nav.Link as={Link} to='/userposts'>Your Posts</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
@@ -119,14 +118,12 @@ class Account extends React.Component {
                                 <Form.Control type="text" placeholder={this.state.userInfo.username}
                                               onChange={e => this.username = e.target.value}/>
 
-                                {/*<Button variant="light" type="submit">Update Username</Button>*/}
                                 <InputGroup.Append>
                                     <Button variant="light" type="submit">Update Username</Button>
                                 </InputGroup.Append>
                             </InputGroup>
 
 
-                            {/*<Button variant="light" type="submit">Update Username</Button>*/}
                         </Form>
 
                         {' '}
@@ -137,24 +134,8 @@ class Account extends React.Component {
                              <ListGroup.Item>Email: {this.state.userInfo.email}</ListGroup.Item>
                              <ListGroup.Item>Date joined: {date.toLocaleString()}</ListGroup.Item>
                         </ListGroup>
-                        {/*<Card.Text>*/}
-                        {/*    First name: {this.state.userInfo.firstName}*/}
-                        {/*</Card.Text>*/}
-                        {/*<Card.Text>*/}
-                        {/*    Last name: {this.state.userInfo.lastName}*/}
-                        {/*</Card.Text>*/}
-                        {/*<Card.Text>*/}
-                        {/*    User id: {localStorage.getItem('userId')}*/}
-                        {/*</Card.Text>*/}
-                        {/*<Card.Text>*/}
-                        {/*    Email: {this.state.userInfo.email}*/}
-                        {/*</Card.Text>*/}
-                        {/*<Card.Text>*/}
-                        {/*    Joined: {date.toLocaleString()}*/}
-                        {/*</Card.Text>*/}
                         <Nav fill variant="tabs" defaultActiveKey="/">
                             <Nav.Item>
-                                {/*<Link as={Link} variant-"light" to='/'>Return home</.Link>*/}
                                 <Link to={'/'}><Button variant='light' as="input" type="button"
                                                        value="Return home"/>{' '}</Link>
                             </Nav.Item>

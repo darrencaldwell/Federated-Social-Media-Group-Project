@@ -19,8 +19,9 @@ class AccountPosts extends React.Component {
                 })
                 console.log('posts', this.state.postList)
             }).catch(err => {
-                console.log(err)
-            // alert("something went wrong")
+            if (err.response) {
+                alert(err.response.message())
+            }
         })
     }
 
