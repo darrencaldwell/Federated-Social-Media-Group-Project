@@ -108,6 +108,7 @@ pub struct LoginResponse {
     pub user_id: String,
     pub username: String,
     pub token: String,
+    pub exp: i64,
 }
 
 /// Enumeration of all login errors
@@ -176,7 +177,7 @@ pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
         profile_image_url: result.profile_picture.unwrap(),
         links: gen_links(&user_id),
         user_id,
-        description: result.description,
+        description: result.description
     })
 }
 

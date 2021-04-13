@@ -22,6 +22,11 @@ class Make extends React.Component {
         };
     }
 
+    move(id){ // Move to a post given an id
+        this.props.history.push("/" + this.props.match.params.impID + "/" + this.props.match.params.forumID 
+        + "/" + this.props.match.params.subforumID + "/" + id);
+    }
+
     submit() {
         // if no text has been entered, it will return to default before the button is pressed
         if ((this.state.titleText === this.state.defaultTitle) || this.state.bodyText === this.state.defaultBody) {
@@ -46,6 +51,9 @@ class Make extends React.Component {
                 })
             }).then(responseJson => {
                 console.log(responseJson);
+                responseJson.json().then(post => {
+                    this.move(post.id);
+                })
             }).catch(error => this.setState({
                 message: "Error posting post: " + error
             }));

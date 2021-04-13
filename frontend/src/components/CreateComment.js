@@ -11,13 +11,23 @@ class Make extends React.Component {
         const root = (typeof this.props.match.params.commentID == 'undefined'); // it's a root comment if the comment ID is undefined
         const url = root ? ("/api/posts/"    + this.props.match.params.postID    + "/comments")
                          : ("/api/comments/" + this.props.match.params.commentID + "/comments");
+
+        const postURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" // URL of post comment belongs to
+                         + this.props.match.params.subforumID + "/" + this.props.match.params.postID 
+        const backURL =  postURL; // structured this way so that if there is a way to check how deep a comment is use ? : to go back to that comment.
         const defaultBody = 'Put the body of your comment here';
         this.state = {
             buttonText: 'Create Comment',
             defaultBody: defaultBody, // default body needs to be preserved
             bodyText: defaultBody, // body starts as default
+            backURL: backURL, // Previous URL
             url: url
         };
+    }
+
+    goTo(x) { // Goes to the url argument then reloads to take updates into account
+        this.props.history.push(x);
+        window.location.reload();
     }
 
     submit() {
@@ -48,6 +58,7 @@ class Make extends React.Component {
             }).catch(error => this.setState({ // catch any error
                 message: "Error posting post: " + error
             }));
+            this.goTo(this.state.backURL);
         }
     }
 
@@ -56,11 +67,10 @@ class Make extends React.Component {
     }
 
     render() {
-        const backURL = "/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID;
 
         return (
             <Container>
-                <BackButton url={backURL}/>
+                <BackButton url={this.state.backURL}/>
                 <Form className="createComment">
                     <Form.Label>Create Comment</Form.Label>
                     <FormGroup controlId="create-title">
