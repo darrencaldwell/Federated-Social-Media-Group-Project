@@ -86,7 +86,7 @@ pub struct Link {
 /// Represents the request to login a [User]
 #[derive(Serialize, Deserialize)]
 pub struct UserLoginRequest {
-    pub username: String,
+    pub email: String,
     pub password: String,
 }
 
@@ -358,7 +358,8 @@ pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser>
         local_user_id: user_id,
         first_name: rec.first_name.unwrap(),
         last_name: rec.last_name.unwrap(),
-        description: rec.description.unwrap(),
+        #[allow(clippy::or_fun_call)]
+        description: rec.description.unwrap_or("Enter a bio!".to_string()),
         email: rec.email.unwrap(),
         date_joined: rec.date_joined.timestamp_millis(),
         profile_image_url: rec.profile_picture.unwrap(),
@@ -406,13 +407,13 @@ pub async fn register(username: String, password: String, first_name: String, la
 
 /// Used for verifying a login attempt, checks that the credentials match
 pub async fn verify(
-    username: &str,
+    email: &str,
     password: &str,
     pool: &MySqlPool,
-) -> Result<String, LoginError> {
+) -> Result<(String, String), LoginError> {
     let rec = sqlx::query!(
-        r#"SELECT password_hash, user_id FROM users WHERE username = ?"#,
-        username
+        r#"SELECT password_hash, user_id, username FROM users WHERE email = ?"#,
+        email
     )
         // Uniqueness guaranteed by database
         .fetch_one(pool)
@@ -441,5 +442,5 @@ pub async fn verify(
         Err(_) => return Err(LoginError::InvalidHash),
     };
 
-    Ok(rec_result.user_id)
+    Ok((rec_result.user_id, rec_result.username.unwrap()))
 }

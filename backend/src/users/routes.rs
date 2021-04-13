@@ -71,7 +71,7 @@ async fn get_profile_picture(pool: web::Data<MySqlPool>, web::Path(id): web::Pat
         id
     )
         .fetch_one(pool.as_ref())
-        .await.unwrap() // TODO: MATCH THIS PROPERLY
+        .await.unwrap()
         .pp.unwrap();
     let res = HttpResponseBuilder::new(StatusCode::OK).content_type("image").body(img);
     Ok(res)
@@ -92,23 +92,23 @@ async fn register(post: web::Json<model::UserRegisterRequest>, pool: web::Data<M
 async fn login(post: web::Json<model::UserLoginRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     // very login by checking username and password matches the hash of the password in the
     // database
-    let result = model::verify(&post.username, &post.password, &pool).await;
+    let result = model::verify(&post.email, &post.password, &pool).await;
 
-    let user_id = match result {
+    let (user_id, username) = match result {
         Ok(result) => result,
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
     println!("after verify: {}", user_id);
     // if successful, returns the token in the response
-    let token = match auth::encode_jwt(user_id.clone(), post.username.clone()) {
+    let token = match auth::encode_jwt(user_id.clone(), post.email.clone()) {
         Ok(token) => token,
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
     let res = model::LoginResponse {
         user_id,
-        username: post.username.clone(),
+        username,
         token,
     };
 
