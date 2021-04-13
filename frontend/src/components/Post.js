@@ -86,7 +86,7 @@ export class Post extends Component {
                 headers: {
                     'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
                     'Content-Type': 'application/json',
-                    'redirect': this.props.impID
+                    'redirect': this.props.match.params.impID
                 }
 
             }).then(responseJson => { // log the response for debugging
