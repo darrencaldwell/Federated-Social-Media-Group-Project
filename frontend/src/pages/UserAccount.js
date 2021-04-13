@@ -29,7 +29,7 @@ class UserAccount extends React.Component {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Accept': 'application/json',
-                        'redirect-url': atob(this.props.match.params.userURL)
+                        'url-redirect': atob(this.props.match.params.userURL)
                     }
                 })
             const result = await res.json()
