@@ -41,7 +41,8 @@ class Make extends React.Component {
                     "postTitle": this.state.titleText,
                     "postContents": this.state.bodyText,
                     "userId": localStorage.getItem('userId'), // userId is a string in localStorage
-                    "username": localStorage.getItem('username')
+                    "username": localStorage.getItem('username'),
+                    "postType": "markdown" // all of our posts are mardown
                 })
             }).then(responseJson => {
                 console.log(responseJson);
