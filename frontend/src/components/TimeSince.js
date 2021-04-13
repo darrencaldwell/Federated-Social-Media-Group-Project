@@ -63,7 +63,7 @@ class TimeSince extends Component {
 
         }
         else {
-            let date_created = this.props.createdTime * 1000
+            let date_created = this.props.createdTime
             let now = new Date().getTime()
             let diff = Math.abs(now - date_created)
             date_string = getTimeSince(diff)

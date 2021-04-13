@@ -196,7 +196,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
     tx.commit().await?;
 
     // return the post as if it was retrieved by a GET
-    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp();
+    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp_millis();
     let new_post = Post {
         post_title: post.post_title,
         post_contents: post.post_contents,
@@ -256,8 +256,8 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             post_title: rec.post_title,
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
-            created_time: rec.created_time.unwrap().timestamp(),
-            modified_time: rec.modified_time.unwrap().timestamp(),
+            created_time: rec.created_time.unwrap().timestamp_millis(),
+            modified_time: rec.modified_time.unwrap().timestamp_millis(),
             // MariaDB returns Decimal from sum, so need to convert
             downvotes: rec.downvotes.to_u64().unwrap(),
             upvotes: rec.upvotes.to_u64().unwrap(),
@@ -319,8 +319,8 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
         id: rec.post_id,
         post_title: rec.post_title,
         post_contents: rec.post_contents,
-        created_time: rec.created_time.unwrap().timestamp(),
-        modified_time: rec.modified_time.unwrap().timestamp(),
+        created_time: rec.created_time.unwrap().timestamp_millis(),
+        modified_time: rec.modified_time.unwrap().timestamp_millis(),
         subforum_id: rec.subforum_id,
         // MariaDB returns Decimal from sum, so need to convert
         downvotes: rec.downvotes.unwrap().to_u64().unwrap(),
