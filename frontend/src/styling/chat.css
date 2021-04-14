@@ -1,40 +1,55 @@
-.recievedMessage {
+.rec {
     background-color: #bfdffc;
-    border: 1px solid #a5d3fb;
-    margin: 10px 10px;
+    border-radius: 0px!important;
+    border: 1px solid #383838!important;
+    border-top: 0px!important;
     width: 100%;
-    padding: 5px;
 }
 
-.sentMessage {
-    background-color: #FFFFF;
-    border: 1px solid #a5d3fb;
-    margin: 10px 10px;
+.rec-body {
+    padding: 0.2rem!important;
+}
+
+.rec-title {
+    padding: 0rem!important;
+}
+
+.sent {
+    background-color: #bfdffc;
+    border-radius: 0px!important;
+    border: 1px solid #383838!important;
+    border-top: 0px!important;
     width: 100%;
+}
+
+.sent-body {
+    padding: 0.2rem!important;
     text-align: right;
-    padding: 5px;
+}
+
+.sent-title {
+    padding: 0rem!important;
+}
+
+.server {
+    background-color: #bfdffc;
+    border-radius: 0px!important;
+    border: 1px solid #383838!important;
+    border-top: 0px!important;
+}
+
+.server-body {
+    padding: 0.2rem!important;
+    text-align: center;
 }
 
 .input {
-    background-color: #bfdffc;
     margin: 10px 10px;
+    padding: 1rem;
     display: inline;
 }
 
-.textbox {
-    background-color: #C4D7F3;
-    padding: 0px;
-    border: none;
-}
-
-.textbox:focus {
-    background-color: #C4D7F3;
-    padding: 0px;
-    border: none;
-}
-
-.button {
-    background-color: #C4C7F3;
-    display: inline-block;
-    border: none;
+.messages {
+    padding-top: 0.1rem;
+    overflow-y: scroll;
 }

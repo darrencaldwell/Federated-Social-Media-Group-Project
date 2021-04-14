@@ -1,19 +1,41 @@
 use std::time::{Duration, Instant};
 
+use sqlx::MySqlPool;
+
 use actix::prelude::*;
 use actix_web::{Error, HttpRequest, HttpResponse, web, get};
 use actix_web_actors::ws;
+
+use serde::Serialize;
 
 use crate::{chat::server, id_extractor::UserId};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 
+#[derive(Serialize)]
+pub enum MessageType {
+    Connect,
+    Disconnect,
+    Message,
+    Whisper,
+    Server,
+    UserList,
+}
+
+#[derive(Serialize)]
+pub struct Message {
+    pub message_type: MessageType,
+    pub user_id: String,
+    pub user_name: String,
+    pub content: Option<String>,
+}
+
 struct WsChatSession {
-    id: usize,
+    id: String,
     hb: Instant,
     room: String,
-    name: Option<String>,
+    name: String,
     addr: Addr<server::ChatServer>,
 }
 
@@ -21,7 +43,7 @@ impl WsChatSession {
     fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
         ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
             if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
-                act.addr.do_send(server::Disconnect { id: act.id });
+                act.addr.do_send(server::Disconnect { user_name: act.name.clone(), id: act.id.clone() });
                 ctx.stop();
 
                 return
@@ -40,11 +62,16 @@ impl Actor for WsChatSession {
 
         let addr = ctx.address();
         self.addr
-            .send(server::Connect { addr: addr.recipient(), room: self.room.clone() })
+            .send(server::Connect { 
+                user_name: self.name.clone(),
+                id: self.id.clone(),
+                addr: addr.recipient(),
+                room: self.room.clone() }
+            )
             .into_actor(self)
             .then(|res, act, ctx| {
                 match res {
-                    Ok(res) => act.id = res,
+                    Ok(()) => (),
                     _ => ctx.stop(),
                 }
                 fut::ready(())
@@ -53,7 +80,7 @@ impl Actor for WsChatSession {
     }
 
     fn stopping(&mut self, _: &mut Self::Context) -> Running {
-        self.addr.do_send(server::Disconnect { id: self.id });
+        self.addr.do_send(server::Disconnect { user_name: self.name.clone(), id: self.id.clone() });
         Running::Stop
     }
 }
@@ -90,20 +117,45 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsChatSession {
                 if m.starts_with('/') {
                     let v: Vec<&str> = m.splitn(2, ' ').collect();
                     match v[0] {
-                        "/help" => ctx.text("List of commands: /help".to_string()),
-                        "/ping" => ctx.text("pong".to_string()),
-                        _ => ctx.text("Not a valid command.".to_string()),
+                        "/help" => {
+                            let msg = Message {
+                                message_type: MessageType::Server,
+                                user_id: self.id.clone(),
+                                user_name: self.name.clone(),
+                                content: Some("List of commands: /help".to_string())
+                            };
+                            ctx.text(serde_json::to_string(&msg).unwrap());
+                        },
+                        "/ping" => {
+                            let msg = Message {
+                                message_type: MessageType::Server,
+                                user_id: self.id.clone(),
+                                user_name: self.name.clone(),
+                                content: Some("pong".to_string())
+                            };
+                            ctx.text(serde_json::to_string(&msg).unwrap());
+                        },
+                        _ => {
+                            let msg = Message {
+                                message_type: MessageType::Server,
+                                user_id: self.id.clone(),
+                                user_name: self.name.clone(),
+                                content: Some("Not a valid command, type /help".to_string())
+                            };
+                            ctx.text(serde_json::to_string(&msg).unwrap());
+                        },
                     }
                 } else {
-                    let msg = if let Some(ref name) = self.name {
-                        format!("{}: {}", name, m)
-                    } else {
-                        m.to_owned()
+                    let msg = Message {
+                        message_type: MessageType::Message,
+                        user_id: self.id.clone(),
+                        user_name: self.name.clone(),
+                        content: Some(m.to_owned()),
                     };
 
                     self.addr.do_send(server::ClientMessage {
-                        id: self.id,
-                        msg,
+                        id: self.id.clone(),
+                        msg: serde_json::to_string(&msg).unwrap(),
                         room: self.room.clone(),
                     })
                 }
@@ -126,16 +178,22 @@ pub async fn chat_route(
     req: HttpRequest,
     stream: web::Payload,
     srv: web::Data<Addr<server::ChatServer>>,
+    pool: web::Data<MySqlPool>,
     web::Path(id): web::Path<String>,
     UserId(user_id): UserId,
 ) -> Result<HttpResponse, Error> {
-    println!("new conenctiojn");
+
+    let user_name = sqlx::query!("SELECT username FROM users WHERE user_id = ?", user_id)
+        .fetch_one(pool.as_ref())
+        .await.unwrap()
+        .username.unwrap();
+
     ws::start(
         WsChatSession {
-            id: 0,
+            id: user_id,
             hb: Instant::now(),
             room: id,
-            name: Some(user_id),
+            name: user_name,
             addr: srv.get_ref().clone(),
         },
         &req,
