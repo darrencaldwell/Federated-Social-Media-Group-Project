@@ -1,11 +1,7 @@
 import {React, Component} from 'react'
 import {Link} from 'react-router-dom'
-<<<<<<< HEAD
 import {Card, Container, Button, ButtonGroup} from "react-bootstrap";
 import CardActionArea from '@material-ui/core/CardActionArea';
-=======
-import {Card, Container, Button, ButtonGroup, Dropdown, DropdownButton} from "react-bootstrap";
->>>>>>> master
 import Avatar, {Cache} from 'react-avatar';
 import ReactMarkdown from 'react-markdown';
 import Voting from './Voting'
@@ -130,7 +126,6 @@ class Comment extends Component {
                                 </Card.Subtitle>
                             </div>
                         </div>
-<<<<<<< HEAD
                         <ReactMarkdown className="mt-3 comment-body">{this.props.comment.commentContent}</ReactMarkdown>
                         <ButtonGroup vertical className="buttons">
                             <ButtonGroup>
@@ -141,43 +136,6 @@ class Comment extends Component {
                             <a className="button reply-button" title="Reply"
                                href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>
                         </ButtonGroup>
-=======
-                        <Card.Text className="mt-3 comment-body">{this.props.comment.commentContent}</Card.Text>
-                        <div className="buttons">
-                            {/*<div className="comment-columns">*/}
-                                {/*<Button variant="outline-secondary"*/}
-                                {/*   href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>Edit</Button>{" "}*/}
-                                {/*<Button variant="outline-danger" onClick={() => {*/}
-                                {/*    if (window.confirm('Are you sure you wish to delete this comment?')) this.delete()*/}
-                                {/*}}*/}
-                                {/*   href={this.props.posturl}>🗑</Button>*/}
-
-                            {/*    <a className="button edit-button"*/}
-                            {/*       href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>🖉</a>*/}
-                            {/*    <a className='button delete-button' onClick={() => {*/}
-                            {/*        if (window.confirm('Are you sure you wish to delete this comment?')) this.delete()*/}
-                            {/*    }}*/}
-                            {/*       href={this.props.posturl}>🗑</a>*/}
-                            {/*</div>*/}
-                            {/*/!*<Button variant="info"*!/*/}
-                            {/*/!*   href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</Button>*!/*/}
-                            {/*<a className="button reply-button"*/}
-                            {/*   href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</a>*/}
-
-                                <DropdownButton as={ButtonGroup}
-                                                key={'Secondary'}
-                                                id={`dropdown-variants-Secondary`}
-                                                variant={'secondary'}
-                                                title="...">
-                                    <Dropdown.Item href={this.props.posturl + "/" + this.props.comment.id + "/edit"}>Edit Comment</Dropdown.Item>
-                                    <Dropdown.Item onClick={() => {
-                                        if (window.confirm('Are you sure you wish to delete this comment?')) this.delete()
-                                    }}
-                                                   href={this.props.posturl}>Delete Comment</Dropdown.Item>
-                                    <Dropdown.Item href={this.props.posturl + "/" + this.props.comment.id + "/new"}>Reply</Dropdown.Item>
-                                </DropdownButton>
-                        </div>
->>>>>>> master
                     </div>
                 </Card.Body>
                 <Comments url={"/api/comments/" + this.props.comment.id + "/comments"}
