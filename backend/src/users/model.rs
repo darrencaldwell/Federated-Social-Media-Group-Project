@@ -86,7 +86,7 @@ pub struct Link {
 /// Represents the request to login a [User]
 #[derive(Serialize, Deserialize)]
 pub struct UserLoginRequest {
-    pub username: String,
+    pub email: String,
     pub password: String,
 }
 
@@ -108,6 +108,7 @@ pub struct LoginResponse {
     pub user_id: String,
     pub username: String,
     pub token: String,
+    pub exp: i64,
 }
 
 /// Enumeration of all login errors
@@ -115,23 +116,25 @@ pub enum LoginError {
     InvalidHash,
 }
 
-/// Represents a request to modify a user
+/// Represents a request to modify a users bio
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserPatchRequest {
     pub description: String,
+    pub username: String
 }
 
 /// Modifies an existing user bio
-pub async fn patch_user_bio(user_id: String, user: UserPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
+pub async fn patch_user(user_id: String, user: UserPatchRequest, pool: &MySqlPool) -> Result<(), RequestError> {
 
     let bio_modified = sqlx::query!(
         r#"
         UPDATE users
-        SET description = ?
+        SET description = ?, username = ?
         WHERE user_id = ?
         "#,
         user.description,
+        user.username,
         user_id
     )
         .execute(pool)
@@ -170,11 +173,11 @@ pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
 
     Ok(User {
         username: result.username.unwrap(),
-        created_time: result.date_joined.timestamp(),
+        created_time: result.date_joined.timestamp_millis(),
         profile_image_url: result.profile_picture.unwrap(),
         links: gen_links(&user_id),
         user_id,
-        description: result.description,
+        description: result.description
     })
 }
 
@@ -198,7 +201,7 @@ pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
             User {
                 username: rec.username.unwrap(),
                 description: rec.description,
-                created_time: rec.date_joined.timestamp(),
+                created_time: rec.date_joined.timestamp_millis(),
                 profile_image_url: rec.profile_picture.unwrap(),
                 links: gen_links(&user_id),
                 user_id: user_id.to_string(),
@@ -238,7 +241,8 @@ pub async fn get_user_comments(user_id: String, pool: &MySqlPool) -> Result<Comm
         LEFT JOIN users on comments.user_id = users.user_id
         LEFT JOIN posts on comments.post_id = posts.post_id
         LEFT JOIN subforums on posts.subforum_id = subforums.subforum_id
-        WHERE comments.user_id = ?"#, &user_id)
+        WHERE comments.user_id = ?
+        GROUP BY comments.comment_id"#, &user_id)
         .fetch_all(pool)
         .await?;
 
@@ -246,8 +250,8 @@ pub async fn get_user_comments(user_id: String, pool: &MySqlPool) -> Result<Comm
         .map(|rec| {
             let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
-                created_time: rec.created_time.unwrap().timestamp(),
-                modified_time: rec.modified_time.unwrap().timestamp(),
+                created_time: rec.created_time.unwrap().timestamp_millis(),
+                modified_time: rec.modified_time.unwrap().timestamp_millis(),
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
@@ -277,7 +281,7 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
         r#"
         SELECT
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!", u.username, p.created_time, p.modified_time,
-            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
+            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!", p.post_type,
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
             JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
@@ -296,6 +300,7 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
         LEFT JOIN users u ON
             p.user_id = u.user_id AND p.implementation_id = u.implementation_id
         WHERE p.user_id = ?
+        GROUP BY p.post_id
         ORDER BY created_time
         "#,
         &user_id
@@ -303,15 +308,17 @@ pub async fn get_user_posts(user_id: String, pool: &MySqlPool) -> Result<PostEmb
         .fetch_all(pool)
         .await?;
 
+
     for rec in recs {
         let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
         posts.push(Post {
+            post_type: rec.post_type,
             id: rec.post_id,
             post_title: rec.post_title,
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
-            created_time: rec.created_time.unwrap().timestamp(),
-            modified_time: rec.modified_time.unwrap().timestamp(),
+            created_time: rec.created_time.unwrap().timestamp_millis(),
+            modified_time: rec.modified_time.unwrap().timestamp_millis(),
             downvotes: rec.downvotes.to_u64().unwrap(),
             upvotes: rec.upvotes.to_u64().unwrap(),
             user_votes,
@@ -353,9 +360,9 @@ pub async fn get_account(user_id: String, pool: &MySqlPool) -> Result<LocalUser>
         local_user_id: user_id,
         first_name: rec.first_name.unwrap(),
         last_name: rec.last_name.unwrap(),
-        description: rec.description.unwrap(),
+        description: rec.description.unwrap_or_else(|| "Enter a bio!".to_string()),
         email: rec.email.unwrap(),
-        date_joined: rec.date_joined.timestamp(),
+        date_joined: rec.date_joined.timestamp_millis(),
         profile_image_url: rec.profile_picture.unwrap(),
     })
 }
@@ -381,7 +388,7 @@ pub async fn register(username: String, password: String, first_name: String, la
     tx.commit().await?;
     let user_id: String = rec.get(0);
     let date_joined: DateTime<Utc> = rec.get(1);
-    let date_joined_ts = date_joined.timestamp();
+    let date_joined_ts = date_joined.timestamp_millis();
 
     let local_user = LocalUser {
         links: gen_links(&user_id),
@@ -401,13 +408,13 @@ pub async fn register(username: String, password: String, first_name: String, la
 
 /// Used for verifying a login attempt, checks that the credentials match
 pub async fn verify(
-    username: &str,
+    email: &str,
     password: &str,
     pool: &MySqlPool,
-) -> Result<String, LoginError> {
+) -> Result<(String, String), LoginError> {
     let rec = sqlx::query!(
-        r#"SELECT password_hash, user_id FROM users WHERE username = ?"#,
-        username
+        r#"SELECT password_hash, user_id, username FROM users WHERE email = ?"#,
+        email
     )
         // Uniqueness guaranteed by database
         .fetch_one(pool)
@@ -436,5 +443,5 @@ pub async fn verify(
         Err(_) => return Err(LoginError::InvalidHash),
     };
 
-    Ok(rec_result.user_id)
+    Ok((rec_result.user_id, rec_result.username.unwrap()))
 }

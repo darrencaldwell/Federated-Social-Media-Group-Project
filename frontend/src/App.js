@@ -66,15 +66,26 @@ class App extends React.Component {
         this.setState({token: localStorage.getItem('token')});
     }
 
+    checkExpr = () => {
+        //If there is a token and it has expired change url to homepage one and logout
+        if(this.state.token){
+            var dateNow = new Date();
+            if(localStorage.getItem('expr') * 1000 < dateNow.getTime()){ // *1000 so that they both have same sig figs
+                window.history.replaceState(window.history.state, "", "/");
+                this.logout();
+            } 
+        } 
+    }
+
     changeImp = (imp) => {
         this.setState({imp: imp});
     }
-
     /**
      *
      * @returns {JSX.Element}
      */
     render() {
+        this.checkExpr();
         // Whether user is logged in or logged out
         const {token, impList, imp} = this.state;
         return (

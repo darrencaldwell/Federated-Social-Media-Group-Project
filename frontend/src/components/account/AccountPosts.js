@@ -12,14 +12,17 @@ class AccountPosts extends React.Component {
         }
     }
 
-    componentDidMount() {
+    componentDidMount = async() =>{
         axios.get('api/users/' + localStorage.getItem('userId') + '/posts')
             .then(res => {
                 this.setState({
                     postList: res.data._embedded.postList
                 })
+                console.log('posts', this.state.postList)
             }).catch(err => {
-            alert("something went wrong")
+            if (err.response) {
+                alert(err.response.message())
+            }
         })
     }
 

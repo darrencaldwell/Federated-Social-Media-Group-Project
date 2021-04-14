@@ -48,8 +48,8 @@ class TimeSince extends Component {
         let date_string
 
         if (this.props.createdTime && this.props.modifiedTime) {
-            let date_created = this.props.createdTime * 1000
-            let date_modified = this.props.modifiedTime * 1000
+            let date_created = this.props.createdTime
+            let date_modified = this.props.modifiedTime
 
             if (date_created - date_modified === 0) {
                 date_string = null
@@ -63,7 +63,7 @@ class TimeSince extends Component {
 
         }
         else {
-            let date_created = this.props.createdTime * 1000
+            let date_created = this.props.createdTime
             let now = new Date().getTime()
             let diff = Math.abs(now - date_created)
             date_string = getTimeSince(diff)

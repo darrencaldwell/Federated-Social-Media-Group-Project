@@ -6,6 +6,7 @@ use super::super::request_errors::RequestError;
 use bigdecimal::ToPrimitive;
 use super::super::voting::{UserVote, parse_mariadb};
 use chrono::{DateTime, Utc};
+
 /// Represents a request to POST a post
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -14,6 +15,7 @@ pub struct PostRequest {
     pub post_contents: String,
     pub user_id: String,
     pub username: String,
+    pub post_type: String,
 }
 
 /// Represents a request to modify a post
@@ -29,7 +31,7 @@ impl Serialize for Post {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
             S: Serializer {
-        let mut state = serializer.serialize_struct("Post", 6)?;
+        let mut state = serializer.serialize_struct("Post", 13)?;
         state.serialize_field("postTitle", &self.post_title)?;
         state.serialize_field("postContents", &self.post_contents)?;
         state.serialize_field("userId", &self.user_id.to_string())?;
@@ -38,6 +40,7 @@ impl Serialize for Post {
         state.serialize_field("subforumId", &self.subforum_id.to_string())?;
         state.serialize_field("downvotes", &self.downvotes)?;
         state.serialize_field("upvotes", &self.upvotes)?;
+        state.serialize_field("postType", &self.post_type.to_string())?;
         state.serialize_field("_userVotes", &self.user_votes)?;
         state.serialize_field("_links", &self.links)?;
         state.serialize_field("createdTime", &self.created_time)?;
@@ -57,6 +60,7 @@ pub struct Post {
     pub subforum_id: u64,
     pub downvotes: u64,
     pub upvotes: u64,
+    pub post_type: String,
     pub user_votes: Vec<UserVote>,
     pub links: PostLinks,
 }
@@ -147,15 +151,16 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
     // Insert post
     let insert_rec = sqlx::query!(
         r#"
-        insert into posts (post_title, user_id, post_contents, subforum_id, implementation_id)
-        values( ?, ?, ?, ?, ?)
+        insert into posts (post_title, user_id, post_contents, subforum_id, implementation_id, post_type)
+        values( ?, ?, ?, ?, ?, ?)
         RETURNING post_id, created_time
         "#,
         post.post_title,
         post.user_id,
         post.post_contents,
         subforum_id,
-        implementation_id
+        implementation_id,
+        post.post_type
     )
         .fetch_one(pool)
         .await?;
@@ -196,7 +201,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
     tx.commit().await?;
 
     // return the post as if it was retrieved by a GET
-    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp();
+    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp_millis();
     let new_post = Post {
         post_title: post.post_title,
         post_contents: post.post_contents,
@@ -208,6 +213,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
         subforum_id,
         downvotes: 0,
         upvotes: 0,
+        post_type: post.post_type,
         user_votes: Vec::with_capacity(0),
         links: generate_post_links(insert_rec.get(0), subforum_id, rec.forum_id, rec.user_endpoint.unwrap()),
     };
@@ -221,7 +227,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
         r#"
         SELECT
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!", u.username, p.created_time, p.modified_time,
-            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
+            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!", p.post_type,
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes!",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes!",
             JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
@@ -256,8 +262,8 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             post_title: rec.post_title,
             post_contents: rec.post_contents,
             subforum_id: rec.subforum_id,
-            created_time: rec.created_time.unwrap().timestamp(),
-            modified_time: rec.modified_time.unwrap().timestamp(),
+            created_time: rec.created_time.unwrap().timestamp_millis(),
+            modified_time: rec.modified_time.unwrap().timestamp_millis(),
             // MariaDB returns Decimal from sum, so need to convert
             downvotes: rec.downvotes.to_u64().unwrap(),
             upvotes: rec.upvotes.to_u64().unwrap(),
@@ -268,6 +274,7 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
                 rec.forum_id,
                 rec.user_endpoint.unwrap(),
             ),
+            post_type: rec.post_type,
             user_id: rec.user_id.to_string(),
             username: rec.username.unwrap().to_string(),
         });
@@ -285,7 +292,7 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
         r#"
         SELECT
             p.post_id AS "post_id!", post_title AS "post_title!", p.user_id AS "user_id!", u.username, p.created_time, p.modified_time,
-            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!",
+            post_contents AS "post_contents!", p.subforum_id AS "subforum_id!", forum_id AS "forum_id!", p.post_type,
             sum(case when pv.is_upvote = 0 then 1 else 0 end) AS "downvotes",
             sum(case when pv.is_upvote = 1 then 1 else 0 end) AS "upvotes",
             JSON_OBJECT("_userVotes", JSON_ARRAYAGG(
@@ -316,11 +323,12 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
 
     let user_id = rec.user_id;
     let post = Post {
+        post_type: rec.post_type.unwrap(),
         id: rec.post_id,
         post_title: rec.post_title,
         post_contents: rec.post_contents,
-        created_time: rec.created_time.unwrap().timestamp(),
-        modified_time: rec.modified_time.unwrap().timestamp(),
+        created_time: rec.created_time.unwrap().timestamp_millis(),
+        modified_time: rec.modified_time.unwrap().timestamp_millis(),
         subforum_id: rec.subforum_id,
         // MariaDB returns Decimal from sum, so need to convert
         downvotes: rec.downvotes.unwrap().to_u64().unwrap(),

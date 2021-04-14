@@ -1,8 +1,7 @@
 import React from "react";
 import {Button, Card, Container, Nav} from "react-bootstrap";
 import {Link, Redirect} from "react-router-dom";
-//import DisplayPicture from "../components/account/DisplayPicture";
-//import axios from 'axios'
+
 
 class UserAccount extends React.Component {
 
@@ -29,11 +28,12 @@ class UserAccount extends React.Component {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token'),
                         'Accept': 'application/json',
-                        'redirect-url': atob(this.props.match.params.userURL)
+                        'url-redirect': atob(this.props.match.params.userURL)
                     }
                 })
             const result = await res.json()
             this.setState({userInfo: result}); // we store the json for the post in the state
+            console.log(this.state.userInfo)
 
         } catch (e) {
             console.log(e)
@@ -43,7 +43,7 @@ class UserAccount extends React.Component {
 
 
     render() {
-        const date = new Date(this.state.userInfo.createdTime * 1000)
+        const date = new Date(this.state.userInfo.createdTime)
         const forums_url = "/1/forums"
 
         if (this.state.userInfo.id === localStorage.getItem('userId')) {
@@ -54,27 +54,6 @@ class UserAccount extends React.Component {
             <Container>
                 <Card.Title>Account for {this.state.userInfo.username}</Card.Title>
                 {/*<DisplayPicture uploadedPicture={false}/>*/}
-                <Container className="bio">
-                    <Card.Title>Their Bio</Card.Title>
-                    <Card>
-                        <Card.Text>This is where the bio would go</Card.Text>
-                    </Card>
-                </Container>
-
-                {/*<Nav fill variant="tabs" defaultActiveKey="/">*/}
-                {/*    <Nav.Item>*/}
-                {/*        <Nav.Link as={Link} to='/'>About Us</Nav.Link>*/}
-                {/*    </Nav.Item>*/}
-                {/*    <Nav.Item>*/}
-                {/*        <Nav.Link as={Link} to='/userposts'>//users name Posts</Nav.Link>*/}
-                {/*    </Nav.Item>*/}
-                {/*    <Nav.Item>*/}
-                {/*        <Nav.Link as={Link} to='/usercomments'>//users Comments</Nav.Link>*/}
-                {/*    </Nav.Item>*/}
-                {/*    <Nav.Item>*/}
-                {/*        <Nav.Link as={Link} to='/'>//users Roles</Nav.Link>*/}
-                {/*    </Nav.Item>*/}
-                {/*</Nav>*/}
                 <Card>
                     <Card.Body>
                         <Card.Text>

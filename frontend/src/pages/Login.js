@@ -13,7 +13,7 @@ class Login extends React.Component {
 
         // Store data to be sent to backend
         const data = {
-            username: this.username,
+            email: this.email,
             password: this.password
         }
 
@@ -25,6 +25,7 @@ class Login extends React.Component {
                 localStorage.setItem('token', res.data.token);
                 localStorage.setItem('userId', res.data.userId);
                 localStorage.setItem('username', res.data.username);
+                localStorage.setItem('expr', res.data.exp);
                 this.setState({
                     loggedIn: true
                 })
@@ -51,9 +52,9 @@ class Login extends React.Component {
 
                     {/* Username Input */}
                     <FormGroup>
-                        <label>Username</label>
-                        <input type="text" input="username" className="form-control" placeholder="Username"
-                               onChange={e => this.username = e.target.value}/>
+                        <label>Email</label>
+                        <input type="text" input="email" className="form-control" placeholder="Email"
+                               onChange={e => this.email = e.target.value}/>
                     </FormGroup>
 
                     {/* Password Input */}

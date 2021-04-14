@@ -130,7 +130,7 @@ pub async fn insert_comment(post_id: u64,
         .await?;
 
     let comment_id = insert_rec.get(0);
-    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp();
+    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp_millis();
 
     // Insert username into users table (user_id may already be pressent post GET request via middleware)
     let rows_affected = sqlx::query!(
@@ -209,7 +209,7 @@ pub async fn insert_child_comment(parent_id: u64,
         .await?;
 
     let comment_id = insert_rec.get(0);
-    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp();
+    let created_time: i64 = insert_rec.get::<DateTime<Utc>, usize>(1).timestamp_millis();
 
     // Insert username into users table (user_id may already be pressent post GET request via middleware)
     let rows_affected = sqlx::query!(
@@ -336,8 +336,8 @@ pub async fn get_comments(post_id: u64, pool: &MySqlPool) -> Result<Comments> {
         .map(|rec| {
             let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
-                created_time: rec.created_time.unwrap().timestamp(),
-                modified_time: rec.modified_time.unwrap().timestamp(),
+                created_time: rec.created_time.unwrap().timestamp_millis(),
+                modified_time: rec.modified_time.unwrap().timestamp_millis(),
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
@@ -397,8 +397,8 @@ pub async fn get_child_comments(comment_id: u64, pool: &MySqlPool) -> Result<Com
         .map(|rec| {
             let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
             Comment {
-                created_time: rec.created_time.unwrap().timestamp(),
-                modified_time: rec.modified_time.unwrap().timestamp(),
+                created_time: rec.created_time.unwrap().timestamp_millis(),
+                modified_time: rec.modified_time.unwrap().timestamp_millis(),
                 id: rec.comment_id,
                 comment_content: rec.comment,
                 username: rec.username,
@@ -463,8 +463,8 @@ pub async fn get_comment(comment_id: u64, pool: &MySqlPool) -> Result<Comment> {
 
     let user_votes = parse_mariadb(rec.user_votes.clone().unwrap());
     Ok(Comment {
-        created_time: rec.created_time.unwrap().timestamp(),
-        modified_time: rec.modified_time.unwrap().timestamp(),
+        created_time: rec.created_time.unwrap().timestamp_millis(),
+        modified_time: rec.modified_time.unwrap().timestamp_millis(),
         id: comment_id,
         comment_content: rec.comment,
         username: rec.username,

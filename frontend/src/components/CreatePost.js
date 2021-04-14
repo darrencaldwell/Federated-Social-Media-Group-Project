@@ -24,6 +24,11 @@ class Make extends React.Component {
         };
     }
 
+    move(id){ // Move to a post given an id
+        this.props.history.push("/" + this.props.match.params.impID + "/" + this.props.match.params.forumID 
+        + "/" + this.props.match.params.subforumID + "/" + id);
+    }
+
     submit() {
         // if no text has been entered, it will return to default before the button is pressed
         if ((this.state.titleText === this.state.defaultTitle) || this.state.bodyText === this.state.defaultBody ||
@@ -44,14 +49,14 @@ class Make extends React.Component {
                     "postTitle": this.state.titleText,
                     "postContents": this.state.bodyText,
                     "userId": localStorage.getItem('userId'), // userId is a string in localStorage
-                    "username": localStorage.getItem('username')
+                    "username": localStorage.getItem('username'),
+                    "postType": "markdown" // all of our posts are mardown
                 })
             }).then(responseJson => {
                 console.log(responseJson);
-                if (responseJson.status === 200) {
-                    alert("Successfully created the post");
-                    window.location.href = this.state.backURL;
-                }
+                responseJson.json().then(post => {
+                    this.move(post.id);
+                })
             }).catch(error => this.setState({
                 message: "Error posting post: " + error
             }));

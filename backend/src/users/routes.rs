@@ -10,12 +10,12 @@ use log::info;
 use crate::request_errors::RequestError;
 
 #[patch("/local/users/{id}")]
-async fn patch_user_bio(
+async fn patch_user(
     web::Path(id): web::Path<String>,
     pool: web::Data<MySqlPool>,
     user: web::Json<model::UserPatchRequest>
 ) -> impl Responder {
-    match model::patch_user_bio(id,user.into_inner(), &pool).await {
+    match model::patch_user(id, user.into_inner(), &pool).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(e) => {
             info!("ROUTE ERROR: patch_user_bio: {}", e.to_string());
@@ -26,6 +26,7 @@ async fn patch_user_bio(
         }
     }
 }
+
 
 #[post("/local/users/{id}/profilepicture")]
 async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>, web::Path(id): web::Path<String>) -> Result<HttpResponse, Error> {
@@ -70,7 +71,7 @@ async fn get_profile_picture(pool: web::Data<MySqlPool>, web::Path(id): web::Pat
         id
     )
         .fetch_one(pool.as_ref())
-        .await.unwrap() // TODO: MATCH THIS PROPERLY
+        .await.unwrap()
         .pp.unwrap();
     let res = HttpResponseBuilder::new(StatusCode::OK).content_type("image").body(img);
     Ok(res)
@@ -91,24 +92,30 @@ async fn register(post: web::Json<model::UserRegisterRequest>, pool: web::Data<M
 async fn login(post: web::Json<model::UserLoginRequest>, pool: web::Data<MySqlPool>) -> impl Responder {
     // very login by checking username and password matches the hash of the password in the
     // database
-    let result = model::verify(&post.username, &post.password, &pool).await;
+    let result = model::verify(&post.email, &post.password, &pool).await;
 
-    let user_id = match result {
+    let (user_id, username) = match result {
         Ok(result) => result,
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
     println!("after verify: {}", user_id);
     // if successful, returns the token in the response
-    let token = match auth::encode_jwt(user_id.clone(), post.username.clone()) {
+    let token = match auth::encode_jwt(user_id.clone(), post.email.clone()) {
         Ok(token) => token,
+        Err(_) => return HttpResponse::Forbidden().body(""),
+    };
+
+    let exp = match auth::decode_jwt_expr(&token) {
+        Ok(exp) => exp,
         Err(_) => return HttpResponse::Forbidden().body(""),
     };
 
     let res = model::LoginResponse {
         user_id,
-        username: post.username.clone(),
+        username,
         token,
+        exp,
     };
 
     HttpResponse::Ok().json(res)
@@ -194,7 +201,7 @@ async fn get_user_comments(
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(register);
     cfg.service(login);
-    cfg.service(patch_user_bio);
+    cfg.service(patch_user);
     cfg.service(get_users);
     cfg.service(get_user);
     cfg.service(get_account);

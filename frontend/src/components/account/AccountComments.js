@@ -21,13 +21,15 @@ const cache = new Cache({
 class AccountComments extends Component {
 
     constructor(props) {
+        console.log('comment got here 1')
         super(props);
         this.state = {
             commentList: []
         }
     }
 
-    componentDidMount() {
+    componentDidMount = async() => {
+        console.log('comment got here 2')
         axios.get('api/users/' + localStorage.getItem('userId') + '/comments')
             .then(res => {
                 this.setState({
@@ -40,6 +42,8 @@ class AccountComments extends Component {
 
 
     render() {
+        const start_url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/1/"
+        console.log('comment got here 3')
         if (this.state.commentList.length === 0) {
             return (
                 <Container>

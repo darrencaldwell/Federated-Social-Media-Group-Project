@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Container, Nav, Form, FormGroup} from "react-bootstrap";
+import {Button, Card, Container, Nav, Form, FormGroup, ListGroup, InputGroup} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import DisplayPicture from "../components/account/DisplayPicture";
 import axios from 'axios'
@@ -22,19 +22,24 @@ class Account extends React.Component {
                     userInfo: res.data
                 })
             }).catch(err => {
-            // alert("something went wrong")
+            if (err.response) {
+                alert(err.response.message())
+            }
         })
     }
 
-    // send patch req to backend to update the bio
-    editBio = async () => {
+    // send patch req to backend to update the user details
+    editBio = async (event) => {
+        event.preventDefault();
         const data = {
+            username: this.state.userInfo.username,
             description: this.description
         }
 
         axios.patch('local/users/' + localStorage.getItem('userId'), data)
             .then(res => {
                 this.setState({
+                    username: this.state.userInfo.username,
                     description: this.description
                 })
                 alert("Successfully updated bio!")
@@ -47,9 +52,32 @@ class Account extends React.Component {
 
     }
 
+    editUname = async (event) => {
+        event.preventDefault();
+        const data = {
+            username: this.username,
+            description: this.state.userInfo.description
+        }
+
+        axios.patch('local/users/' + localStorage.getItem('userId'), data)
+            .then(res => {
+                this.setState({
+                    username: this.username,
+                    description: this.state.userInfo.description
+                })
+                localStorage.setItem('username', this.username);
+                alert("Successfully updated username!")
+            }).catch(err => {
+                if (err.response) {
+                    alert(err.response.message())
+                }
+            }
+        )
+    }
+
 
     render() {
-        const date = new Date(this.state.userInfo.dateJoined * 1000)
+        const date = new Date(this.state.userInfo.dateJoined)
         const forums_url = "/1/forums"
         let desc = "Type your bio here..";
         console.log('info',this.state.userInfo)
@@ -76,9 +104,6 @@ class Account extends React.Component {
 
                 <Nav fill variant="tabs" defaultActiveKey="/">
                     <Nav.Item>
-                        <Nav.Link as={Link} to='/'>About Us</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
                         <Nav.Link as={Link} to='/userposts'>Your Posts</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
@@ -87,27 +112,30 @@ class Account extends React.Component {
                 </Nav>
                 <Card>
                     <Card.Body>
-                        <Card.Text>
-                            Username: {localStorage.getItem('username')}
-                        </Card.Text>
-                        <Card.Text>
-                            First name: {this.state.userInfo.firstName}
-                        </Card.Text>
-                        <Card.Text>
-                            Last name: {this.state.userInfo.lastName}
-                        </Card.Text>
-                        <Card.Text>
-                            User id: {localStorage.getItem('userId')}
-                        </Card.Text>
-                        <Card.Text>
-                            Email: {this.state.userInfo.email}
-                        </Card.Text>
-                        <Card.Text>
-                            Joined: {date.toLocaleString()}
-                        </Card.Text>
+                        <Form.Label>Username</Form.Label>
+                        <Form onSubmit={this.editUname}>
+                            <InputGroup controlId="uname">
+                                <Form.Control type="text" placeholder={this.state.userInfo.username}
+                                              onChange={e => this.username = e.target.value}/>
+
+                                <InputGroup.Append>
+                                    <Button variant="light" type="submit">Update Username</Button>
+                                </InputGroup.Append>
+                            </InputGroup>
+
+
+                        </Form>
+
+                        {' '}
+                        <ListGroup>
+                             <ListGroup.Item>First name: {this.state.userInfo.firstName}</ListGroup.Item>
+                             <ListGroup.Item>Last name: {this.state.userInfo.lastName}</ListGroup.Item>
+                             <ListGroup.Item>User id: {this.state.userInfo.user_id}</ListGroup.Item>
+                             <ListGroup.Item>Email: {this.state.userInfo.email}</ListGroup.Item>
+                             <ListGroup.Item>Date joined: {date.toLocaleString()}</ListGroup.Item>
+                        </ListGroup>
                         <Nav fill variant="tabs" defaultActiveKey="/">
                             <Nav.Item>
-                                {/*<Link as={Link} variant-"light" to='/'>Return home</.Link>*/}
                                 <Link to={'/'}><Button variant='light' as="input" type="button"
                                                        value="Return home"/>{' '}</Link>
                             </Nav.Item>
