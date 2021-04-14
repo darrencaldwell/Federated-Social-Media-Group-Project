@@ -85,9 +85,8 @@ impl<S, B> Service for ProxyReqMiddleware<S>
             }
             // when we are directly redirecting a url we can just set it.
             else {
-                let dest_url = req.headers().get("redirect-url").unwrap().to_str().unwrap().to_string();
-                dest_url_complete = format!("{}{}", dest_url, req.path());
-                if dest_url.starts_with("https://cs3099user-b5") {
+                dest_url_complete = req.headers().get("redirect-url").unwrap().to_str().unwrap().to_string();
+                if dest_url_complete.starts_with("https://cs3099user-b5") {
                     return srv.call(req).await
                 }
             }
