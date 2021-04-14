@@ -95,9 +95,10 @@ export default class SubforumList extends Component {
             this.fetchSubforums();
         }
 
-        if(typeof this.props.match.params.subforumID !== "undefined" && 
-           (typeof oldProps.match.params.subforumID === "undefined" || 
-            this.props.match.params.subforumID !== oldProps.match.params.subforumID)) {
+        if((typeof this.props.match.params.subforumID !== "undefined" &&            // case 1 : new subforumID is defined
+           (typeof oldProps.match.params.subforumID === "undefined" ||                  // should refresh if either a: the old id was undefined OR
+            this.props.match.params.subforumID !== oldProps.match.params.subforumID)) || // the new id is different from the old id
+            (typeof this.props.match.params.subforumID === "undefined" && typeof oldProps.match.params.subforumID !== "undefined")) {            // case 2: subforumID is undefined, but was defined (i.e. remove highlighting)
             this.setState({currSubforumID : this.props.match.params.subforumID});
         }
     }
@@ -106,7 +107,7 @@ export default class SubforumList extends Component {
         //var name = this.state.forumName;
         return (
             <div className="subforum-container">
-                <Button className="button forum-info forum-info-container" href={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID}>
+                <Button bsPrefix="button forum-info forum-info-container" href={'/' + this.props.match.params.impID + '/' + this.props.match.params.forumID}>
                     {this.state.forum.forumName}
                 </Button>
                 <Container className="subforumlist">

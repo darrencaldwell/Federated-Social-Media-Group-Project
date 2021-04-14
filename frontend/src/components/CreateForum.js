@@ -44,7 +44,8 @@ class Make extends React.Component {
             }).then(responseJson => {
                 console.log(responseJson);
                 responseJson.json().then(forum => {
-                    this.move(forum.id);
+                    // this.move(forum.id);
+                    window.location.href = "/" + this.props.match.params.impID + "/" + forum.id;
                 })
             }).catch(error => this.setState({
                 message: "Error posting post: " + error

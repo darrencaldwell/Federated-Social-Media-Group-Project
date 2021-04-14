@@ -93,6 +93,7 @@ img {
     text-align: center;
     display: flex;
     flex-direction: y;
+    padding-right: 15px!important;
 }
 
 a.button {
@@ -123,6 +124,7 @@ a.button {
   .admin-dropdown {
     width:10%!important;
     color: black!important;
+    padding-left: 1%!important;
   }
 
   path {
@@ -131,7 +133,6 @@ a.button {
   
   .forum-name {
     width: 90%!important;
-    padding-left: 10%!important;
     margin: 0px!important;
   }
   
@@ -152,8 +153,13 @@ a.button {
 
 .subforumlist{height:83%; overflow-y:scroll; padding: 5%}
 .subforum-container{width:15%; border-right: 2px solid black; background:grey}
-.forum-info-container{width:100%; height:10%!important; border-bottom: 3px solid grey; background-color: #555555!important; padding:30px 0!important; margin:auto!important}
-.forum-info{font-weight: bold!important; font-size: 26px!important; text-align: center; color: lightslategrey;}
+.forum-info-container{width:100%; height:10%!important; border-bottom: 3px solid grey; background-color: #555555!important; margin:auto!important; display:grid}
+.forum-info{font-weight: bold!important; font-size: 26px!important; text-align: center; color: lightslategrey; line-height: 60px; margin: auto!important; padding:10%!important}
+.forum-info {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  }
 .forum-info:hover{color: lightgray!important}
 
 .MuiCardActionArea-root:hover {

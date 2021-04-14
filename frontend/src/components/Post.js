@@ -74,6 +74,31 @@ export class Post extends Component {
         } catch (e) {
             console.log(e)
         }
+
+        try {
+            // the url to make the request to is given by the parent
+            let url = "/api/users/" + this.state.post.userId
+            let res = await fetch(url
+                , {
+                    method: 'get', // we're making a GET request
+
+                    withCredentials: true, // we're using authorisation with a token in local storage
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token'),
+                        'Accept': 'application/json',
+                        'redirect-url': this.state.post._links.user.href
+                    }
+                }
+            );
+
+            let result = await res.json(); // we know the result will be json
+            this.setState({profilePicture: result.profileImageURL, user: result, loading: false})
+
+        } catch (e) {
+            console.log("GET_USER " + e);
+            this.setState({loading: false, profilePicture: ""})
+        }
     }
 
     delete(e) { 
