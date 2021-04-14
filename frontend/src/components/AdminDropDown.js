@@ -22,8 +22,8 @@ export class AdminDropDown extends Component {
 
     render() {
         return (
-            <Container className="pr-0 d-flex flex-row justify-content-end admin-dropdown">
-                <Dropdown className="admin-dropdown">  
+            <Container bsPrefix="pr-0 d-flex flex-row admin-dropdown">
+                <Dropdown className="admin-dropdown" color="black">  
                     <Dropdown.Toggle as={CustomToggle} variant="success" id="dropdown-basic"/>
                     <Dropdown.Menu>
                         {!this.props.isSubscribed && <Dropdown.Item href="#/action-1">Subscribe</Dropdown.Item>}

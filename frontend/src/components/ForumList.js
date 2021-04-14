@@ -11,10 +11,10 @@ function ForumCard({currID, forum, impID}) {
     return (
         <Card className={"forum " + styling} >  {/*each forum is displayed as a card with className forum */}
             <Card.Link as={Link} to={'/' + impID + '/' + forum.id}>
-                <Card.Body className={"forum-body pb-3 pt-0 " + styling}>
-                    <AdminDropDown className="admin-dropdown" permsLink={`/editperms/forum/${forum.id}/${forum.forumName}`}/>
+                <Card.Body className={"forum-body " + styling}>
                     {/*The card consists of the name of the forum, which links to the forum itself */}
-                    {forum.forumName}
+                    <Card.Text className="forum-name">{forum.forumName}</Card.Text>
+                    <AdminDropDown className="admin-dropdown" permsLink={`/editperms/forum/${forum.id}/${forum.forumName}`}/>
                 </Card.Body>                    
             </Card.Link> 
         </Card>

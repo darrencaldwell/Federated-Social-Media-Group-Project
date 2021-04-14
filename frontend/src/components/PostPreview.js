@@ -58,7 +58,7 @@ export class PostPreview extends Component {
         const parsed_user_link = btoa(this.props.post._links.user.href)
 
         return (
-            <Card border="dark" className="mt-3 post" >
+            <Card border="dark" className="mt-3 post-preview" >
                 <Card.Body>
                     <div className="post-columns">
                         <div className="post-comment-voting-container">

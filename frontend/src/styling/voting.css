@@ -56,6 +56,8 @@ div.voting {
 .voting-container {
     display: grid;
     grid-template-rows: auto auto auto;
+    display:block;
+    margin:auto;
     padding-right: 10px!important;
     padding: 0px;
   }

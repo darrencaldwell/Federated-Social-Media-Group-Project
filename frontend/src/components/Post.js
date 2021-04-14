@@ -11,6 +11,7 @@ import Avatar, {Cache} from 'react-avatar';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
 import ReactMarkdown from 'react-markdown';
+import BackButton from './BackButton';
 
 // for react avatar
 const cache = new Cache({
@@ -120,10 +121,10 @@ export class Post extends Component {
 
         return (
             <div className="post-wrapper">
-            <Container className="post-container">
+            <Container bsPrefix="post-container">
             <div className="separator"/>
                 {/* <div className="mt-3"> */}
-                    <Card border="dark">
+                    <Card border="dark" className="post">
                         <Card.Body>
                             <div className="post-columns">
                                 <div className="post-voting">
@@ -172,6 +173,8 @@ export class Post extends Component {
                 {/*<CreateComment url={url}/>*/}
 
                 <div className="separator"/>
+
+                {this.state.expanded ? <BackButton url={"/" + this.props.match.params.impID + "/" + this.props.match.params.forumID + "/" + this.props.match.params.subforumID + "/" + this.props.match.params.postID}/> : "" }
 
                 {/*<Dropdown className="mt-3">*/}
                 {/*<Dropdown.Toggle variant="light" id="dropdown-comments">View Comments</Dropdown.Toggle>*/}

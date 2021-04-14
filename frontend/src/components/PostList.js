@@ -74,7 +74,7 @@ class PostList extends Component {
             // If we are rendering a list of posts go through the returned array of posts and display them.
             return (
                 <div className="post-wrapper">
-                    <Container className="postlist">
+                    <Container bsPrefix="postlist">
                         {/*map is used to apply this html for each post in the list */}
                         {this.state.postList.map((post) => (
                             // the PostPreview element is used for this, which takes the post id and the post json

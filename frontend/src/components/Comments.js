@@ -157,7 +157,7 @@ export default class Comments extends Component {
                            : (this.props.level);
         this.state = {
             level: level,
-            commentList: [] // the list of comments will be stored here
+            commentList: [], // the list of comments will be stored here
         }
     }
 
@@ -195,15 +195,15 @@ export default class Comments extends Component {
     }
 
     render() {
-        if (this.state.expanded) {  // provide a link to return to the post. Might not need this anymore as back button now goes back to post when expanded.
-            return (
-                <Container>
-                    <Button className="button" as={Link} to={this.props.posturl}>Return</Button>
-                    <Comments url={this.props.url} impID={this.props.impID} expanded={false}
-                              posturl={this.props.posturl}/>
-                </Container>
-            )
-        } else if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
+        // if (this.state.expanded) {  // provide a link to return to the post. Might not need this anymore as back button now goes back to post when expanded.
+        //     return (
+        //         <Container>
+        //             <Button className="button" as={Link} to={this.props.posturl}>Return</Button>
+        //             <Comments url={this.props.url} impID={this.props.impID} expanded={false}
+        //                       posturl={this.props.posturl}/>
+        //         </Container>
+        //     )
+        if (this.state.level >= 3) { // to prevent cramped elements due to heavy nesting
             return (
                 <Container>
                     <a className="button expand-button" href={this.props.posturl + "/" + this.props.parentID}>Expand</a>
@@ -213,7 +213,7 @@ export default class Comments extends Component {
 
             // if there are comments, display them
             return (
-                <Container>
+                <Container bsPrefix={this.state.level > 0 ? "comments" : "root-comment"}>
                     {/*map is used to apply this html for each comment in the list */}
                     {this.state.commentList.map((comment) => (
                         // the Comment element above is used for this, which takes the comment json

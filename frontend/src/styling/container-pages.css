@@ -48,7 +48,11 @@
 
 .post-columns{display:flex; flex-direction:row; width: 100%;}
 .create-comment-button{width: 15%!important; height: 100px!important}
-.post-body{margin-left: 10px!important; font-size: 22px!important; }
+.post-body{margin-left: 10px!important; font-size: 22px!important; object-fit: contain!important}
+img {
+  width: 100%!important;
+  object-fit: contain!important;
+}
 .post-title{font-size: 32px!important; margin-left: 10px!important; margin-top: 0px!important}
 .post-text{width: 70%!important}
 
@@ -87,6 +91,8 @@
 
 .forum-body {
     text-align: center;
+    display: flex;
+    flex-direction: y;
 }
 
 a.button {
@@ -115,7 +121,18 @@ a.button {
   }
 
   .admin-dropdown {
-    float: right;
+    width:10%!important;
+    color: black!important;
+  }
+
+  path {
+    color:#888888!important;
+  }
+  
+  .forum-name {
+    width: 90%!important;
+    padding-left: 10%!important;
+    margin: 0px!important;
   }
   
   a.button:hover {
@@ -144,10 +161,14 @@ a.button {
   text-decoration: none!important;
 }
 
-.postlist{height:93%; overflow-y:scroll;}
-.post-container{height:93%; width: 70%; overflow-y:scroll;}
-.post:hover{background-color: #eeeeee;}
+.postlist{height:93%; overflow-y:scroll; padding-left:3%; padding-right:3%}
+.post-container{height:93%; width: 100%; overflow-y:scroll; padding:0px!important; margin:0px!important;}
+.post{margin-left:2%!important; margin-right:2%!important}
+.post-preview:hover{background-color: #eeeeee;}
 .post-wrapper{width: 70%; overflow-y: scroll;}
+
+.comments{width:98%!important; margin: auto!important;}
+.root-comment{width:92%!important; margin: auto!important;}
 
 ::-webkit-scrollbar {
   width: 10px;
