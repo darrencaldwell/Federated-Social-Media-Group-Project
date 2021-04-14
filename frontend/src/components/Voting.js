@@ -119,9 +119,7 @@ render() {
     if (!this.props._userVotes) {
       return null
     }
-    const upImage = this.getUpvoteImg();
-    const downImage = this.getDownvoteImg();
-
+    
     const upStyle = this.getUpstyle();
     const downStyle = this.getDownstyle();
     

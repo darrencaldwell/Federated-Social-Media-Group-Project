@@ -42,8 +42,6 @@ class AccountComments extends Component {
 
 
     render() {
-        const start_url = "https://cs3099user-b5.host.cs.st-andrews.ac.uk/1/"
-        console.log('comment got here 3')
         if (this.state.commentList.length === 0) {
             return (
                 <Container>

@@ -1,5 +1,4 @@
 import {React, Component} from 'react'
-import {Link} from 'react-router-dom'
 import {Card, Container, Button, ButtonGroup} from "react-bootstrap";
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Avatar, {Cache} from 'react-avatar';

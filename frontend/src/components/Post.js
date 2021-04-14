@@ -17,7 +17,7 @@ import BackButton from './BackButton';
 const cache = new Cache({
 
     // Keep cached source failures for up to 7 days
-    sourceTTL: 7 * 24 * 3600 * 1000,
+    sourceTTL: 1,
 
     // Keep a maximum of 0 entries in the source cache (we don't care about remembering broken links!)
     sourceSize: 0
@@ -70,7 +70,6 @@ export class Post extends Component {
             let result_post = await res.json(); // we know the result will be json
 
             this.setState({post: result_post, loading: false}); // we store the json for the post in the state
-
         } catch (e) {
             console.log(e)
         }
