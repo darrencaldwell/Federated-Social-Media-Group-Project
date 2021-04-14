@@ -24,7 +24,36 @@ export class PostPreview extends Component {
     constructor(props) {
         super(props);
         this.delete = this.delete.bind(this);
-        this.state = {}
+        this.state = {
+        }
+    }
+
+    // Runs when the component is loaded, fetching the details of the user who created the comment
+    componentDidMount = async () => {
+        try {
+            // the url to make the request to is given by the parent
+            let url = "/api/users/" + this.props.post.userId
+            let res = await fetch(url
+                , {
+                    method: 'get', // we're making a GET request
+
+                    withCredentials: true, // we're using authorisation with a token in local storage
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token'),
+                        'Accept': 'application/json',
+                        'redirect-url': this.props.post._links.user.href
+                    }
+                }
+            );
+
+            let result = await res.json(); // we know the result will be json
+            this.setState({profilePicture: result.profileImageURL, user: result, loading: false})
+
+        } catch (e) {
+            console.log("GET_USER " + e);
+            this.setState({loading: false, profilePicture: ""})
+        }
     }
 
     delete(e) {
