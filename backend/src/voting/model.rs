@@ -3,14 +3,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::{MySqlPool, Done};
 use super::super::request_errors::RequestError;
 
-/*
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct UserVotes {
-    #[serde(rename = "_userVotes")]
-    pub user_votes: Vec<UserVote>,
-}
-*/
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UserVote {
@@ -31,6 +23,7 @@ pub struct DbUserVotes {
 }
 
 /// Deals with the bug in MariaDB where sometimes it incorrectly formats JSON
+/// See https://jira.mariadb.org/browse/MDEV-23004 
 pub fn parse_mariadb(json_string: String) -> Vec<UserVote> {
     // MariaDB has a bug where it forgets to add the brackets when there are < 7 votes in the
     // database, so we have to manually correct that
@@ -60,6 +53,7 @@ pub fn parse_mariadb(json_string: String) -> Vec<UserVote> {
     user_votes.retain(|x| x.user.is_some() && x.is_upvote.is_some());
     user_votes
 }
+
 /// Modifies an existing post
 pub async fn put_post_vote(post_id: u64, user_id: String, implementation_id: u64, vote: VoteRequest, pool: &MySqlPool) -> Result<(), RequestError> {
     let is_upvote = vote.is_upvote;

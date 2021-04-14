@@ -26,6 +26,7 @@ async fn put_post_vote(
         }
     }
 }
+
 #[put("/api/comments/{post_id}/vote")]
 async fn put_comment_vote(
         web::Path(comment_id): web::Path<u64>,

@@ -154,6 +154,7 @@ pub async fn get_subforum(subforum_id: u64, pool: &MySqlPool) -> Result<Subforum
 
 pub async fn post_subforum(forum_id: u64, subforum_request: PostSubforumRequest,
                             pool: &MySqlPool) -> Result<Subforum> {
+                                
     let mut tx = pool.begin().await?;
 
     let subforum_id = sqlx::query!(

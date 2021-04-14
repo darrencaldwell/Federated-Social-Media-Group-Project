@@ -34,8 +34,6 @@ pub fn sign_signature<'a>(res_headers: &'a mut HeaderMap,
     res_headers.insert(HeaderName::from_static("user-id"), HeaderValue::from_str(user)?);
 
     // sign
-    // TODO: check if we want to not just create our own host header, instead of using the
-    // others host
     let string_to_sign = format!("*request-target: {} {}\ncurrent-date: {}\nuser-id: {}",
     req_method.to_lowercase(),
     req_path,
@@ -77,13 +75,9 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     // get header value for sig input
     let signature_input = req_headers.get("Signature-Input").unwrap().to_str().unwrap();
 
-    // TODO: check for 0 splits, could be caught later potentially. - Darren
     let iter_signature_input = signature_input.split(';');
 
     // build struct and do soft validation on signature-input header contents
-    // TODO: can make this better by using an enum but im lazy x - Darren
-    // TODO: realistically only the created and expires will fail to parse, but these
-    // aren't in the protocl so we can kinda of ignore them for now - Darren
     for entry in iter_signature_input {
         let trim_entry = entry.trim();
         if trim_entry.starts_with("sig1=") {
@@ -106,8 +100,8 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
             return Err(anyhow!("Error: Invalid signature-input attribute: {}", trim_entry));
         }
     }
-    // check covered_content / sig1= is valid with headers
 
+    // check covered_content / sig1= is valid with headers
     // check starts and ends with parenthesis
     if !sig_input_struct.covered_content.starts_with('(') || !sig_input_struct.covered_content.ends_with(')') {
         // if not, then error
@@ -134,7 +128,6 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
         if field_trim.starts_with(req_tar_string) {
             signature_strings.push(format!("{}: {} {}", req_tar_string, req_method, req_path));
         }
-        // TODO: if statements for *created and *expires
 
         else {
             // check field against headers, if exist add, else error
@@ -156,9 +149,6 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
     struct Key {
         key: String,
     }
-
-    // TODO: potentially cache key in db per domain
-    // TODO: extract domain from keyId
 
     // makes request for key, returning an error if this fails, or key isn't a valid
     // string
@@ -217,6 +207,8 @@ pub async fn check_signature(req_headers: &HeaderMap, req_path: &str, req_method
         let parsed_url = full_url.split("/api/").collect::<Vec<_>>()[0];
         return Ok(parsed_url.to_string())
     } else {
+        // in this case the verification has failed, without any additional information, odds
+        // are the signatures don't match.
         return Err(anyhow!("Error: verifying signature, may not match, signed with this string: \n{}", string_to_sign))
     }
 }

@@ -264,7 +264,6 @@ pub async fn get_all(subforum_id: u64, pool: &MySqlPool) -> Result<Embedded> {
             subforum_id: rec.subforum_id,
             created_time: rec.created_time.unwrap().timestamp_millis(),
             modified_time: rec.modified_time.unwrap().timestamp_millis(),
-            // MariaDB returns Decimal from sum, so need to convert
             downvotes: rec.downvotes.to_u64().unwrap(),
             upvotes: rec.upvotes.to_u64().unwrap(),
             user_votes,
@@ -330,7 +329,6 @@ pub async fn get_one(id: u64, pool: &MySqlPool) -> Result<Post> {
         created_time: rec.created_time.unwrap().timestamp_millis(),
         modified_time: rec.modified_time.unwrap().timestamp_millis(),
         subforum_id: rec.subforum_id,
-        // MariaDB returns Decimal from sum, so need to convert
         downvotes: rec.downvotes.unwrap().to_u64().unwrap(),
         upvotes: rec.upvotes.unwrap().to_u64().unwrap(),
         user_votes,

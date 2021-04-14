@@ -162,12 +162,15 @@ fn gen_links(user_id: &str) -> UserLinks {
 
 /// Given a user_id and db pool queries for that user and returns it
 pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
-    let result = sqlx::query!("SELECT username, description, date_joined, 
-                                CASE WHEN profile_picture IS NOT NULL THEN 
-                                    CONCAT('https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/',user_id,'/profilepicture')
-                                    ELSE 'https://ksr-ugc.imgix.net/assets/011/966/553/23c6dcdf71e75a951f9a7067164852e5_original.png?ixlib=rb-2.1.0&crop=faces&w=1552&h=873&fit=crop&v=1463719973&auto=format&frame=1&q=92&s=acb4111ef541f9f9488608adbb991fab'
-                                    END AS profile_picture
-                              FROM users WHERE user_id = ? AND implementation_id = 1", &user_id)
+    let result = sqlx::query!(
+        "SELECT 
+            username, description, date_joined, 
+            CASE WHEN profile_picture IS NOT NULL THEN 
+                CONCAT('https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/',user_id,'/profilepicture')
+            ELSE 
+                'https://ksr-ugc.imgix.net/assets/011/966/553/23c6dcdf71e75a951f9a7067164852e5_original.png?ixlib=rb-2.1.0&crop=faces&w=1552&h=873&fit=crop&v=1463719973&auto=format&frame=1&q=92&s=acb4111ef541f9f9488608adbb991fab'
+            END AS profile_picture
+        FROM users WHERE user_id = ? AND implementation_id = 1", &user_id)
         .fetch_one(pool)
         .await?;
 
@@ -183,13 +186,14 @@ pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
 
 /// Returns a list of ALL users within our database, should probably not be used.
 pub async fn get_users(pool: &MySqlPool) -> Result<Users> {
-    let result = sqlx::query!(r#"
-                    SELECT user_id, username, description, date_joined,
-                    CASE WHEN profile_picture IS NOT NULL THEN 
-                        CONCAT('https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/',user_id,'/profilepicture')
-                        ELSE 'https://ksr-ugc.imgix.net/assets/011/966/553/23c6dcdf71e75a951f9a7067164852e5_original.png?ixlib=rb-2.1.0&crop=faces&w=1552&h=873&fit=crop&v=1463719973&auto=format&frame=1&q=92&s=acb4111ef541f9f9488608adbb991fab'
-                        END AS profile_picture
-                        FROM users WHERE implementation_id = 1
+    let result = sqlx::query!(
+        r#"
+            SELECT user_id, username, description, date_joined,
+            CASE WHEN profile_picture IS NOT NULL THEN 
+                CONCAT('https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/',user_id,'/profilepicture')
+                ELSE 'https://ksr-ugc.imgix.net/assets/011/966/553/23c6dcdf71e75a951f9a7067164852e5_original.png?ixlib=rb-2.1.0&crop=faces&w=1552&h=873&fit=crop&v=1463719973&auto=format&frame=1&q=92&s=acb4111ef541f9f9488608adbb991fab'
+                END AS profile_picture
+            FROM users WHERE implementation_id = 1
                               "#)
         .fetch_all(pool)
         .await?;

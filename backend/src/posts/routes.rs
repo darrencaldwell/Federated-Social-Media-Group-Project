@@ -13,7 +13,6 @@ async fn patch_post(
         pool: web::Data<MySqlPool>,
         post: web::Json<model::PostPatchRequest>,
     ) -> impl Responder {
-    // TODO: validate permission to modify post
     match model::patch(id, post.into_inner(), pool.get_ref()).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(e) => {
@@ -32,7 +31,6 @@ async fn delete_post(
         ImplementationId(implementation_id): ImplementationId,
         pool: web::Data<MySqlPool>,
     ) -> impl Responder {
-    // TODO: validate permission to delete post
     match model::delete(id, pool.get_ref()).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(e) => {

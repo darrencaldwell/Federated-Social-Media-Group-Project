@@ -72,14 +72,10 @@ impl<S, B> Service for ProxyReqMiddleware<S>
             if req.headers().contains_key("redirect") {
                 // get URL from querying database
                 let pool = req.app_data::<Data<MySqlPool>>().unwrap().clone();
-                // TODO: handle where id isn't a number
                 let id = req.headers().get("redirect").unwrap().to_str().unwrap().parse::<u64>().unwrap();
-                // TODO: first value in db should be local, so don't go for it, maybe we need a less
-                // magic number approach?
                 if id == 1 {
                     return srv.call(req).await
                 }
-                // TODO: handle impl not existing
                 let implementation = get_one(id, &pool).await.unwrap();
                 dest_url_complete = format!("{}{}", implementation.url, req.path());
             }
@@ -118,7 +114,7 @@ impl<S, B> Service for ProxyReqMiddleware<S>
             // sends payload with request (useful for POST/PATCH etc)
             let mut response = client_req.send_stream(payload).await.unwrap();
 
-            // verify signature of response
+            // verify signature of response, not agreed upon to sign responses in protocol, not in use.
             /*
             let signature_verf = util::check_signature(response.headers(), &http_req.path(), &http_req.method().as_str().to_lowercase()).await;
             if signature_verf.is_err() {

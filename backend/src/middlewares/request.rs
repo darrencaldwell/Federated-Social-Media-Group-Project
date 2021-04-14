@@ -79,7 +79,6 @@ where
                 return srv.call(req).await
             }
 
-
             if req.path().starts_with("/local/forums/") && req.path().ends_with("/chat") {
                 if let Some(Ok(token)) = req.headers().get("sec-websocket-protocol").map(|token| token.to_str()) {
                     if let Ok(user_id) = crate::auth::decode_jwt(token) {

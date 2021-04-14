@@ -26,8 +26,6 @@ use openssl::pkey::{PKey, Private};
 use openssl::rsa::Rsa;
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[derive(Debug)]
 pub struct Key {
     pub key: String,
 }
@@ -48,16 +46,16 @@ async fn main() -> Result<()> {
     // pool used for database connections, gets databse url from env file
     let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await?;
 
+    // generate a new random key to use to sign signatures
     let key_pair = Rsa::generate(2048).unwrap();
     let key_pair: PKey<Private> = PKey::from_rsa(key_pair).unwrap();
 
+    // initialize websocket chat server
     let chat_server = chat::ChatServer::new(Arc::new(AtomicUsize::new(0))).start();
 
     HttpServer::new(move || {
 
         App::new()
-            // example of being able to add any data to App
-            // Data is functionally a map of Type:Value
             .data(key_pair.clone())
             .data(pool.clone())
             // construct a client for each worker

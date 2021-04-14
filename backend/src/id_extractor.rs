@@ -5,6 +5,7 @@ use futures_util::future::{err, ok, Ready};
 #[derive(Debug, Deserialize)]
 pub struct UserId(pub String);
 
+/// Returns the user_id from a request automatically in the route handlers
 impl FromRequest for UserId {
     type Error = actix_web::Error;
     type Future = Ready<Result<Self, Self::Error>>;

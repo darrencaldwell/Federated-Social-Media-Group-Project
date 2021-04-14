@@ -27,7 +27,6 @@ async fn patch_user(
     }
 }
 
-
 #[post("/local/users/{id}/profilepicture")]
 async fn profile_picture(mut payload: mp::Multipart, pool: web::Data<MySqlPool>, web::Path(id): web::Path<String>) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
