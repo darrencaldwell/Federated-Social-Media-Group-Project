@@ -63,7 +63,7 @@ impl<S, B> Service for ProxyReqMiddleware<S>
 
         Box::pin(async move {
             // check if request has redirection headers
-            if !req.headers().contains_key("redirect") && !req.headers().contains_key("url-redirect") {
+            if !req.headers().contains_key("redirect") && !req.headers().contains_key("redirect-url") {
                 // if not we don't care
                 return srv.call(req).await
             }

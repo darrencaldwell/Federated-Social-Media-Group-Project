@@ -39,7 +39,7 @@ pub fn parse_mariadb(json_string: String) -> Vec<UserVote> {
             user_votes
         },
         Err(_) => {
-            log::info!("old_string: {:?}",&json_string);
+            log::info!("MariaDB bug occured...attempting to deal with it");
             if json_string.starts_with("{\"_userVotes\": \"[") {
                 // replace \"[ , ]\"
                 let tmp = json_string.replace("\"[", "[");
