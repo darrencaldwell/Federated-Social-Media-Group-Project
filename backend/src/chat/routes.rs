@@ -4,6 +4,8 @@ use sqlx::MySqlPool;
 
 use actix::prelude::*;
 use actix_web::{Error, HttpRequest, HttpResponse, web, get};
+use actix_web::http::HeaderName;
+
 use actix_web_actors::ws;
 
 use serde::Serialize;
@@ -18,7 +20,6 @@ pub enum MessageType {
     Connect,
     Disconnect,
     Message,
-    Whisper,
     Server,
     UserList,
 }
@@ -69,7 +70,7 @@ impl Actor for WsChatSession {
                 room: self.room.clone() }
             )
             .into_actor(self)
-            .then(|res, act, ctx| {
+            .then(|res, _act, ctx| {
                 match res {
                     Ok(()) => (),
                     _ => ctx.stop(),
@@ -188,7 +189,7 @@ pub async fn chat_route(
         .await.unwrap()
         .username.unwrap();
 
-    ws::start(
+    let res = ws::start(
         WsChatSession {
             id: user_id,
             hb: Instant::now(),
@@ -198,7 +199,16 @@ pub async fn chat_route(
         },
         &req,
         stream,
-    )
+    );
+    if res.is_ok() {
+        // add protocol from request to response
+        let mut resp = res.unwrap();
+        let token = req.headers().get("sec-websocket-protocol").unwrap();
+        resp.headers_mut().insert(HeaderName::from_static("sec-websocket-protocol"), token.clone());
+        return Ok(resp)
+    } else {
+        return res
+    }
 }
 
 pub fn init(cfg: &mut web::ServiceConfig) {

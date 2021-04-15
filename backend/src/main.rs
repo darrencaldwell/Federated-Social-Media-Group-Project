@@ -7,6 +7,9 @@ use env_logger::Env;
 use sqlx::MySqlPool;
 use std::{env, sync::{Arc, atomic::AtomicUsize}};
 
+use sqlx_adapter::casbin::prelude::*;
+use sqlx_adapter::SqlxAdapter;
+
 mod posts;
 mod users;
 mod auth;
@@ -17,6 +20,7 @@ mod id_extractor;
 mod implementation_id_extractor;
 mod request_errors;
 mod implementations;
+mod casbin;
 mod voting;
 mod chat;
 
@@ -24,6 +28,8 @@ use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, get, HttpResponse};
 use openssl::pkey::{PKey, Private};
 use openssl::rsa::Rsa;
+
+use crate::casbin::casbin_enforcer;
 
 #[derive(Serialize, Deserialize)]
 pub struct Key {
@@ -44,7 +50,13 @@ async fn main() -> Result<()> {
     // initiates logger for actix middleware
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     // pool used for database connections, gets databse url from env file
-    let pool = MySqlPool::connect(&env::var("DATABASE_URL").unwrap()).await?;
+    let database_url = env::var("DATABASE_URL").unwrap();
+    let pool = MySqlPool::connect(&database_url).await?;
+
+    let model = DefaultModel::from_file("casbin/model.conf").await?;
+    let adapter = SqlxAdapter::new(&database_url, 8).await?;
+    let enforcer = casbin_enforcer::CasbinData::new(model, adapter).await?;
+    enforcer.setup().await;
 
     // generate a new random key to use to sign signatures
     let key_pair = Rsa::generate(2048).unwrap();
@@ -60,6 +72,7 @@ async fn main() -> Result<()> {
             .data(pool.clone())
             // construct a client for each worker
             .data(Client::default())
+            .data(enforcer.clone())
             .data(chat_server.clone())
             // configures the error that is returned when an unparsable var is used in the path,
             // eg an id that is not a u64
@@ -72,6 +85,7 @@ async fn main() -> Result<()> {
             }))
             .wrap(middlewares::ProxyReq)
             .wrap(middlewares::ProtectLocal)
+            //.data(enforcer.clone())
             // auth middleware has to be at bottom,
             .wrap(middlewares::ResponseSign)
             .wrap(middlewares::RequestAuth)
@@ -84,6 +98,7 @@ async fn main() -> Result<()> {
             .configure(comments::init)
             .configure(forums::init)
             .configure(implementations::init)
+            .configure(casbin::init)
             .configure(voting::init)
             .configure(chat::init)
     })

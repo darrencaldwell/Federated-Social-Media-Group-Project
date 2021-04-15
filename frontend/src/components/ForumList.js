@@ -4,17 +4,21 @@ import {Link} from 'react-router-dom';
 import AdminDropDown from './AdminDropDown';
 import '../styling/container-pages.css';
 
-function ForumCard({currID, forum, impID}) {
+function ForumCard({currID, forum, impID, refresh}) {
     const styling = (forum.id === currID) ? "current"
                                           : "other";
-    
+
     return (
         <Card className={"forum " + styling} >  {/*each forum is displayed as a card with className forum */}
             <Card.Link as={Link} to={'/' + impID + '/' + forum.id}>
                 <Card.Body className={"forum-body " + styling}>
-                    {/*The card consists of the name of the forum, which links to the forum itself */}
                     <Card.Text className="forum-name">{forum.forumName}</Card.Text>
-                    <AdminDropDown className="admin-dropdown" permsLink={`/editperms/forum/${forum.id}/${forum.forumName}`}/>
+                    { impID === "1" && <AdminDropDown
+                        refresh={refresh}
+                        className="admin-dropdown"
+                        forumID={forum.id}
+                        permsLink={`/editperms/forum/${forum.id}/${forum.forumName}`}/>
+                    }
                 </Card.Body>                    
             </Card.Link> 
         </Card>
@@ -33,11 +37,21 @@ export default class ForumList extends Component {
         }
     }
 
+    refresh = () => {
+        this.fetchForums();
+    }
+
     // When the component loads, fetch the list of forums
-    componentDidMount = async () => {
+    componentDidMount = () => {
+        this.fetchForums();
+    }
+
+    fetchForums = async () => {
+        let forums_result
         try {
             // this is the url to fetch forums from, no IDs required
             let url = "/api/forums";
+            let result;
 
             let res = await fetch(url, 
                 {
@@ -54,12 +68,38 @@ export default class ForumList extends Component {
             );
 
             if (res.ok) {
-                let result = await res.json(); // we know the result will be json
-                this.setState({forumList: result._embedded.forumList} ); // and we store that json in the state
+                forums_result = await res.json(); // we know the result will be json
+                //this.setState({forumList: result._embedded.forumList} ); // and we store that json in the state
             } else {
                 alert("Error: " + res.statusText);
             }
-
+            
+            if (this.props.match.params.impID == 1) {
+                forums_result._embedded.forumList.forEach( async (forum) => {
+                    let url = `/local/forums/${forum.id}/roles`
+   
+                   let res = await fetch(url, 
+                       {
+                           method: 'get',  // we're making a GET request
+   
+                           withCredentials: true,  // we want to use authorisation
+                           credentials: 'include',
+                           headers: {
+                               'Authorization': "Bearer " + localStorage.getItem('token'),
+                               'Accept': 'application/json',
+                               'redirect': this.props.match.params.impID
+                           }
+                       }
+                   );
+                   if (res.ok) {
+                       let result = await res.json(); // we know the result will be json
+                       forum.roles = result
+                   } else {
+                       console.log("Error: " + res.statusText);
+                   }
+                })
+                this.setState({forumList: forums_result._embedded.forumList} ); // and we store that json in the state
+            }
         } catch (e) {
             console.log("Error", e.stack);
             console.log("Error", e.name);
@@ -76,14 +116,19 @@ export default class ForumList extends Component {
     }
 
     render() {
+        console.log(this.state.forumList)
         return (
             <div className="forum-container">
 
                 <Container className="forumlist">
                 {/*Use the map function to apply the html to all forums in the list */}
                 {this.state.forumList.map((forum) => ( 
-                    <ForumCard key={forum.id} currID={this.state.currForumID} forum={forum} impID={this.props.match.params.impID
-                                }/>  //each forum is displayed as a card with className forum 
+                    <ForumCard 
+                        key={forum.id}
+                        currID={this.state.currForumID}
+                        forum={forum}
+                        impID={this.props.match.params.impID}
+                        refresh={this.refresh}/>  //each forum is displayed as a card with className forum 
                         // <ForumCard key={forum.id} 
                         // link={`/${this.props.match.params.impID}/${forum.id}`} 
                         // forumID={forum.id}

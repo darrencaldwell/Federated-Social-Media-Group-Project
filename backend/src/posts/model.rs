@@ -26,6 +26,11 @@ pub struct PostPatchRequest {
     pub post_contents: String,
 }
 
+#[derive(Deserialize)]
+pub struct LockRequest {
+    pub roles: Vec<String>,
+}
+
 /// Represents the database record for a given post
 impl Serialize for Post {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -144,7 +149,13 @@ pub async fn delete(post_id: u64, pool: &MySqlPool) -> Result<(), RequestError> 
 }
 
 /// Creates / Inserts a post into the database
-pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, implementation_id: u64) -> Result<Post, RequestError> {
+pub async fn create(
+    forum_id: u64,
+    subforum_id: u64,
+    post: PostRequest,
+    pool: &MySqlPool,
+    implementation_id: u64
+) -> Result<Post, RequestError> {
     // pool is used for a transaction, ie a rollbackable operation
     let mut tx = pool.begin().await?;
 
@@ -187,12 +198,10 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
     // Get Forum Id from subforum
     let rec = sqlx::query!(
         r#"
-        WITH forum AS (
-            SELECT forum_id FROM subforums WHERE subforum_id = ?
-        ) SELECT forum_id, CONCAT(i.implementation_url, '/api/users/', ?) AS user_endpoint
-        FROM implementations i, forum WHERE implementation_id = ?
+        SELECT CONCAT(implementation_url, '/api/users/', ?) AS user_endpoint
+        FROM implementations WHERE implementation_id = ?
         "#,
-        subforum_id, &post.user_id, implementation_id
+        &post.user_id, implementation_id
     )
         .fetch_one(pool)
         .await?;
@@ -215,7 +224,7 @@ pub async fn create(subforum_id: u64, post: PostRequest, pool: &MySqlPool, imple
         upvotes: 0,
         post_type: post.post_type,
         user_votes: Vec::with_capacity(0),
-        links: generate_post_links(insert_rec.get(0), subforum_id, rec.forum_id, rec.user_endpoint.unwrap()),
+        links: generate_post_links(insert_rec.get(0), subforum_id, forum_id, rec.user_endpoint.unwrap()),
     };
     Ok(new_post)
 }

@@ -2,6 +2,7 @@ import React from "react";
 import {Button, Container} from "react-bootstrap";
 import AssignRoles from './AssignRoles';
 import ModifyRoles from './ModifyRoles';
+import ViewRoles from './ViewRoles';
 
 
 // props: type, name
@@ -17,7 +18,7 @@ class EditPerms extends React.Component {
     assign_roles = () => {
         if (this.state.activeComponent !== <AssignRoles/>) {
           this.setState({
-                activeComponent: <AssignRoles/>
+                activeComponent: <AssignRoles forumID={this.props.match.params.forumID}/>
           })
         }
     }
@@ -25,7 +26,15 @@ class EditPerms extends React.Component {
     modify_roles = () => {
         if (this.state.activeComponent !== <ModifyRoles/>) { 
             this.setState({
-                activeComponent: <ModifyRoles/>
+                activeComponent: <ModifyRoles forumID={this.props.match.params.forumID}/>
+            })
+        }
+    }
+
+    view_roles = () => {
+        if (this.state.activeComponent !== <ViewRoles/>) { 
+            this.setState({
+                activeComponent: <ViewRoles forumID={this.props.match.params.forumID}/>
             })
         }
     }
@@ -39,6 +48,7 @@ class EditPerms extends React.Component {
                     <h1>
                         Editing permissions for {this.props.match.params.type}: {this.props.match.params.name}
                     </h1>
+                    <Button className="mr-3" variant="primary" onClick={this.view_roles}>View Roles</Button>
                     <Button className="mr-3" variant="primary" onClick={this.assign_roles}>Assign Roles</Button>
                     <Button variant="primary" onClick={this.modify_roles}>Modify Roles</Button>
 

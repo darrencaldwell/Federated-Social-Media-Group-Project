@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}, sync::{Arc, atomic::{AtomicUsize, Ordering}}};
+use std::{collections::HashMap, sync::{Arc, atomic::{AtomicUsize, Ordering}}};
 
 use crate::chat::routes;
 
@@ -6,6 +6,7 @@ use actix::prelude::*;
 
 use serde::Serialize;
 
+#[allow(unused_imports)]
 use rand::{Rng, prelude::ThreadRng};
 
 #[derive(Message)]
@@ -51,6 +52,7 @@ struct Entry {
 pub struct ChatServer {
     sessions: HashMap<String, Recipient<Message>>,
     rooms: HashMap<String, HashMap<String, String>>,
+    #[allow(dead_code)]
     rng: ThreadRng,
     visitor_count: Arc<AtomicUsize>,
 }
@@ -67,7 +69,7 @@ impl ChatServer {
 
     fn send_message(&self, room: &str, message: &str, skip_id: String) {
         if let Some(sessions) = self.rooms.get(room) {
-            for (id, name) in sessions {
+            for id in sessions.keys() {
                 if *id != skip_id {
                     if let Some(addr) = self.sessions.get(id) {
                         let _ = addr.do_send(Message(message.to_owned()));
@@ -119,7 +121,7 @@ impl Handler<Connect> for ChatServer {
         };
 
         let join_msg = serde_json::to_string(&join_msg).unwrap();
-        let count = self.visitor_count.fetch_add(1, Ordering::SeqCst);
+        let _count = self.visitor_count.fetch_add(1, Ordering::SeqCst);
         self.send_message(&msg.room, &join_msg, msg.id);
     }
 }

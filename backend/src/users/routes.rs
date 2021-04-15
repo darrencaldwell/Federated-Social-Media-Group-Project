@@ -8,6 +8,7 @@ use actix_multipart as mp;
 use futures_util::stream::StreamExt;
 use log::info;
 use crate::request_errors::RequestError;
+use crate::casbin_enforcer::CasbinData;
 
 #[patch("/local/users/{id}")]
 async fn patch_user(
@@ -127,10 +128,26 @@ async fn get_user(
     UserId(_user_id): UserId,
     ImplementationId(implementation_id): ImplementationId,
 ) -> impl Responder {
-    match model::get_user(id, &pool).await {
+    match model::get_user(id, implementation_id, &pool).await {
         Ok(user) => HttpResponse::Ok().json(user),
         Err(e) => {
             info!("ROUTE ERROR: impl_id: {}, get_user: {}", implementation_id, e.to_string());
+            HttpResponse::InternalServerError().body(e.to_string())
+        }
+    }
+}
+
+#[get("/local/forums/{id}/userIdentity/{username}")]
+async fn user_search(
+    path: web::Path<(u64, String)>,
+    pool: web::Data<MySqlPool>,
+    enforcer: web::Data<CasbinData>,
+    UserId(_user_id): UserId,
+) -> impl Responder {
+    let (id, username) = path.into_inner();
+    match model::search_users(username, id, &enforcer, &pool).await {
+        Ok(user) => HttpResponse::Ok().json(user),
+        Err(e) => {
             HttpResponse::InternalServerError().body(e.to_string())
         }
     }
@@ -208,5 +225,6 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(get_user_comments);
     cfg.service(profile_picture);
     cfg.service(get_profile_picture);
+    cfg.service(user_search);
 }
 

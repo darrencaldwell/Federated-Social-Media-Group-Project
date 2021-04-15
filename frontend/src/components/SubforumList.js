@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom';
 import AdminDropDown from './AdminDropDown';
 import '../styling/container-pages.css';
 
-function SubforumCard({currID, subforum, impID, forumID}) {
+function SubforumCard({currID, subforum, impID, forumID, refresh}) {
     const styling = (subforum.id === currID) ? "current"
                                             : "other";
     
@@ -12,9 +12,14 @@ function SubforumCard({currID, subforum, impID, forumID}) {
         <Card className={"forum " + styling} >  {/*each forum is displayed as a card with className forum */}
             <Card.Link as={Link} to={'/' + impID + '/' + forumID + '/' + subforum.id}>
                 <Card.Body className={"forum-body " + styling}>
-                    {/*The card consists of the name of the subforum, which links to the subforum itself */}
                     <Card.Text className="forum-name">{subforum.subforumName}</Card.Text>
-                    <AdminDropDown permsLink={`/editperms/subforum/${subforum.id}/${subforum.subforumName}`}/>
+                    { impID === "1" && <AdminDropDown
+                        refresh={refresh}
+                        forumID={forumID}
+                        subforumID={subforum.id}
+                        permsLink={`/editperms/subforum/${subforum.id}/${subforum.subforumName}`}/>
+                    }
+                    {/*The card consists of the name of the subforum, which links to the subforum itself */}
                 </Card.Body>                    
             </Card.Link> 
         </Card>
@@ -31,9 +36,14 @@ export default class SubforumList extends Component {
             forum: {},
             forumName: {},
             forumLink: {},
+            reload: false,
             currSubforumID: (typeof this.props.match.params.subforumID == "undefined") ? -1
                                                                                        : this.props.match.params.subforumID,
         }
+    }
+
+    refresh = () => {
+        this.fetchSubforums();
     }
 
     fetchSubforums = async () => {
@@ -113,7 +123,7 @@ export default class SubforumList extends Component {
                 <Container className="subforumlist">
                     {/*Use the map function to apply the html to all forums in the list */}
                     {this.state.subforumList.map((subforum) => (
-                        <SubforumCard key={subforum.id} currID={this.state.currSubforumID} subforum={subforum} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID}/>
+                        <SubforumCard key={subforum.id} currID={this.state.currSubforumID} subforum={subforum} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID} refresh={this.refresh}/>
                         // <ForumCard key={subforum.id} 
                         // link={`/${this.props.match.params.impID}/${this.props.match.params.forumID}/${subforum.id}`} 
                         // name={subforum.subforumName}

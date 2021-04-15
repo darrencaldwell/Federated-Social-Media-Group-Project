@@ -2,11 +2,22 @@ use anyhow::Result;
 use serde::{Serialize, Deserialize};
 use bcrypt::hash;
 use sqlx::{Row, Done, FromRow, MySqlPool};
-use crate::comments::{Comments, Comment, CommentList, gen_links as gen_comment_links, SelfLink, Link as CommentLink};
-use crate::posts::{Post, PostList, Embedded as PostEmbedded, generate_post_links};
-use super::super::voting::parse_mariadb;
 use chrono::{DateTime, Utc};
 use bigdecimal::ToPrimitive;
+
+use crate::casbin::casbin_enforcer::{CasbinData, Object, Role};
+
+use crate::comments::{
+    Comments,
+    Comment,
+    CommentList,
+    gen_links as gen_comment_links,
+    SelfLink,
+    Link as CommentLink};
+
+use crate::posts::{Post, PostList, Embedded as PostEmbedded, generate_post_links};
+use super::super::voting::parse_mariadb;
+
 use crate::request_errors::RequestError;
 
 /// Represents an entire user
@@ -42,6 +53,21 @@ pub struct LocalUser {
     pub date_joined: i64,
     #[serde(rename = "profileImageURL")]
     profile_image_url: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserIdentity {
+    pub username: String,
+    pub user_id: String,
+    pub impl_name: String,
+    pub impl_id: u64,
+    pub roles: Vec<String>,
+}
+
+#[derive(Serialize)]
+pub struct UserIdentities {
+    pub users: Vec<UserIdentity>,
 }
 
 /// The links sent with a [User] object
@@ -161,16 +187,13 @@ fn gen_links(user_id: &str) -> UserLinks {
 }
 
 /// Given a user_id and db pool queries for that user and returns it
-pub async fn get_user(user_id: String, pool: &MySqlPool) -> Result<User> {
-    let result = sqlx::query!(
-        "SELECT 
-            username, description, date_joined, 
-            CASE WHEN profile_picture IS NOT NULL THEN 
-                CONCAT('https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/',user_id,'/profilepicture')
-            ELSE 
-                'https://ksr-ugc.imgix.net/assets/011/966/553/23c6dcdf71e75a951f9a7067164852e5_original.png?ixlib=rb-2.1.0&crop=faces&w=1552&h=873&fit=crop&v=1463719973&auto=format&frame=1&q=92&s=acb4111ef541f9f9488608adbb991fab'
-            END AS profile_picture
-        FROM users WHERE user_id = ? AND implementation_id = 1", &user_id)
+pub async fn get_user(user_id: String, imp_id: u64, pool: &MySqlPool) -> Result<User> {
+    let result = sqlx::query!("SELECT username, description, date_joined, 
+                                CASE WHEN profile_picture IS NOT NULL THEN 
+                                    CONCAT('https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/users/',user_id,'/profilepicture')
+                                    ELSE 'https://ksr-ugc.imgix.net/assets/011/966/553/23c6dcdf71e75a951f9a7067164852e5_original.png?ixlib=rb-2.1.0&crop=faces&w=1552&h=873&fit=crop&v=1463719973&auto=format&frame=1&q=92&s=acb4111ef541f9f9488608adbb991fab'
+                                    END AS profile_picture
+                              FROM users WHERE user_id = ? AND implementation_id = ?", &user_id, imp_id)
         .fetch_one(pool)
         .await?;
 
@@ -441,11 +464,56 @@ pub async fn verify(
     };
 
     match bcrypt::verify(password, &password_hash) {
-        Ok(boolean) => if !boolean { // if password hash doesn't match
-            return Err(LoginError::InvalidHash);
-        },
-        Err(_) => return Err(LoginError::InvalidHash),
-    };
+        Ok(true) => Ok((rec_result.user_id, rec_result.username.unwrap_or_else(|| "UNKNOWN".to_string()))),
+        _ => Err(LoginError::InvalidHash),
+    }
 
-    Ok((rec_result.user_id, rec_result.username.unwrap()))
+}
+
+pub async fn search_users(username: String,
+                          forum_id: u64,
+                          enforcer: &CasbinData,
+                          pool: &MySqlPool
+) -> Result<Vec<UserIdentity>> {
+    let recs = sqlx::query!(r#"SELECT users.username, users.user_id, users.implementation_id,
+                                imp.implementation_name
+                            FROM users
+                            LEFT JOIN implementations AS imp
+                            ON imp.implementation_id = users.implementation_id
+                            WHERE users.username LIKE CONCAT('%', ?, '%')
+                            LIMIT 10
+                            "#, username)
+        .fetch_all(pool)
+        .await?;
+
+    let mut identities = Vec::with_capacity(recs.len());
+
+    for rec in recs {
+        let username = match rec.username {
+            Some(username) => username,
+            None => continue,
+        };
+
+        let impl_name = match rec.implementation_name {
+            Some(name) => name,
+            None => continue,
+        };
+
+        let mut roles = enforcer.get_user_role(&rec.user_id, rec.implementation_id, &Object::Forum(forum_id)).await;
+        if roles.is_empty() {
+            roles.push(Role::Guest.name().to_string());
+        }
+
+        let user = UserIdentity {
+            username,
+            user_id: rec.user_id,
+            impl_name,
+            impl_id: rec.implementation_id,
+            roles,
+        };
+
+        identities.push(user);
+    }
+
+    Ok(identities)
 }

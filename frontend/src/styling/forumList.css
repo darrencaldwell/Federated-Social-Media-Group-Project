@@ -1,0 +1,35 @@
+.forumlist {
+    height: 93%;
+    overflow-y:scroll;
+    padding: 0px!important;
+}
+
+.forum-container {
+    width:15%;
+    border-right: 3px solid black;
+    align-items: center;
+    background-color: grey;
+}
+
+.forum-body {
+    display: flex;
+    font-size: 1rem;
+    color: black;
+    padding: 0.2rem!important;
+}
+
+.forum {
+    width: 100%;
+    background-color: whitesmoke!important;
+    border: 0px!important;
+    border-radius: 0px!important;
+    height: 8%;
+    overflow: hidden;
+    color: black!important;
+}
+
+.forum:hover {
+    width: 100%;
+    background-color: lightgray!important;
+    border: 0px!important;
+}
