@@ -8,7 +8,9 @@ import CreateForum from "./components/CreateForum";
 import CreatePost from "./components/CreatePost";
 import CreateSubforum from "./components/CreateSubforum";
 import Chat from "./components/Chat";
+import Forum from "./pages/Forum";
 import ForumList from "./components/ForumList";
+import Permissions from "./pages/Permissions";
 import Post from "./components/Post";
 import PostList from "./components/PostList";
 import SubforumList from "./components/SubforumList";
@@ -129,7 +131,7 @@ class App extends React.Component {
                             {/*<Route exact path="/user/:impID/:userId" component={UserAccount}/>*/}
 
                             <Route exact path="/:impID" component={props => <Home {...props} user={this.state.user} currImp={this.state.imp}/>}/> {/*default homepage*/}
-                            <Route exact path="/editperms/:type/:id/:name" component={EditPerms}></Route>
+                            <Route exact path="/editperms/:type/:forumID/:name" component={EditPerms}></Route>
 
                             {/*<Route exact path="/:impID/forums" component={() => <Home user={this.state.user}/>}/> {/*shows the list of forums (for our server)*/}
                             <Route exact path="/:impID/new" component={CreateForum}/> {/*page to create a new forum*/}
@@ -137,6 +139,7 @@ class App extends React.Component {
 
                             <Route exact path="/:impID/:forumID/chat" component={Chat}/> {/*could have forum info here*/}
                             <Route exact path="/:impID/:forumID/new" component={CreateSubforum}/> {/*page to create a new subforum in the forum*/}
+                            <Route exact path="/:impID/:forumID/permissions" component={Permissions}/> {/*page to create a new subforum in the forum*/}
                             <Route exact path="/:impID/:forumID/:subforumID" component={PostList}/> {/*page for a specific subforum*/}
 
                             <Route exact path="/:impID/:forumID/:subforumID/new" component={CreatePost}/> {/*page to create a new post in a subforum*/}

@@ -3,6 +3,8 @@ use anyhow::Result;
 use serde::{Serialize, Deserialize};
 use serde::ser::{Serializer, SerializeStruct};
 
+use crate::casbin_enforcer::{Object, Action, Role, CasbinData};
+
 /// Represents a forum
 impl Serialize for Forum {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -175,21 +177,55 @@ pub async fn post_subforum(forum_id: u64, subforum_request: PostSubforumRequest,
     })
 }
 
-pub async fn get_subforums(forum_id: u64, pool: &MySqlPool) -> Result<Subforums> {
+pub async fn get_subforums(
+    forum_id: u64,
+    user_id: String,
+    imp_id: u64,
+    pool: &MySqlPool,
+    enforcer: &CasbinData
+) -> Result<Subforums> {
     let results = sqlx::query!(
         "SELECT subforum_id, subforum_name FROM subforums WHERE forum_id = ?", forum_id)
         .fetch_all(pool)
         .await?;
 
-    let subforums: Vec<Subforum> = results
-        .into_iter()
-        .map(|rec| Subforum {
+    let mut subforums: Vec<Subforum> = Vec::with_capacity(results.len());
+
+    for rec in results {
+        let allowed = enforcer.enforce(user_id.clone(),
+                                       imp_id,
+                                       forum_id,
+                                       Object::Subforum(rec.subforum_id),
+                                       Action::Read)
+        .await
+        .unwrap_or(false);
+
+        if !allowed { continue; }
+
+        let subforum = Subforum {
             id: rec.subforum_id,
             subforum_name: rec.subforum_name,
             forum_id,
             links: gen_sub_links(rec.subforum_id, forum_id),
-        })
-        .collect();
+        };
+
+        subforums.push(subforum);
+    }
+
+    //let subforums: Future<Output = Vec<Subforum>> = results
+    //    .into_iter()
+    //    .map(|rec| Subforum {
+    //        id: rec.subforum_id,
+    //        subforum_name: rec.subforum_name,
+    //        forum_id,
+    //        links: gen_sub_links(rec.subforum_id, forum_id),
+    //    })
+    //    .filter(|sub_forum| {
+    //        enforcer.enforce(user_id, sub_forum.forum_id, Object::Subforum(sub_forum.id), Action::Read)
+    //        .await
+    //        .unwrap_or(false)
+    //    })
+    //    .collect();
 
     Ok(Subforums {
         _embedded: SubforumList { subforum_list: subforums },
@@ -215,7 +251,11 @@ pub async fn get_forum(forum_id: u64, pool: &MySqlPool) -> Result<Forum> {
 }
 
 pub async fn post_forum(forum_request: PostForumRequest,
-                            pool: &MySqlPool) -> Result<Forum> {
+                        user_id: &str,
+                        imp_id: u64,
+                        pool: &MySqlPool,
+                        enforcer: &CasbinData,
+) -> Result<Forum> {
     let mut tx = pool.begin().await?;
 
     let forum_id = sqlx::query!(
@@ -225,7 +265,15 @@ pub async fn post_forum(forum_request: PostForumRequest,
         .await?
         .last_insert_id();
 
-    tx.commit().await?;
+    let worked = enforcer.setup_forum(forum_id).await;
+    match enforcer.add_user_to_group(user_id, imp_id, &Role::Creator, &Object::Forum(forum_id)).await.and(worked) {
+        Ok(true) => tx.commit().await?,
+        _ => {
+            drop(tx);
+            return Err(anyhow::anyhow!("failed to add creator"))
+        },
+    }
+
 
     Ok(Forum {
         forum_name: forum_request.forum_name,
@@ -253,4 +301,30 @@ pub async fn get_forums(pool: &MySqlPool) -> Result<Forums> {
             _embedded: ForumList { forum_list: forums },
             _links: ForumsLinks { _self: Link { href: "https://cs3099user-b5.host.cs.st-andrews.ac.uk/api/forums".to_string() } },
         })
+}
+
+pub async fn delete_forum(id: u64, pool: &MySqlPool) -> Result<()> {
+    let mut tx = pool.begin().await?;
+    sqlx::query!("DELETE FROM forums
+                  WHERE forum_id = ?"
+                  , id)
+        .execute(&mut tx)
+        .await?;
+
+    tx.commit().await?;
+    
+    Ok(())
+}
+
+pub async fn delete_subforum(subforum_id: u64, pool: &MySqlPool) -> Result<()> {
+    let mut tx = pool.begin().await?;
+    sqlx::query!("DELETE FROM subforums
+                  WHERE subforum_id = ?"
+                  , subforum_id)
+        .execute(&mut tx)
+        .await?;
+
+    tx.commit().await?;
+    
+    Ok(())
 }

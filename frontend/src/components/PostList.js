@@ -12,7 +12,8 @@ class PostList extends Component {
         this.state = {
             loading: true, // Set to true if loading
             postList: {}, // Stores list of posts
-            listingPosts: false // Set to true when rendering a list of posts
+            listingPosts: false, // Set to true when rendering a list of posts
+            update: false,
 
             // post listing has been moved to keep design in line with the new navigation structure
             // listingPost: false // Set to true when rendering a specific post
@@ -39,9 +40,9 @@ class PostList extends Component {
             );
             let result_posts = await res.json();
 
-            this.setState({postList: result_posts._embedded.postList, loading: false, listingPosts: true});
+            this.setState({postList: result_posts._embedded.postList, loading: false, listingPosts: true, update: false});
         } catch (e) {
-            this.setState({loading: false});
+            this.setState({loading: false, update: false});
         }
     }
 
@@ -53,7 +54,8 @@ class PostList extends Component {
     // url is not a prop!
     componentDidUpdate = (oldProps) => {
         if ( this.props.match.params.forumID !== oldProps.match.params.forumID ||
-             this.props.match.params.subforumID !== oldProps.match.params.subforumID) {
+             this.props.match.params.subforumID !== oldProps.match.params.subforumID ||
+             this.state.update) {
             this.getPosts();
         }
     }
@@ -78,7 +80,7 @@ class PostList extends Component {
                         {/*map is used to apply this html for each post in the list */}
                         {this.state.postList.map((post) => (
                             // the PostPreview element is used for this, which takes the post id and the post json
-                            <PostPreview key={post.id} post={post} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID} subforumID={this.props.match.params.subforumID}/>
+                            <PostPreview update={()=>this.setState({update: true})} key={post.id} post={post} impID={this.props.match.params.impID} forumID={this.props.match.params.forumID} subforumID={this.props.match.params.subforumID}/>
                         ))}
                         <div className="separator"/>
                     </Container>

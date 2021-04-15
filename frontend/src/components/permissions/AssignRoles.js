@@ -7,8 +7,8 @@ class RoleSelector extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            selected_user_id: this.props.username_results[0].id,
-            selected_imp_id: this.props.username_results[0].impID,
+            selected_user_id: this.props.username_results[0].userId,
+            selected_imp_id: this.props.username_results[0].implId,
             selected_role: 'Guest'
 
         }
@@ -35,10 +35,33 @@ class RoleSelector extends React.Component {
         });
     }
     
+    // set role
     handleSubmit(event) {
-    event.preventDefault();
-    alert(`${this.state.selected_user_id}#${this.state.selected_imp_id} with role ${this.state.selected_role}`);
-    // TODO: SET ROLE
+        event.preventDefault();
+        alert(`${this.state.selected_user_id}#${this.state.selected_imp_id} with role ${this.state.selected_role}`);
+        fetch(`/local/forums/${this.props.forumID}/permissions/users`, {
+            method: "PATCH",
+            withCredentials: true,
+            credentials: 'include',
+            headers: {
+                'Authorization': "Bearer " + localStorage.getItem('token'), // need to get the auth token from localStorage
+                'Content-Type': 'application/json',
+                'redirect': 1
+            },
+            body: JSON.stringify({
+                "role": this.state.selected_role,
+                "user": this.state.selected_user_id,
+                "impId": parseInt(this.state.selected_imp_id)
+            })
+        }).then(responseJson => {
+            console.log(responseJson);
+            if (responseJson.status === 200) {
+                alert("Successfully modified the user's role!");
+                window.location.href = this.state.backURL;
+            }
+        }).catch(error => this.setState({
+            message: "Error modifying role: " + error
+        }));
     }
 
     render() {
@@ -48,9 +71,9 @@ class RoleSelector extends React.Component {
                 <InputGroup className="mb-3">
                     <Form.Control as="select" onChange={this.handleUserChange} value={this.state.selected_user}>
                         {this.props.username_results.map((user) => (
-                            <option value={`${user.id}#${user.impID}`}
-                                    key={`${user.id}#${user.impID}`}>
-                                {user.username}#{user.id} from {user.impName}#{user.impID}
+                            <option value={`${user.userId}#${user.implId}`}
+                                    key={`${user.userId}#${user.implId}`}>
+                                {user.username}#{user.userId} from {user.implName}#{user.implId} | Current Role(s): {user.roles} 
                             </option>
                         ))}
                     </Form.Control>
@@ -80,31 +103,45 @@ class AssignRoles extends React.Component {
             username_results: null
         }
         this.update_username_to_search = this.update_username_to_search.bind(this);
-        this.search_username = this.search_username.bind(this);
+        //this.search_username = this.search_username.bind(this);
     }
 
     update_username_to_search(event) {
         this.setState({search_username: event.target.value})
     }
-    search_username(event) {
-        event.preventDefault();
-        console.log(this.state.search_username)
-        // TODO: GET REQ to get all matching usernames
-        this.setState({username_results: [
-            {username: "test", id: "abc", impID: 1, impName: "local"},
-            {username: "123", id: "zxy", impID: 3, impName: "local"}
 
-        ]})
+    search_username = async (event) => {
+        event.preventDefault();
+        // TODO: GET REQ to get all matching usernames
+        let res = await fetch(`/local/forums/${this.props.forumID}/userIdentity/${this.state.search_username}`, 
+            {
+                method: 'get',  // we're making a GET request
+
+                withCredentials: true,  // we want to use authorisation
+                credentials: 'include',
+                headers: {
+                    'Authorization': "Bearer " + localStorage.getItem('token'),
+                    'Accept': 'application/json',
+                    'redirect': 1
+                }
+            }
+        );
+        if (res.ok) {
+            let result = await res.json() // we know the result will be json
+            this.setState( {username_results: result} ); // and we store that json in the state
+        } else {
+            alert("Error: " + res.statusText);
+        }        
     }
 
 
     render() {
 
         let role_select;
-        if (this.state.username_results === null) {
+        if (!this.state.username_results) {
             role_select = null
         } else if (this.state.username_results.length > 0) {
-            role_select = <RoleSelector username_results={this.state.username_results}/>
+            role_select = <RoleSelector forumID={this.props.forumID } username_results={this.state.username_results}/>
         } else if (this.state.username_results.length === 0) {
             role_select = <p1>No user's found with that username!</p1>;
         }

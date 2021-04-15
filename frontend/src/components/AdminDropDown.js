@@ -20,22 +20,47 @@ export class AdminDropDown extends Component {
         }
     }
 
+    delete = (e) => {
+        e.preventDefault()
+        let url = (this.props.subforumID !== undefined) ? 
+            `/local/subforums/${this.props.subforumID}`:
+            `/local/forums/${this.props.forumID}`;
+
+        if (window.confirm('Are you sure you wish to delete this comment?\n THIS CANNOT BE UNDONE!')) {
+            fetch(url, {
+                method: "DELETE",
+                withCredentials: true,
+                credentials: 'include',
+                headers: {
+                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                    'Content-Type': 'application/json',
+                    'redirect': 1
+                }
+            }).then(responseJson => {
+                if (responseJson.status === 200) {
+                    this.props.refresh();
+                }
+            })
+        }
+    }
+
     render() {
         return (
             <Container bsPrefix="pr-0 d-flex flex-row admin-dropdown">
                 <Dropdown className="admin-dropdown" color="black">  
                     <Dropdown.Toggle as={CustomToggle} variant="success" id="dropdown-basic"/>
                     <Dropdown.Menu>
-                        {!this.props.isSubscribed && <Dropdown.Item href="#/action-1">Subscribe</Dropdown.Item>}
-
-                        {this.props.isSubscribed && <Dropdown.Item href="#/action-1">UnSubcribe</Dropdown.Item>}
-
                         {(!this.props.isModerator || this.props.isCreator) && 
                             <Dropdown.Item as={Link} to={this.props.permsLink}>
                                 Edit Permissions
                             </Dropdown.Item>}
+                        {this.props.subforumID === undefined &&
+                            <Dropdown.Item as={Link} to={`/1/${this.props.forumID}/chat`}>
+                                Chat
+                            </Dropdown.Item>}
 
-                        {this.props.isCreator && <Dropdown.Item href="#/action-3">Delete</Dropdown.Item>}
+                        {(this.props.isCreator || this.props.impID !== 1) &&
+                                <Dropdown.Item onClick={this.delete}>Delete</Dropdown.Item>}
                     </Dropdown.Menu>
                 </Dropdown>
             </Container>

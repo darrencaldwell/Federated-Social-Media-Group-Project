@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
-import {Card, Button, ButtonGroup} from "react-bootstrap";
+import {Card, Button, ButtonGroup, Container, Dropdown} from "react-bootstrap";
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Avatar, {Cache} from 'react-avatar';
-//import {Link} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import Voting from './Voting';
 import TimeSince from './TimeSince';
+import {ThreeDots} from 'react-bootstrap-icons';    
 // import '../styling/individualPost.css';
 import '../styling/container-pages.css';
 import ReactMarkdown from 'react-markdown';
@@ -19,20 +20,117 @@ const cache = new Cache({
     sourceSize: 0
 });
 
-// props: post, impID, forumID, subforumID
+// props: post, impID, forumID, subforumID, update()
 export class PostPreview extends Component {
     constructor(props) {
         super(props);
-        this.delete = this.delete.bind(this);
         this.state = {
+            can_lock: false,
+            can_delete: false,
         }
     }
 
+    componentDidMount = () => {
+        this.checkPerms();
+        this.getPic();
+    }
+
+    checkPerms = () => {
+        if (this.props.impID === "1") {
+            fetch(`/local/posts/${this.props.post.id}/can_lock`, {
+                method: "GET",
+                withCredentials: true,
+                credentials: 'include',
+                headers: {
+                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                    'Content-Type': 'application/json',
+                }
+
+            }).then(responseJson => { // log the response for debugging
+                if (responseJson.status === 202) {
+                    this.setState({can_lock: true})
+                }
+            });
+
+            fetch(`/local/posts/${this.props.post.id}/can_delete`, {
+                method: "GET",
+                withCredentials: true,
+                credentials: 'include',
+                headers: {
+                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                    'Content-Type': 'application/json',
+                }
+
+            }).then(responseJson => { // log the response for debugging
+                if (responseJson.status === 202) {
+                    this.setState({can_delete: true});
+                }
+            });
+        }
+
+        if (this.props.post.userId === localStorage.getItem("userId"))
+            this.setState({can_delete: true});
+    }
+
+    lock = () => {
+        let accounts = {
+            roles: ["Guest", "User"]
+        };
+
+        fetch(`/local/posts/${this.props.post.id}/lock`, {
+            method: "POST",
+            withCredentials: true,
+            credentials: 'include',
+            body: JSON.stringify(accounts),
+            headers: {
+                'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                'Content-Type': 'application/json',
+            }
+
+        }).then(_ => { // log the response for debugging
+            this.props.update();
+        });
+
+    }
+
+    delete = () => {
+        if (window.confirm('Are you sure you wish to delete this comment?\n THIS CANNOT BE UNDONE!')) {
+            fetch(`/api/posts/${this.props.post.id}`, {
+                method: "DELETE",
+                withCredentials: true,
+                credentials: 'include',
+                headers: {
+                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
+                    'Content-Type': 'application/json',
+                }
+
+            }).then(_ => { // log the response for debugging
+                this.props.update();
+            });
+        }
+    }
+
+    genDropDown = () => {
+        if (!(this.state.can_lock || this.state.can_delete)) return;
+
+        return (
+            <Container className="pr-0 d-flex flex-row justify-content-end admin-dropdown">
+                <Dropdown className="admin-dropdown">  
+                    <Dropdown.Toggle as={CustomToggle} variant="success" id="dropdown-basic"/>
+                    <Dropdown.Menu>
+                        {this.state.can_lock && <Dropdown.Item onClick={this.lock}>Lock</Dropdown.Item>}
+                        {this.state.can_delete && <Dropdown.Item onClick={this.delete}>Delete</Dropdown.Item>}
+                    </Dropdown.Menu>
+                </Dropdown>
+            </Container>
+        );
+    }
+
     // Runs when the component is loaded, fetching the details of the user who created the comment
-    componentDidMount = async () => {
+    getPic = async () => {
         try {
             // the url to make the request to is given by the parent
-            let url = "/api/users/" + this.props.post.userId
+            let url = "/api/users/" + this.props.post.userId;
             let res = await fetch(url
                 , {
                     method: 'get', // we're making a GET request
@@ -48,43 +146,16 @@ export class PostPreview extends Component {
             );
 
             let result = await res.json(); // we know the result will be json
-            this.setState({profilePicture: result.profileImageURL, user: result, loading: false})
+            this.setState({profilePicture: result.profileImageURL, user: result, loading: false});
 
         } catch (e) {
             console.log("GET_USER " + e);
-            this.setState({loading: false, profilePicture: ""})
-        }
-    }
-
-    delete(e) {
-        e.preventDefault()
-        
-        if (window.confirm('Are you sure you wish to delete this comment?\n THIS CANNOT BE UNDONE!')) {
-            // this is the HTML request
-            fetch("/api/posts/" + this.props.post.id, {
-                method: "DELETE",
-                withCredentials: true,
-                credentials: 'include',
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token'), //need the auth token
-                    'Content-Type': 'application/json',
-                    'redirect': this.props.impID
-                }
-
-            }).then(responseJson => { // log the response for debugging
-                console.log(responseJson);
-                if (responseJson.status === 200) {
-                    alert("Successfully deleted post.");
-                    window.location.href = "/" + this.props.impID + "/" + this.props.forumID + "/" + this.props.subforumID + "/";
-                }
-            }).catch(error => this.setState({ // catch any error
-                message: "Error deleting post: " + error
-            }));
+            this.setState({loading: false, profilePicture: ""});
         }
     }
 
     render() {
-        const parsed_user_link = btoa(this.props.post._links.user.href)
+        const parsed_user_link = btoa(this.props.post._links.user.href);
 
         return (
             <Card border="dark" className="mt-3 post-preview" >
@@ -122,6 +193,9 @@ export class PostPreview extends Component {
                             </Card.Body>
                         </CardActionArea>
 
+                        {this.genDropDown()}
+
+                        {/*
                         <ButtonGroup vertical className="buttons">
                             <ButtonGroup>
                                 <Button className="button edit-button" title="Edit"
@@ -131,6 +205,7 @@ export class PostPreview extends Component {
                             <a className="button reply-button" title="Comment"
                                href={"/" + this.props.impID + "/" + this.props.forumID + "/" + this.props.subforumID + "/" + this.props.post.id + "/new"}>Comment</a>
                         </ButtonGroup>
+                        */}
                     </div>
                 </Card.Body>
             </Card>
@@ -139,3 +214,20 @@ export class PostPreview extends Component {
 }
 
 export default PostPreview
+
+const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+    <a
+      href=""
+      ref={ref}
+      onClick={e => {
+        e.preventDefault();
+        onClick(e);
+      }}
+      style={{ zIndex: 2, position: "relative" }}
+    >
+  
+      {children}
+      <ThreeDots />
+  
+    </a>
+  ));
