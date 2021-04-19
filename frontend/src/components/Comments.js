@@ -25,7 +25,9 @@ class Comment extends Component {
         this.delete = this.delete.bind(this); // bind this so it can override onClick
         this.state = {
             loading: true, // Set to true if loading
-            parentID: this.props.comment._links.parentComment.href.substring(this.props.comment._links.parentComment.href.lastIndexOf('/') + 1)
+            parentID: this.props.comment._links.parentComment ? 
+		this.props.comment._links.parentComment.href.substring(this.props.comment._links.parentComment.href.lastIndexOf('/') + 1) :
+		null
         }
     }
 

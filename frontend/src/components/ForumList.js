@@ -69,7 +69,9 @@ export default class ForumList extends Component {
 
             if (res.ok) {
                 forums_result = await res.json(); // we know the result will be json
-                //this.setState({forumList: result._embedded.forumList} ); // and we store that json in the state
+		if (this.props.match.params.impID !== 1) {
+			this.setState({forumList: forums_result._embedded.forumList} ); // and we store that json in the state
+		}
             } else {
                 alert("Error: " + res.statusText);
             }

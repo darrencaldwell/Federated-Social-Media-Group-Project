@@ -171,10 +171,12 @@ export class PostPreview extends Component {
                             ></Voting>
                             {/*Links to the post itself, to view/make comments. Removing the /api part directs you to the correct app page. */}
                             <div className="voting-adj">
-                                <CardActionArea href={'/user/' + parsed_user_link}>
+                                <CardActionArea>
+				    <Link to={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
                                     <Avatar cache={cache} size="50" round={true} src={this.state.profilePicture}
                                         name={this.props.post.username}/>
                                     {"  "} {this.props.post.username}
+				    </Link>
                                 </CardActionArea>
                                 <Card.Subtitle className="text-muted mt-1 time-since">
                                     <TimeSince createdTime={this.props.post.createdTime}/>
@@ -185,12 +187,13 @@ export class PostPreview extends Component {
                             </div>
                         </div>
                             
-                        <CardActionArea style={{ textDecoration: 'none' }} 
-                                        href={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
-                            <Card.Body className="comment-body">
-                                <Card.Title className="post-title"> {this.props.post.postTitle}</Card.Title>
-                                <ReactMarkdown className="post-body">{this.props.post.postContents}</ReactMarkdown>     {/*Use the body from the prop as the body */}
-                            </Card.Body>
+                        <CardActionArea style={{ textDecoration: 'none' }}>
+			    <Link to={'/' + this.props.impID + '/' + this.props.forumID + '/' + this.props.subforumID + '/' + this.props.post.id}>
+				    <Card.Body className="comment-body">
+					<Card.Title className="post-title"> {this.props.post.postTitle}</Card.Title>
+					<ReactMarkdown className="post-body">{this.props.post.postContents}</ReactMarkdown>     {/*Use the body from the prop as the body */}
+				    </Card.Body>
+			    </Link>
                         </CardActionArea>
 
                         {this.genDropDown()}
