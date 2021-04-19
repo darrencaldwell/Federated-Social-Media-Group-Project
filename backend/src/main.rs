@@ -45,7 +45,7 @@ async fn get_key(key_pair: web::Data<PKey<Private>>) -> impl Responder {
 #[actix_web::main]
 async fn main() -> Result<()> {
     // update env with .env file.
-    dotenv().unwrap();
+    dotenv().ok();
     std::env::set_var("RUST_LOG", "info,sqlx=error");
     // initiates logger for actix middleware
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
