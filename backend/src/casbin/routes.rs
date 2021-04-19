@@ -84,7 +84,7 @@ async fn change_role(
                                             r == Role::Guest.name()) ||
                                             current_roles.is_empty() 
             {
-                &request.role == Role::User.name() || request.role == Role::Guest.name()
+                request.role == Role::User.name() || request.role == Role::Guest.name()
             } else {
                 log::info!("Attempt to change moderator/creator role");
                 false

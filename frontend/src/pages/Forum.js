@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
-import {Container, Jumbotron, Button, Dropdown, Card} from "react-bootstrap";
-import {Link} from 'react-router-dom'
+import {Container, Jumbotron} from "react-bootstrap";
 
-import PostList from '../components/PostList'
 import "../styling/forum.css"
 
 // props: match.params.impID match.params.forumID

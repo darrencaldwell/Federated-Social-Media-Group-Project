@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Card, Button, ButtonGroup, Container, Dropdown} from "react-bootstrap";
+import {Card, Container, Dropdown} from "react-bootstrap";
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Avatar, {Cache} from 'react-avatar';
 import {Link} from 'react-router-dom';
@@ -155,7 +155,6 @@ export class PostPreview extends Component {
     }
 
     render() {
-        const parsed_user_link = btoa(this.props.post._links.user.href);
 
         return (
             <Card border="dark" className="mt-3 post-preview" >
@@ -218,6 +217,7 @@ export class PostPreview extends Component {
 
 export default PostPreview
 
+/* eslint-disable jsx-a11y/anchor-is-valid */
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     <a
       href=""

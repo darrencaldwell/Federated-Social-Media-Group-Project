@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {Tabs, Tab, Container, InputGroup, Dropdown, DropdownButton} from "react-bootstrap";
-import {Link} from 'react-router-dom'
 
 // props: match.params.impID match.params.forumID
 class Permissions extends Component {

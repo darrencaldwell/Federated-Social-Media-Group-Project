@@ -8,7 +8,6 @@ import CreateForum from "./components/CreateForum";
 import CreatePost from "./components/CreatePost";
 import CreateSubforum from "./components/CreateSubforum";
 import Chat from "./components/Chat";
-import Forum from "./pages/Forum";
 import ForumList from "./components/ForumList";
 import Permissions from "./pages/Permissions";
 import Post from "./components/Post";

@@ -51,7 +51,6 @@ export default class ForumList extends Component {
         try {
             // this is the url to fetch forums from, no IDs required
             let url = "/api/forums";
-            let result;
 
             let res = await fetch(url, 
                 {
@@ -76,7 +75,7 @@ export default class ForumList extends Component {
                 alert("Error: " + res.statusText);
             }
             
-            if (this.props.match.params.impID == 1) {
+            if (this.props.match.params.impID === 1) {
                 forums_result._embedded.forumList.forEach( async (forum) => {
                     let url = `/local/forums/${forum.id}/roles`
    
@@ -118,7 +117,6 @@ export default class ForumList extends Component {
     }
 
     render() {
-        console.log(this.state.forumList)
         return (
             <div className="forum-container">
 
