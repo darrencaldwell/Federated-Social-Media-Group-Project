@@ -366,7 +366,9 @@ impl CasbinData {
             let val = lock.add_policies(moderator_policies).await.and(val);
             let val = lock.add_policies(creator_policies).await.and(val);
         drop(lock);
-        dbg!(val);
+        if let Err(e) = val {
+            println!("Could not add new perms: {:?}", e);
+        }
     }
 
     pub async fn setup(&self) {
