@@ -123,7 +123,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsChatSession {
                                 message_type: MessageType::Server,
                                 user_id: self.id.clone(),
                                 user_name: self.name.clone(),
-                                content: Some("List of commands: /help".to_string())
+                                content: Some("List of commands: /help, /ping".to_string())
                             };
                             ctx.text(serde_json::to_string(&msg).unwrap());
                         },
@@ -183,7 +183,6 @@ pub async fn chat_route(
     web::Path(id): web::Path<String>,
     UserId(user_id): UserId,
 ) -> Result<HttpResponse, Error> {
-
     let user_name = sqlx::query!("SELECT username FROM users WHERE user_id = ?", user_id)
         .fetch_one(pool.as_ref())
         .await.unwrap()

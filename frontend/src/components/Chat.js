@@ -40,6 +40,14 @@ export class Chat extends Component {
         }
     }
 
+    componentDidUpdate = (prevProps) => {
+        if (this.props.match.url !== prevProps.match.url) {
+            this.state.ws.close();
+            this.setState({messages: [], userList: new Map(), message: ""})
+            this.connect();
+        }
+    }
+
     handleMessage = (msg) => {
         console.log(msg);
         let message = JSON.parse(msg);
