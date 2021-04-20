@@ -144,7 +144,7 @@ pub fn default_perms(role: Role, forum_id: Option<u64>) -> Vec<Vec<String>> {
         ],
         vec![
             role.name().to_string(),
-            forum.clone(),
+            forum,
             Object::all_posts(),
             Action::Write.name().to_string(),
             "allow".to_string(),
@@ -164,6 +164,20 @@ pub fn mod_perms(role: Role, forum_id: Option<u64>) -> Vec<Vec<String>> {
             forum.clone(),
             forum.clone(),
             Action::Write.name().to_string(),
+            "allow".to_string(),
+        ],
+        vec![
+            role.name().to_string(),
+            forum.clone(),
+            Object::all_posts(),
+            Action::Delete.name().to_string(),
+            "allow".to_string(),
+        ],
+        vec![
+            role.name().to_string(),
+            forum,
+            Object::Comment.name(),
+            Action::Delete.name().to_string(),
             "allow".to_string(),
         ]
     ]
@@ -352,7 +366,9 @@ impl CasbinData {
             let val = lock.add_policies(moderator_policies).await.and(val);
             let val = lock.add_policies(creator_policies).await.and(val);
         drop(lock);
-        dbg!(val);
+        if let Err(e) = val {
+            println!("Could not add new perms: {:?}", e);
+        }
     }
 
     pub async fn setup(&self) {

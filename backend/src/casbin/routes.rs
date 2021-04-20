@@ -109,14 +109,14 @@ async fn change_role(
     }
 }
 
-#[patch("/local/forums/{id}/permissions")]
+#[patch("/local/forums/{forum_id}/subforums/{sub_id}/permissions")]
 async fn alter_permissions(
-    web::Path(id): web::Path<u64>,
+    web::Path((forum_id, sub_id)): web::Path<(u64, u64)>,
     enforcer: web::Data<CasbinData>,
     request: web::Json::<model::AlterPermissionsRequest>,
     UserId(user_id): UserId,
 ) -> impl Responder {
-    let roles = enforcer.get_user_role(&user_id, 1, &Object::Forum(id)).await;
+    let roles = enforcer.get_user_role(&user_id, 1, &Object::Forum(forum_id)).await;
     if !roles.iter().any(|r| Role::can_lock_post(r)) {
         return HttpResponse::Forbidden().finish();
     }
@@ -126,16 +126,16 @@ async fn alter_permissions(
 
     let post_policy = vec![
             Role::Guest.name().to_string(),
-            Object::Forum(id).name(),
-            Object::all_subforums(),
+            Object::Forum(forum_id).name(),
+            Object::Subforum(sub_id).name(),
             Action::Write.name().to_string(),
             post_effect.to_string(),
         ];
 
     let view_policy = vec![
             Role::Guest.name().to_string(),
-            Object::Forum(id).name(),
-            Object::all_subforums(),
+            Object::Forum(forum_id).name(),
+            Object::Subforum(sub_id).name(),
             Action::Read.name().to_string(),
             view_effect.to_string(),
         ];
@@ -144,8 +144,8 @@ async fn alter_permissions(
         let remove_effect = if request.can_post { "deny" } else { "allow" };
         let old = vec![
                 Role::Guest.name().to_string(),
-                Object::Forum(id).name(),
-                Object::all_subforums(),
+                Object::Forum(forum_id).name(),
+                Object::Subforum(sub_id).name(),
                 Action::Write.name().to_string(),
                 remove_effect.to_string(),
             ];
@@ -161,8 +161,8 @@ async fn alter_permissions(
         let remove_effect = if request.can_view { "deny" } else { "allow" };
         let old = vec![
                 Role::Guest.name().to_string(),
-                Object::Forum(id).name(),
-                Object::all_subforums(),
+                Object::Forum(forum_id).name(),
+                Object::Subforum(sub_id).name(),
                 Action::Read.name().to_string(),
                 remove_effect.to_string(),
             ];

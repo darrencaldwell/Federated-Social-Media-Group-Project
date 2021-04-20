@@ -62,7 +62,7 @@ class ModifyRoles extends React.Component {
         try {
             let perms = this.state.perms.get(id); 
             let json = JSON.stringify({canPost: perms.canPost, canView: perms.canView});
-            await fetch(`/local/forums/${this.props.forumID}/permissions`, {
+            await fetch(`/local/forums/${this.props.forumID}/subforums/${id}/permissions`, {
                 method: "PATCH",
                 withCredentials: true,
                 credentials: 'include',

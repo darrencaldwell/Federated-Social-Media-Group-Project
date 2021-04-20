@@ -82,12 +82,12 @@ async fn delete_subforum(
         .fetch_one(pool.get_ref())
         .await;
 
-    let _forum_id = match res {
+    let forum_id = match res {
         Ok(rec) => rec.forum_id,
         Err(_) => return HttpResponse::BadRequest().body("No such subforum"),
     };
 
-    let roles = enforcer.get_user_role(&user_id, 1, &Object::Forum(id)).await;
+    let roles = enforcer.get_user_role(&user_id, 1, &Object::Forum(forum_id)).await;
 
     if !roles.iter().any(|r| r == Role::Admin.name() || r == Role::Creator.name() || r == Role::Moderator.name()) {
         return HttpResponse::Forbidden().finish()

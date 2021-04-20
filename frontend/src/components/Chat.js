@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Card, Container, Row, Col, Form} from 'react-bootstrap';
+import {Card, Container, Row, Col, Form, ListGroup} from 'react-bootstrap';
 //import { BrowserRouter as Router, Link } from 'react-router-dom';
 // import CreatePost from './CreatePost.js';
 // import '../styling/Post.css';
@@ -37,6 +37,14 @@ export class Chat extends Component {
     componentWillUnmount = async () => {
         if (this.state.ws != null) {
             this.state.ws.close();
+        }
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (this.props.match.url !== prevProps.match.url) {
+            this.state.ws.close();
+            this.setState({messages: [], userList: new Map(), message: ""})
+            this.connect();
         }
     }
 
@@ -162,7 +170,13 @@ export class Chat extends Component {
     renderUserList = () => {
         let list = [];
         this.state.userList.forEach((name, _) => {list.push(name)});
-        return list
+        return (
+            <ListGroup>
+                {list.map( user => {
+                    return <ListGroup.Item>{user}</ListGroup.Item>
+                })}
+            </ListGroup>
+        );
     }
 
     render() {
