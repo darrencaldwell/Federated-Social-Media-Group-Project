@@ -265,8 +265,7 @@ pub async fn post_forum(forum_request: PostForumRequest,
         .await?
         .last_insert_id();
 
-    let worked = enforcer.setup_forum(forum_id).await;
-    match enforcer.add_user_to_group(user_id, imp_id, &Role::Creator, &Object::Forum(forum_id)).await.and(worked) {
+    match enforcer.add_user_to_group(user_id, imp_id, &Role::Creator, &Object::Forum(forum_id)).await {
         Ok(true) => tx.commit().await?,
         _ => {
             drop(tx);

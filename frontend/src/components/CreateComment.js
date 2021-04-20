@@ -28,7 +28,6 @@ class Make extends React.Component {
 
     goTo(x) { // Goes to the url argument then reloads to take updates into account
         this.props.history.push(x);
-        window.location.reload();
     }
 
     submit() {
