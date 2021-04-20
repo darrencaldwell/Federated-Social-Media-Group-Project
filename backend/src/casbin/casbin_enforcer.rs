@@ -105,45 +105,67 @@ impl Object {
         "Subforum/:id".to_string()
     }
 
-   // pub fn all_forums() -> String {
-   //     "Forum/:id".to_string()
-   // }
+    pub fn all_forums() -> String {
+        "Forum/:id".to_string()
+    }
 
     pub fn all_posts() -> String {
         "Post/:id".to_string()
     }
 }
 
-pub fn default_perms(role: Role, forum_id: u64) -> Vec<Vec<String>> {
+pub fn default_perms(role: Role, forum_id: Option<u64>) -> Vec<Vec<String>> {
+    let forum = match forum_id {
+        Some(id) => Object::Forum(id).name(),
+        None => Object::all_forums(),
+    };
+
     vec![
         vec![
             role.name().to_string(),
-            Object::Forum(forum_id).name(),
+            forum.clone(),
             Object::all_subforums(),
             Action::Write.name().to_string(),
             "allow".to_string(),
         ],
         vec![
             role.name().to_string(),
-            Object::Forum(forum_id).name(),
+            forum.clone(),
             Object::all_subforums(),
             Action::Read.name().to_string(),
             "allow".to_string(),
         ],
         vec![
             role.name().to_string(),
-            Object::Forum(forum_id).name(),
-            Object::Forum(forum_id).name(),
+            forum.clone(),
+            forum.clone(),
             Action::Read.name().to_string(),
             "allow".to_string(),
         ],
         vec![
             role.name().to_string(),
-            Object::Forum(forum_id).name(),
+            forum.clone(),
             Object::all_posts(),
             Action::Write.name().to_string(),
             "allow".to_string(),
         ],
+    ]
+}
+
+pub fn mod_perms(role: Role, forum_id: Option<u64>) -> Vec<Vec<String>> {
+    let forum = match forum_id {
+        Some(id) => Object::Forum(id).name(),
+        None => Object::all_forums(),
+    };
+
+    vec![
+        vec![
+            role.name().to_string(),
+            forum.clone(),
+            forum.clone(),
+            Action::Write.name().to_string(),
+            "allow".to_string(),
+        ]
     ]
 }
 
@@ -316,18 +338,21 @@ impl CasbinData {
     }
 
     pub async fn setup_users(&self) {
-        let cloned_enforcer = self.enforcer.clone();
-        let policies: Vec<Vec<_>> = vec![
-            vec![Role::Moderator.name(), "Forum/:id", "Subforum/:id", Action::Read.name(), "allow"],
-            vec![Role::User.name(), "Forum/:id", "Post/:id", Action::Read.name(), "allow"],
-            vec![Role::Guest.name(), "Forum/:id", "Post/:id", Action::Write.name(), "allow"],
-        ].iter_mut().map(|vec: &mut Vec<_>| vec.iter_mut().map(|s| s.to_string()).collect()).collect();
+        let user_policies = default_perms(Role::User, None);
+        let guest_policies = default_perms(Role::Guest, None);
+        let mut moderator_policies = default_perms(Role::Moderator, None);
+        moderator_policies.append(&mut mod_perms(Role::Moderator, None));
+        let mut creator_policies = default_perms(Role::Creator, None);
+        creator_policies.append(&mut mod_perms(Role::Creator, None));
 
+        let cloned_enforcer = self.enforcer.clone();
         let mut lock = cloned_enforcer.write().await;
-            for policy in policies {
-                let _val = lock.add_policy(policy).await;
-            }
+            let val = lock.add_policies(user_policies).await;
+            let val = lock.add_policies(guest_policies).await.and(val);
+            let val = lock.add_policies(moderator_policies).await.and(val);
+            let val = lock.add_policies(creator_policies).await.and(val);
         drop(lock);
+        dbg!(val);
     }
 
     pub async fn setup(&self) {
@@ -341,22 +366,6 @@ impl CasbinData {
         let cloned_enforcer = self.enforcer.clone();
         let mut lock = cloned_enforcer.write().await;
             let val = lock.get_roles_for_user(&id, Some(&domain));
-        drop(lock);
-        val
-    }
-
-    pub async fn setup_forum(&self, forum_id: u64) -> Result<bool, casbin::Error> {
-        let user_policies = default_perms(Role::User, forum_id);
-        let guest_policies = default_perms(Role::Guest, forum_id);
-        let moderator_policies = default_perms(Role::Moderator, forum_id);
-        let creator_policies = default_perms(Role::Creator, forum_id);
-
-        let cloned_enforcer = self.enforcer.clone();
-        let mut lock = cloned_enforcer.write().await;
-            let val = lock.add_policies(user_policies).await;
-            let val = lock.add_policies(guest_policies).await.and(val);
-            let val = lock.add_policies(moderator_policies).await.and(val);
-            let val = lock.add_policies(creator_policies).await.and(val);
         drop(lock);
         val
     }

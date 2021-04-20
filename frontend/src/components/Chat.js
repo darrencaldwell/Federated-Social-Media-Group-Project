@@ -73,7 +73,7 @@ export class Chat extends Component {
         //let ws = new WebSocket("ws://localhost:21450/local/forums/" + this.props.match.params.forumID + "/chat", localStorage.getItem("token"));
         //let ws = new WebSocket("ws://localhost:25565");
         let ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") +
-            window.location.host + "/local/forums/" + this.props.match.params.forumID + "/chat", localStorage.getItem('token'));
+            window.location.host + "/chat/forums/" + this.props.match.params.forumID, localStorage.getItem('token'));
         let that = this;
         var connectInterval;
 

@@ -99,13 +99,13 @@ async fn change_role(
         let role = Role::from_str(&current_roles[0]).unwrap();
         match enforcer.remove_user_from_group(&request.user, request.imp_id, &role, &domain).await {
             Ok(true) => (),
-            _ => return HttpResponse::InternalServerError().finish(),
+            _ => return HttpResponse::InternalServerError().body("failed to remove current role"),
         }
     }
 
     return match enforcer.add_user_to_group(&request.user, request.imp_id, &role, &domain).await {
-        Ok(true) => HttpResponse::Accepted().finish(),
-        _ => HttpResponse::InternalServerError().finish(),
+        Ok(true) => HttpResponse::Ok().finish(),
+        _ => HttpResponse::InternalServerError().body("failed to add to role"),
     }
 }
 
