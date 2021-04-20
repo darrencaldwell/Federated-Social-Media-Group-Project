@@ -165,6 +165,20 @@ pub fn mod_perms(role: Role, forum_id: Option<u64>) -> Vec<Vec<String>> {
             forum.clone(),
             Action::Write.name().to_string(),
             "allow".to_string(),
+        ],
+        vec![
+            role.name().to_string(),
+            forum.clone(),
+            Object::all_posts(),
+            Action::Delete.name().to_string(),
+            "allow".to_string(),
+        ],
+        vec![
+            role.name().to_string(),
+            forum.clone(),
+            Object::Comment.name(),
+            Action::Delete.name().to_string(),
+            "allow".to_string(),
         ]
     ]
 }
