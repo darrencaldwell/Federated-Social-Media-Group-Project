@@ -144,7 +144,7 @@ pub fn default_perms(role: Role, forum_id: Option<u64>) -> Vec<Vec<String>> {
         ],
         vec![
             role.name().to_string(),
-            forum.clone(),
+            forum,
             Object::all_posts(),
             Action::Write.name().to_string(),
             "allow".to_string(),
@@ -175,7 +175,7 @@ pub fn mod_perms(role: Role, forum_id: Option<u64>) -> Vec<Vec<String>> {
         ],
         vec![
             role.name().to_string(),
-            forum.clone(),
+            forum,
             Object::Comment.name(),
             Action::Delete.name().to_string(),
             "allow".to_string(),
