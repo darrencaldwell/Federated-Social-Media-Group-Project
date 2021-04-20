@@ -174,7 +174,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsChatSession {
     }
 }
 
-#[get("/local/forums/{id}/chat")]
+#[get("/chat/forums/{id}")]
 pub async fn chat_route(
     req: HttpRequest,
     stream: web::Payload,
